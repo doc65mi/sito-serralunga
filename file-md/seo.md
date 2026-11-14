@@ -1,7 +1,7 @@
 # seo.md — scrittura SEO, AEO e GEO
 
-Version: 2.05
-Data: 2026-11-12
+Version: 2.06
+Data: 2026-11-14
 Ambito: universale. Il tono di voce e i fatti sono in `cliente.md` e `fonti/{slug}.md`; le regole del cliente sono nella sezione finale "Specifiche PcFrog".
 
 ---
@@ -90,3 +90,12 @@ I rich result delle FAQ su Google sono limitati: il markup resta utile per altri
 - Tono di voce: `cliente.md` sezione 3 (seconda persona singolare, dati concreti).
 - Prezzi WooCommerce: non si scrivono nei testi; li mostrano i loop dei prodotti.
 - Le specifiche del sito TWS non valgono qui: sono in `file-md/storico/seo-TWS-specifiche.md`.
+
+---
+
+## Specifiche Serralunga
+
+- Titolo SEO (max 60 caratteri), descrizione e immagine di condivisione in ogni pagina del CMS (scheda "SEO"); se vuoti si usano nome ed estratto.
+- JSON-LD generato dal sito: Organization (dati da Impostazioni → Azienda), BreadcrumbList, Product, Person, Article.
+- `sitemap.xml` automatica (solo schede pubblicate); `robots.txt` blocca tutto finché `BLOCCA_INDICIZZAZIONE=1`.
+- Tono e fatti: `cliente.md`.

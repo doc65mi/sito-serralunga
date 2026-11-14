@@ -1,0 +1,9 @@
+---
+/** Frecce che fanno scorrere un carosello (data-rail = id del carosello). */
+interface Props { rail: string }
+const { rail } = Astro.props
+---
+<div class="frecce" data-frecce={rail}>
+  <button type="button" class="freccia" data-dir="-1" aria-controls={rail} aria-label="Scorri indietro">←</button>
+  <button type="button" class="freccia" data-dir="1" aria-controls={rail} aria-label="Scorri avanti">→</button>
+</div>

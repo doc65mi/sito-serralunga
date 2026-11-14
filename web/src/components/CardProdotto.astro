@@ -1,0 +1,21 @@
+---
+/** Card prodotto (home "Portfolio", designer "I pezzi"). Template: Home v2 #portfolio. */
+import Img from './Img.astro'
+import type { Doc } from '../lib/cms'
+interface Props { p: Doc; ancoraRichiesta?: string; mostraSotto?: boolean; sotto?: string }
+const { p, ancoraRichiesta = '/#invito', mostraSotto = true, sotto } = Astro.props
+const scheda = p.schedaPubblicata
+const link = scheda ? `/prodotti/${p.slug}/` : ancoraRichiesta
+---
+<a href={link} class="card">
+  <div class="foto r-45 zoom">
+    <Img media={p.immagine} alt={p.immagine?.alt || p.nome} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 33vw" larghezza={1000} />
+  </div>
+  <div class="card__piede">
+    <div>
+      <div class="card__nome">{p.nome}</div>
+      {mostraSotto && (sotto || p.etichettaCard) && <div class="card__sotto" data-didascalia>{sotto || p.etichettaCard}</div>}
+    </div>
+    <span class:list={['card__azione', scheda && 'card__azione--attiva']}>{scheda ? 'Scheda →' : 'In arrivo'}</span>
+  </div>
+</a>

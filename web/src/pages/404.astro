@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro'
+Astro.response.status = 404
+---
+<Base titolo="Pagina non trovata | Serralunga" descrizione="La pagina cercata non esiste o è stata spostata.">
+  <section class="sez pad fondo-paper vuoto">
+    <div class="centro centro--s">
+      <span class="kicker">Errore 404</span>
+      <h1 class="titolo titolo--xl">Questa pagina<br />non c'è più</h1>
+      <p class="testo">Forse è stata spostata. Riparti dalla home o scopri i nostri designer.</p>
+      <div class="btn-riga btn-riga--centro">
+        <a href="/" class="btn btn--scuro">Torna alla home</a>
+        <a href="/designer/" class="btn btn--bordo">I designer</a>
+      </div>
+    </div>
+  </section>
+</Base>

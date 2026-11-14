@@ -1,0 +1,168 @@
+---
+/** Case history — template: template/Case History - La Loge du Massif.dc.html */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import { perSlug, type Doc } from '../../lib/cms'
+import { isMedia, src } from '../../lib/media'
+import { piatto } from '../../lib/testo'
+
+const c = await perSlug('case-history', Astro.params.slug || '', 2)
+if (!c) return Astro.rewrite('/404')
+
+const sito = (Astro.site?.toString() || '').replace(/\/$/, '')
+const jsonld = [{
+  '@type': 'Article',
+  headline: piatto(c.titolo || c.nome),
+  description: piatto(c.seo?.descrizione || c.introduzione),
+  image: isMedia(c.immagine) ? [src(c.immagine, 1800)] : undefined,
+  publisher: { '@id': `${sito}/#organizzazione` },
+  about: c.prodottiUsati?.voci?.map((v: Doc) => ({ '@type': 'Product', name: v.nome })),
+  dateModified: c.updatedAt,
+}]
+const pos = (a?: string) => (a === 'alto' ? 'pos-alto' : a === 'basso' ? 'pos-basso' : undefined)
+---
+<Base
+  titolo={c.seo?.titolo || `${c.nome} | Serralunga`}
+  descrizione={c.seo?.descrizione || c.introduzione}
+  immagine={c.seo?.immagine || c.immagine}
+  jsonld={jsonld}
+  footerBreve
+  pagina={`case-${c.slug}`}
+>
+  <section class="apertura" id="case-apertura" aria-labelledby="case-titolo">
+    <Img media={c.immagine} class="kb" priorita larghezza={2600} />
+    <div class="velo velo--case"></div>
+    <div class="apertura__testi">
+      {c.kicker && <span class="kicker kicker--largo kicker--chiaro">{c.kicker}</span>}
+      <Testo as="h1" id="case-titolo" t={c.titolo || c.nome} />
+      <div class="riga-base">
+        <Testo t={c.introduzione} />
+        {c.etichetta && <span class="etichetta">{c.etichetta}</span>}
+      </div>
+    </div>
+  </section>
+
+  {c.progetto?.titolo && (
+    <section class="sez-int pad fondo-paper" id="case-progetto">
+      <div class="wrap progetto" data-reveal>
+        <div class="progetto__testi">
+          <span class="kicker">{c.progetto.kicker}</span>
+          <Testo as="h2" class="titolo" t={c.progetto.titolo} />
+          {(c.progetto.paragrafi || []).map((p: Doc) => <Testo class="testo testo--forte" t={p.testo} />)}
+        </div>
+        {(c.progetto.scheda || []).length > 0 && (
+          <dl class="scheda-righe">
+            {c.progetto.scheda.map((r: Doc) => <div><dt>{r.etichetta}</dt><dd>{r.valore}</dd></div>)}
+          </dl>
+        )}
+      </div>
+    </section>
+  )}
+
+  {c.citazione?.testo && (
+    <section class="citazione-foto" id="case-citazione" aria-label="Citazione" data-reveal>
+      <Img media={c.citazione.immagine} larghezza={2600} />
+      <div class="velo velo--basso"></div>
+      <Testo t={c.citazione.testo} />
+    </section>
+  )}
+
+  {(c.passi || []).length > 0 && (
+    <section class="sez-int pad fondo-paper" id="case-passi" aria-label="Sfida, scelta, risultato">
+      <div class="wrap passi" data-reveal>
+        {c.passi.map((p: Doc, k: number) => (
+          <div class="passo">
+            <span class="passo__n" aria-hidden="true">{String(k + 1).padStart(2, '0')}</span>
+            <h3>{p.titolo}</h3>
+            <Testo class="testo" t={p.testo} />
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {(c.coppiaImmagini || []).length > 0 && (
+    <section class="fondo-paper ambiente-sez" id="case-immagini" aria-label="Immagini del progetto">
+      <div class="coppia" data-reveal>
+        {c.coppiaImmagini.map((i: Doc) => (
+          <div class:list={['foto', pos(i.allineamento)]}><Img media={i.immagine} sizes="(max-width: 800px) 100vw, 58vw" larghezza={1800} /></div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {c.protagonista?.titolo && (
+    <section class="sez-int pad scuro" id="case-protagonista">
+      <div class="wrap protagonista" data-reveal>
+        <div class="protagonista__testi">
+          <span class="kicker">{c.protagonista.kicker}</span>
+          <Testo as="h2" class="titolo" t={c.protagonista.titolo} />
+          <Testo class="testo" t={c.protagonista.testo} />
+          {(c.protagonista.dati || []).length > 0 && (
+            <dl class="dati">
+              {c.protagonista.dati.map((r: Doc) => <div><dt class="etichetta">{r.etichetta}</dt><dd>{r.valore}</dd></div>)}
+            </dl>
+          )}
+        </div>
+        <div class="foto foto--scura r-169 pos-alto"><Img media={c.protagonista.immagine} sizes="(max-width: 900px) 100vw, 50vw" larghezza={1800} /></div>
+      </div>
+    </section>
+  )}
+
+  {((c.diario?.immagini || []).length > 0 || c.diario?.segnaposto) && (
+    <section class="fondo-paper sez-diario" id="case-diario">
+      <div class="wrap pad intesta" data-reveal>
+        <Testo as="h2" class="titolo titolo--m" t={c.diario.titolo} />
+        <Testo class="testo testo--s" t={c.diario.testo} />
+      </div>
+      <div class="rail rail--mini" id="diario" tabindex="0" aria-label="Diario della stagione">
+        {(c.diario.immagini || []).map((i: Doc) => <div class="foto"><Img media={i.immagine} sizes="260px" larghezza={400} /></div>)}
+        {c.diario.segnaposto && <div class="segnaposto"><span class="nota-mono">{c.diario.segnaposto}</span></div>}
+      </div>
+    </section>
+  )}
+
+  {(c.prodottiUsati?.voci || []).length > 0 && (
+    <section id="prodotti" class="pad fondo-chiaro sez-prodotti">
+      <div class="wrap">
+        <div class="intesta" data-reveal>
+          <div class="intesta__sx">
+            <span class="kicker">{c.prodottiUsati.kicker}</span>
+            <Testo as="h2" class="titolo" t={c.prodottiUsati.titolo} />
+          </div>
+          <Testo class="testo" t={c.prodottiUsati.testo} />
+        </div>
+        <div class="voci" data-reveal>
+          {c.prodottiUsati.voci.map((v: Doc) => {
+            const rel = typeof v.prodotto === 'object' ? v.prodotto : null
+            const Tag = rel?.schedaPubblicata ? 'a' : 'div'
+            return (
+              <Tag href={rel?.schedaPubblicata ? `/prodotti/${rel.slug}/` : undefined} class="voce">
+                <div class="foto r-43 zoom"><Img media={v.immagine || rel?.immagine} sizes="(max-width: 800px) 100vw, 50vw" larghezza={1000} nota={v.segnapostoImmagine} /></div>
+                <div class="voce__testi">
+                  <div class="card__nome card__nome--l">{v.nome}</div>
+                  {v.sottotitolo && <div class="card__sotto">{v.sottotitolo}</div>}
+                  {v.nota && <span class="nota-mono">{v.nota}</span>}
+                </div>
+              </Tag>
+            )
+          })}
+        </div>
+        <div class="centra" data-reveal><a href="/#portfolio" class="btn btn--bordo-pieno">Vedi tutto il portfolio</a></div>
+      </div>
+    </section>
+  )}
+
+  <section id="contatto" class="notte pad sez-contatto">
+    <div class="centro centro--s">
+      <span class="kicker kicker--largo">{c.contatto?.kicker || 'Il prossimo progetto'}</span>
+      <Testo as="h2" class="titolo titolo--contatto" t={c.contatto?.titolo} />
+      <Testo class="testo" t={c.contatto?.testo} />
+      <div class="btn-riga btn-riga--centro">
+        <a href="/#invito" class="btn btn--chiaro">Parliamo del progetto</a>
+        <a href="/" class="btn btn--bordo-chiaro">Torna alla home</a>
+      </div>
+    </div>
+  </section>
+</Base>

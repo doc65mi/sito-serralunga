@@ -1,0 +1,42 @@
+---
+/**
+ * Immagine dal CMS con srcset. Se manca la foto mostra il segnaposto a strisce
+ * (come nei template: "da fornire"). Il punto focale scelto nel CMS passa
+ * da una variabile CSS, non da uno stile scritto a mano.
+ */
+import { fuoco, isMedia, src, srcset, type Media } from '../lib/media'
+
+interface Props {
+  media?: Media | number | null
+  alt?: string
+  sizes?: string
+  larghezza?: number
+  priorita?: boolean
+  class?: string
+  nota?: string
+  [attr: `data-${string}`]: unknown
+}
+const { media, alt, sizes = '100vw', larghezza = 1800, priorita = false, class: cls, nota, ...rest } = Astro.props
+const m = isMedia(media) ? media : null
+const posizione = m ? fuoco(m) : undefined
+---
+{m ? (
+  <img
+    src={src(m, larghezza)}
+    srcset={srcset(m) || undefined}
+    sizes={sizes}
+    alt={alt ?? m.alt ?? ''}
+    width={m.width}
+    height={m.height}
+    loading={priorita ? 'eager' : 'lazy'}
+    fetchpriority={priorita ? 'high' : undefined}
+    decoding="async"
+    class={cls}
+    {...rest}
+    style={posizione ? `--fuoco:${posizione};object-position:var(--fuoco)` : undefined}
+  />
+) : (
+  <span class:list={['segnaposto', cls]} role="img" aria-label={alt || 'Immagine da fornire'} data-segnaposto {...rest}>
+    {nota && <span class="nota-mono">{nota}</span>}
+  </span>
+)}

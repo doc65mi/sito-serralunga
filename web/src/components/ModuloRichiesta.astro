@@ -1,0 +1,21 @@
+---
+/** Modulo "Richiedi il volume" (template: Home v2 #invito). Invia a /api/richiesta, che salva in Payload. */
+import { impostazioni } from '../lib/cms'
+interface Props { pulsante?: string; grazie?: string; pagina?: string }
+const { pulsante = 'Richiedi il volume', grazie, pagina = '' } = Astro.props
+const imp = await impostazioni()
+const email = imp.azienda?.email || 'info@serralunga.com'
+---
+<form class="modulo" method="post" action="/api/richiesta" data-richiesta data-grazie={grazie} data-email={email}>
+  <div class="modulo__campi">
+    <label><span class="sr-only">Struttura o studio</span><input type="text" name="struttura" placeholder="Struttura o studio" autocomplete="organization" maxlength="200" /></label>
+    <label><span class="sr-only">Referente</span><input type="text" name="referente" placeholder="Referente" autocomplete="name" maxlength="200" /></label>
+    <label><span class="sr-only">Email (obbligatoria)</span><input type="email" name="email" placeholder="Email" autocomplete="email" required maxlength="200" /></label>
+    <label><span class="sr-only">Città del progetto</span><input type="text" name="citta" placeholder="Città del progetto" autocomplete="address-level2" maxlength="200" /></label>
+  </div>
+  <label class="modulo__trappola" aria-hidden="true">Non compilare<input type="text" name="sito_web" tabindex="-1" autocomplete="off" /></label>
+  <input type="hidden" name="pagina" value={pagina} />
+  <button type="submit" class="btn btn--chiaro">{pulsante}</button>
+  <p class="modulo__esito" data-esito role="status" aria-live="polite"></p>
+  <p class="modulo__privacy">Usiamo questi dati solo per rispondere alla richiesta. Scrivici a <a href={`mailto:${email}`}>{email}</a> per cancellarli.</p>
+</form>

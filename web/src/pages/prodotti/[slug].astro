@@ -1,0 +1,221 @@
+---
+/** Scheda prodotto — template: template/Aqua Lounger - Scheda tecnica.dc.html */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import Frecce from '../../components/Frecce.astro'
+import CardCase from '../../components/CardCase.astro'
+import { perSlug, type Doc } from '../../lib/cms'
+import { isMedia, src, urlFile } from '../../lib/media'
+import { chiaro, piatto } from '../../lib/testo'
+
+const p = await perSlug('prodotti', Astro.params.slug || '', 3)
+if (!p || !p.schedaPubblicata) return Astro.rewrite('/404')
+
+const d: Doc | null = typeof p.designer === 'object' ? p.designer : null
+const galleria: Doc[] = (p.galleria || []).filter((g: Doc) => isMedia(g.immagine))
+const viste = galleria.length ? galleria.map((g) => g.immagine) : [p.immagine]
+const casi: Doc[] = (p.caseHistory || []).filter((c: unknown) => typeof c === 'object')
+const correlati: Doc[] = (p.correlati || []).map((c: Doc) => {
+  const rel = typeof c.prodotto === 'object' ? c.prodotto : null
+  return {
+    nome: c.nome || rel?.nome,
+    sotto: c.sottotitolo || rel?.etichettaCard,
+    immagine: c.immagine || rel?.immagine,
+    link: rel?.schedaPubblicata ? `/prodotti/${rel.slug}/` : c.link,
+  }
+})
+const pdf = isMedia(p.disegno?.file) ? urlFile(p.disegno.file) : null
+
+const jsonld = [{
+  '@type': 'Product',
+  name: p.nome,
+  description: piatto(p.seo?.descrizione || p.descrizione),
+  brand: { '@type': 'Brand', name: 'Serralunga' },
+  manufacturer: { '@id': `${(Astro.site?.toString() || '').replace(/\/$/, '')}/#organizzazione` },
+  category: p.categoria,
+  image: viste.filter(isMedia).map((m) => src(m, 1800)),
+  material: p.specifiche?.find((s: Doc) => /material/i.test(s.etichetta))?.valore,
+  ...(d ? { creator: { '@type': 'Person', name: d.nome } } : {}),
+}]
+---
+<Base
+  titolo={p.seo?.titolo || `${p.nome} | Serralunga`}
+  descrizione={p.seo?.descrizione}
+  immagine={p.seo?.immagine || viste[0]}
+  percorso={[{ nome: 'Prodotti', url: '/#portfolio' }, { nome: p.nome, url: `/prodotti/${p.slug}/` }]}
+  jsonld={jsonld}
+  footerBreve
+  pagina={`prodotto-${p.slug}`}
+>
+  <section class="prodotto" id="prodotto-scheda" aria-labelledby="prodotto-titolo">
+    <div class="wrap prodotto__griglia">
+      <div class="galleria" data-galleria>
+        <div class="galleria__palco">
+          {viste.map((v, k) => (
+            <Img media={v} class={k === 0 ? 'attiva' : ''} priorita={k === 0} sizes="(max-width: 900px) 100vw, 56vw" larghezza={1800} data-vista />
+          ))}
+        </div>
+        {viste.length > 1 && (
+          <div class="galleria__miniature">
+            {viste.map((v, k) => (
+              <button type="button" data-mini aria-current={k === 0 ? 'true' : 'false'} aria-label={`Vista ${k + 1}`}>
+                <Img media={v} alt="" sizes="120px" larghezza={400} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div class="prodotto__info">
+        <div class="prodotto__testa">
+          {p.categoria && <span class="kicker">{p.categoria}</span>}
+          <h1 class="prodotto__h1" id="prodotto-titolo">{p.nome}</h1>
+          {(p.firma || d) && <div class="firma-riga"><span>{p.firma || `Disegno di ${d?.nome}`}</span></div>}
+        </div>
+        <Testo class="prodotto__descr" t={p.descrizione} />
+        {(p.colori || []).length > 0 && (
+          <div class="colori">
+            <span class="etichetta">Cartella colori</span>
+            <ul class="colori__elenco">
+              {p.colori.map((c: Doc) => (
+                <li title={c.nome} class={chiaro(c.hex) ? 'chiaro' : undefined} style={`background:${c.hex}`}><span class="sr-only">{c.nome}</span></li>
+              ))}
+            </ul>
+            {p.notaColori && <span class="colori__nota">{p.notaColori}</span>}
+          </div>
+        )}
+        {(p.dimensioni || []).length > 0 && (
+          <dl class="misure">
+            {p.dimensioni.map((m: Doc) => <div><dt>{m.etichetta}</dt><dd>{m.valore}</dd></div>)}
+          </dl>
+        )}
+        <div class="btn-riga">
+          <a href="#richiesta" class="btn btn--scuro">{p.pulsante || 'Richiedi scheda e campionatura'}</a>
+          {(p.disegno?.immagine || pdf) && <a href={pdf || '#disegno'} class="btn btn--bordo" download={pdf ? '' : undefined}>Disegno tecnico</a>}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {(p.specifiche || []).length > 0 && (
+    <section class="specifiche scuro" id="prodotto-specifiche" aria-label="Specifiche">
+      <dl class="wrap">
+        {p.specifiche.map((s: Doc) => <div><dt>{s.etichetta}</dt><dd>{s.valore}</dd></div>)}
+      </dl>
+    </section>
+  )}
+
+  {isMedia(p.disegno?.immagine) && (
+    <section id="disegno" class="sez-int pad">
+      <div class="disegno">
+        <div class="intesta">
+          <Testo as="h2" class="titolo" t={p.disegno.titolo} />
+          <Testo class="testo testo--s" t={p.disegno.testo} />
+        </div>
+        <div class="disegno__tavola"><Img media={p.disegno.immagine} sizes="(max-width: 1180px) 100vw, 1060px" larghezza={1800} /></div>
+      </div>
+    </section>
+  )}
+
+  {(isMedia(p.ambiente?.immagineGrande) || (p.ambiente?.immagini || []).length > 0) && (
+    <section class="pad ambiente-sez" id="prodotto-ambiente">
+      <div class="wrap ambiente">
+        <div class="intesta">
+          <Testo as="h2" class="titolo titolo--m" t={p.ambiente.titolo} />
+          <Testo class="testo testo--s" t={p.ambiente.testo} />
+        </div>
+        {isMedia(p.ambiente.immagineGrande) && <div class="foto r-219"><Img media={p.ambiente.immagineGrande} larghezza={2600} /></div>}
+        {(p.ambiente.immagini || []).length > 0 && (
+          <div class="tre-col">
+            {p.ambiente.immagini.map((i: Doc) => <div class="foto r-43"><Img media={i.immagine} sizes="(max-width: 900px) 100vw, 33vw" larghezza={1000} /></div>)}
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {d && (
+    <section class="sez-int pad scuro" id="prodotto-designer">
+      <div class="wrap firma">
+        <div>
+          {d.ritratto && !d.ritrattoProvvisorio ? (
+            <div class="foto foto--scura r-45"><Img media={d.ritratto} sizes="(max-width: 900px) 100vw, 40vw" larghezza={1000} /></div>
+          ) : (
+            <div class="foto r-45 segnaposto segnaposto--scuro">
+              <Img media={d.ritratto} class="ritratto-tondo ritratto-tondo--l" sizes="170px" larghezza={400} />
+              <span class="nota-mono">{'ritratto in alta risoluzione\nda fornire'}</span>
+            </div>
+          )}
+        </div>
+        <div class="firma__testi">
+          <span class="kicker">{p.firmaProgetto?.kicker || 'La firma del progetto'}</span>
+          <h2 class="titolo">{d.nome}</h2>
+          {(p.firmaProgetto?.testi || []).map((t: Doc) => <Testo class="testo" t={t.testo} />)}
+          {(d.numeri || []).length > 0 && (
+            <div class="numeri-riga">
+              {d.numeri.map((n: Doc) => <div><div class="numeri-riga__valore">{n.valore}</div><div class="etichetta">{n.etichetta}</div></div>)}
+            </div>
+          )}
+          <a href={d.schedaPubblicata ? `/designer/${d.slug}/` : '/designer/'} class="btn btn--bordo-chiaro">{d.schedaPubblicata ? `Scheda di ${d.nome}` : 'Tutti i designer Serralunga'}</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {(casi.length > 0 || (p.caseSegnaposto || []).length > 0) && (
+    <section id="case" class="sez-int fondo-paper">
+      <div class="wrap pad intesta">
+        <div class="intesta__sx">
+          <span class="kicker">Case history</span>
+          <h2 class="titolo titolo--l">Dove questo<br />disegno è già di casa</h2>
+        </div>
+        <Frecce rail="rail-case" />
+      </div>
+      <div class="rail rail--largo" id="rail-case" tabindex="0" aria-label="Case history">
+        {casi.map((c) => <CardCase c={c} />)}
+        {(p.caseSegnaposto || []).map((s: Doc) => <CardCase segnaposto={s} />)}
+      </div>
+    </section>
+  )}
+
+  {correlati.length > 0 && (
+    <section class="sez-int pad fondo-chiaro" id="prodotto-correlati">
+      <div class="wrap">
+        <div class="intesta">
+          <h2 class="titolo titolo--l">Prodotti correlati</h2>
+          <Testo class="testo testo--s" t={p.correlatiTesto} />
+        </div>
+        <div class="griglia-4">
+          {correlati.map((c) => {
+            const Tag = c.link ? 'a' : 'div'
+            return (
+              <Tag href={c.link} class="card">
+                <div class="foto r-11 zoom"><Img media={c.immagine} sizes="(max-width: 560px) 100vw, 25vw" larghezza={1000} /></div>
+                <div>
+                  <div class="card__nome card__nome--s">{c.nome}</div>
+                  {c.sotto && <div class="card__sotto">{c.sotto}</div>}
+                </div>
+              </Tag>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section id="richiesta" class="fascia-finale">
+    <Img media={p.richiesta?.immagine || p.immagine} larghezza={2600} />
+    <div class="fascia-finale__dentro">
+      <div class="centro centro--s">
+        <span class="kicker kicker--largo">{p.richiesta?.kicker || 'Documentazione contract'}</span>
+        <Testo as="h2" class="titolo" t={p.richiesta?.titolo || 'Scheda tecnica,\ndisegni e campioni'} />
+        <Testo class="testo" t={p.richiesta?.testo} />
+        <div class="btn-riga btn-riga--centro">
+          <a href="/#invito" class="btn btn--chiaro">Richiedi la documentazione</a>
+          <a href="/#portfolio" class="btn btn--bordo-chiaro">Torna al portfolio</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

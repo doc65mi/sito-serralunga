@@ -5,3 +5,6 @@ dist/
 *.log
 template/Homepage B2B SerraLunga.zip
 media/
+.next/
+next-env.d.ts
+*.tsbuildinfo

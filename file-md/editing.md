@@ -1,7 +1,7 @@
 # editing.md — struttura delle pagine e contratto dell'editor
 
-Version: 2.14
-Data: 2026-11-12
+Version: 2.15
+Data: 2026-11-14
 Ambito: universale (qualsiasi pagina o sito con l'editor Oltre Editable Media). Le regole del singolo cliente sono solo nella sezione finale "Specifiche PcFrog".
 Plugin di riferimento: Oltre Editable Media 2.14 (versione propria del plugin, condiviso tra più siti).
 
@@ -186,3 +186,10 @@ Manuale:
 - Progetto sul PC: `C:\laragon\www\sito-Pcfrog`; repository `doc65mi/sito-pcfrog`, branch `main`.
 
 Le specifiche del sito TWS (altro progetto con lo stesso plugin) non valgono qui: sono in `file-md/storico/editing-TWS-specifiche.md`.
+
+---
+
+## Specifiche Serralunga
+
+Il sito Serralunga non usa WordPress né Oltre Editable Media: i contenuti si modificano nel pannello **Payload CMS** (`/admin`). Valgono quindi i principi di questo file (un template per pagina, nessuno stile inline, testi solo dove previsto), ma non le parti sul plugin. Struttura e campi: `struttura.md`; aspetto: `design.md`.
+Nei campi di testo: a capo = a capo nella pagina, `_parola_` = corsivo oro.

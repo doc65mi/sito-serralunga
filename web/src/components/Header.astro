@@ -1,0 +1,26 @@
+---
+import { isMedia, urlFile } from '../lib/media'
+import { esterno } from '../lib/testo'
+import type { Doc } from '../lib/cms'
+interface Props { imp: Doc; corrente?: string }
+const { imp, corrente = '' } = Astro.props
+const logo = isMedia(imp.logo) ? imp.logo : null
+const attivo = (link: string) => !!link && !link.includes('#') && link !== '/' && corrente.startsWith(link)
+---
+<header class="header" data-header>
+  <a href="/" class="logo" aria-label={`${imp.nomeSito || 'Serralunga'}, home`}>
+    {logo ? <img src={urlFile(logo)} alt={imp.nomeSito || 'Serralunga'} width={logo.width} height={logo.height} /> : <span class="logo__testo">{imp.nomeSito || 'Serralunga'}</span>}
+  </a>
+  <button type="button" class="menu-apri" aria-expanded="false" aria-controls="menu-principale" data-menu>Menu</button>
+  <nav class="nav" id="menu-principale" aria-label="Menu principale">
+    {(imp.menu || []).map((v: Doc) => (
+      <a
+        href={v.link || '#'}
+        class:list={[v.evidenza && 'evidenza']}
+        aria-current={attivo(v.link) ? 'page' : undefined}
+        target={esterno(v.link) ? '_blank' : undefined}
+        rel={esterno(v.link) ? 'noopener' : undefined}
+      >{v.etichetta}</a>
+    ))}
+  </nav>
+</header>

@@ -1,0 +1,7 @@
+---
+/** Testo dal CMS con la convenzione "_corsivo_" e a capo. */
+import { fmt } from '../lib/testo'
+interface Props { t?: string | null; as?: string; class?: string; [k: string]: unknown }
+const { t, as: Tag = 'p', class: cls, ...rest } = Astro.props
+---
+{t ? <Tag class={cls} {...rest} set:html={fmt(t)} /> : null}

@@ -1,0 +1,45 @@
+---
+/** Elenco designer — template: template/Designer.dc.html */
+import Base from '../../layouts/Base.astro'
+import Testo from '../../components/Testo.astro'
+import CardDesigner from '../../components/CardDesigner.astro'
+import { elenco, globale } from '../../lib/cms'
+import { piatto } from '../../lib/testo'
+
+const pagina = await globale('pagina-designer', 1)
+const designer = await elenco('designer', { depth: 1 })
+const segnaposto = Array.from({ length: pagina.segnaposto || 0 })
+---
+<Base
+  titolo={pagina.seo?.titolo || `${piatto(pagina.titolo)} | Serralunga`}
+  descrizione={pagina.seo?.descrizione}
+  immagine={pagina.seo?.immagine}
+  percorso={[{ nome: 'I designer', url: '/designer/' }]}
+  pagina="designer"
+>
+  <section class="intro-pagina" id="designer-intro">
+    <div class="wrap intro-pagina__griglia">
+      <div>
+        {pagina.kicker && <span class="kicker">{pagina.kicker}</span>}
+        <Testo as="h1" class="titolo titolo--display" t={pagina.titolo} />
+      </div>
+      <Testo class="testo" t={pagina.testo} />
+    </div>
+  </section>
+
+  <section class="pad ambiente-sez" id="designer-elenco" aria-label="Elenco dei designer">
+    <div class="wrap elenco-designer">
+      {designer.map((d) => <CardDesigner d={d} link />)}
+      {segnaposto.map(() => <CardDesigner />)}
+    </div>
+  </section>
+
+  <section id="richiesta" class="sez-int pad scuro">
+    <div class="centro centro--s">
+      {pagina.cta?.kicker && <span class="kicker kicker--largo">{pagina.cta.kicker}</span>}
+      <Testo as="h2" class="titolo titolo--cta" t={pagina.cta?.titolo} />
+      <Testo class="testo" t={pagina.cta?.testo} />
+      {pagina.cta?.pulsante && <a href={pagina.cta.link || '/#invito'} class="btn btn--chiaro">{pagina.cta.pulsante}</a>}
+    </div>
+  </section>
+</Base>
