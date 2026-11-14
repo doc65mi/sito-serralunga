@@ -1,6 +1,6 @@
 # Avvio e pubblicazione
 
-Version: 1.01
+Version: 1.02
 
 Quattro servizi Docker: `db` (PostgreSQL 16), `cms` (Payload), `web` (Astro) e `proxy` (Caddy). Solo il proxy è aperto verso l'esterno: **sito e pannello stanno sulla stessa porta**, il pannello su `/admin`.
 Il database e le foto caricate stanno in due volumi: `db-dati` e `media`. **Sono gli unici da salvare nei backup.**
@@ -31,7 +31,7 @@ La porta si cambia con `PORTA` nel `.env` (8080 per non scontrarsi con Laragon s
 3. "port is already allocated": la porta 8080 è occupata, mettere per esempio `PORTA=8090` nel `.env` e rilanciare `docker compose up -d`.
 4. Il seed (`docker compose exec cms npm run seed`) va lanciato solo dopo che `cms` è partito.
 
-Il seed carica i contenuti dei template e le foto (da `template/assets` e da serralunga.com). Si può rilanciare: aggiorna i contenuti con lo stesso slug, non duplica.
+Il seed carica i contenuti dei template in italiano e in inglese e le foto (da `template/assets` e da serralunga.com). **Attenzione:** rilanciarlo riporta i testi italiani a quelli di partenza, quindi va usato solo all'inizio o per ripristinare; le traduzioni inglesi già scritte dal pannello restano.
 
 Comandi utili:
 

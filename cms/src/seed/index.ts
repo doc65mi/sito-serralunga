@@ -15,6 +15,7 @@ import config from '@payload-config'
 
 import { aquaLounger, caseLoge, designerDati, prodottiCard } from './dati'
 import { homeDati, impostazioniDati, paginaDesignerDati } from './globali'
+import { applicaInglese } from './inglese'
 
 const payload = await getPayload({ config })
 const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
@@ -124,6 +125,9 @@ await payload.updateGlobal({
 log('aggiornata la home')
 await payload.updateGlobal({ slug: 'pagina-designer', data: (await paginaDesignerDati()) as never })
 log('aggiornata la pagina designer')
+
+// 6. Inglese: riempie i campi ancora vuoti con le traduzioni di partenza
+await applicaInglese(payload, log)
 
 const mancanti = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
 if (mancanti.length) {
