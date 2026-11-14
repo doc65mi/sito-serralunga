@@ -5,6 +5,7 @@
  * da una variabile CSS, non da uno stile scritto a mano.
  */
 import { fuoco, isMedia, src, srcset, type Media } from '../lib/media'
+import { traduttore } from '../lib/lingua'
 
 interface Props {
   media?: Media | number | null
@@ -14,9 +15,11 @@ interface Props {
   priorita?: boolean
   class?: string
   nota?: string
+  /** Percorso del campo immagine nel documento, per sostituirla dalla pagina. */
+  campo?: string
   [attr: `data-${string}`]: unknown
 }
-const { media, alt, sizes = '100vw', larghezza = 1800, priorita = false, class: cls, nota, ...rest } = Astro.props
+const { media, alt, sizes = '100vw', larghezza = 1800, priorita = false, class: cls, nota, campo, ...rest } = Astro.props
 const m = isMedia(media) ? media : null
 const posizione = m ? fuoco(m) : undefined
 ---
@@ -32,11 +35,12 @@ const posizione = m ? fuoco(m) : undefined
     fetchpriority={priorita ? 'high' : undefined}
     decoding="async"
     class={cls}
+    data-campo-img={campo}
     {...rest}
     style={posizione ? `--fuoco:${posizione};object-position:var(--fuoco)` : undefined}
   />
 ) : (
-  <span class:list={['segnaposto', cls]} role="img" aria-label={alt || 'Immagine da fornire'} data-segnaposto {...rest}>
+  <span class:list={['segnaposto', cls]} role="img" aria-label={alt || traduttore(Astro.locals.lingua)('Immagine da fornire')} data-segnaposto data-campo-img={campo} {...rest}>
     {nota && <span class="nota-mono">{nota}</span>}
   </span>
 )}

@@ -119,7 +119,7 @@ await payload.updateGlobal({ slug: 'impostazioni', data: (await impostazioniDati
 log('aggiornate le impostazioni')
 await payload.updateGlobal({
   slug: 'home',
-  data: { ...(await homeDati(media, designerId, prodottoId)), _status: 'published' } as never,
+  data: { ...(await homeDati(media)), _status: 'published' } as never,
 })
 log('aggiornata la home')
 await payload.updateGlobal({ slug: 'pagina-designer', data: (await paginaDesignerDati()) as never })

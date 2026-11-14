@@ -1,6 +1,6 @@
 # Sito Serralunga
 
-Version: 1.00
+Version: 1.01
 
 Sito istituzionale Serralunga (1825 S.R.L.) costruito dai template in `template/`.
 
@@ -17,10 +17,18 @@ Avvio in locale e pubblicazione su Coolify: vedi [DEPLOY.md](DEPLOY.md).
 
 | URL | Template | Contenuti dal CMS |
 |---|---|---|
-| `/` | `Serralunga Contract Home v2` (slide) / `v3` (video) | globale **Home** |
+| `/` | `Serralunga Contract Home - Hero fullscreen` (immagine a tutto schermo, video facoltativo) | globale **Home** |
 | `/prodotti/{slug}/` | `Aqua Lounger.dc.html` | collezione **Prodotti** (solo con "Scheda pubblicata") |
 | `/case-history/{slug}/` | `Case History - La Loge du Massif` | collezione **Case history** |
 | `/designer/` | `Designer.dc.html` | globale **Pagina designer** + collezione **Designer** |
 | `/designer/{slug}/` | `Designer - Marc Sadler` | collezione **Designer** (solo con "Scheda pubblicata") |
 | `/api/richiesta` | modulo "Richiedi il volume" | salva in **Richieste** |
 | `/sitemap.xml`, `/robots.txt` | — | generati |
+
+## Lingue
+
+Italiano senza prefisso (`/designer/`), inglese con `/en/` (`/en/designer/`). I contenuti si traducono nel pannello scegliendo la lingua in alto; un campo inglese vuoto mostra il testo italiano. I testi fissi dell'interfaccia sono in `web/src/lib/lingua.ts`.
+
+## Modifica dalla pagina
+
+Chi ha fatto l'accesso al pannello vede sul sito la barra **Modifica pagina**: clic su un testo per correggerlo, clic su una foto per sostituirla. Il salvataggio pubblica subito, nella lingua della pagina. Funziona perché sito e pannello stanno sullo stesso indirizzo (servizio `proxy`).

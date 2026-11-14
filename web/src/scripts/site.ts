@@ -44,7 +44,7 @@ for (const hero of $$('[data-hero]')) {
   punti.forEach((p, k) => p.addEventListener('click', () => (ferma(), mostra(k))))
   hero.querySelector('[data-prec]')?.addEventListener('click', () => (ferma(), mostra(i - 1)))
   hero.querySelector('[data-succ]')?.addEventListener('click', () => (ferma(), mostra(i + 1)))
-  if (slide.length > 1 && !riduciMovimento) timer = window.setInterval(() => mostra(i + 1), 7000)
+  if (slide.length > 1 && !riduciMovimento) timer = window.setInterval(() => !document.documentElement.classList.contains('in-modifica') && mostra(i + 1), 7000)
 }
 
 /* Caroselli orizzontali */
@@ -77,7 +77,7 @@ for (const btn of $$<HTMLButtonElement>('[data-play]')) {
   if (!video) continue
   if (riduciMovimento) video.pause()
   const aggiorna = () => {
-    btn.textContent = video.paused ? '▶' : 'II'
+    btn.textContent = video.paused ? '▶' : '❙❙'
     btn.setAttribute('aria-pressed', String(!video.paused))
   }
   btn.addEventListener('click', () => (video.paused ? video.play() : video.pause()))
@@ -123,21 +123,37 @@ for (const form of $$<HTMLFormElement>('form[data-richiesta]')) {
     if (btn) btn.disabled = true
     if (esito) {
       esito.dataset.tipo = ''
-      esito.textContent = 'Invio in corso…'
+      esito.textContent = form.dataset.invio || 'Invio in corso…'
     }
     try {
       const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } })
       const dati = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(dati.errore || 'Invio non riuscito')
+      if (!res.ok) throw new Error(dati.errore || form.dataset.errore || 'Invio non riuscito')
       form.reset()
       if (esito) esito.textContent = form.dataset.grazie || 'Grazie, vi ricontatteremo a breve.'
     } catch (err) {
       if (esito) {
         esito.dataset.tipo = 'errore'
-        esito.textContent = `${(err as Error).message}. Potete scriverci anche a ${form.dataset.email || 'info@serralunga.com'}.`
+        esito.textContent = `${(err as Error).message}. ${form.dataset.anche || 'Potete scriverci anche a'} ${form.dataset.email || 'info@serralunga.com'}.`
       }
     } finally {
       if (btn) btn.disabled = false
     }
   })
+}
+
+/* Modifica dalla pagina: lo strumento si carica solo per chi ha fatto l'accesso al pannello. */
+if (document.documentElement.hasAttribute('data-redazione')) void import('./modifica')
+
+/* Home: filtro delle installazioni per categoria */
+for (const gruppo of $$<HTMLElement>('[data-filtri]')) {
+  const bottoni = Array.from(gruppo.querySelectorAll<HTMLButtonElement>('[data-filtro]'))
+  const voci = $$<HTMLElement>('[data-cat]')
+  for (const b of bottoni) {
+    b.addEventListener('click', () => {
+      const cat = b.dataset.filtro || 'all'
+      bottoni.forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
+      voci.forEach((v) => (v.hidden = cat !== 'all' && v.dataset.cat !== cat))
+    })
+  }
 }

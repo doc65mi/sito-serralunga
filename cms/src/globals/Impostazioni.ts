@@ -50,6 +50,15 @@ export const Impostazioni: GlobalConfig = {
           label: 'Menu',
           fields: [
             {
+              name: 'barra',
+              type: 'group',
+              label: 'Barra scura sopra il menu (home)',
+              fields: [
+                testo('testo', 'Testo a sinistra'),
+                { type: 'row', fields: [testo('linkEtichetta', 'Link a destra'), link('link', 'Indirizzo')] },
+              ],
+            },
+            {
               name: 'menu',
               type: 'array',
               label: 'Voci del menu',
@@ -59,7 +68,7 @@ export const Impostazioni: GlobalConfig = {
                   type: 'row',
                   fields: [testo('etichetta', 'Etichetta', { required: true }), link('link', 'Link')],
                 },
-                { name: 'evidenza', type: 'checkbox', label: 'In evidenza (colore d’accento)' },
+                { name: 'evidenza', type: 'checkbox', label: 'In evidenza (pulsante con bordo in home, colore d’accento nelle altre pagine)' },
               ],
             },
           ],

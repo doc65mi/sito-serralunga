@@ -3,7 +3,7 @@ import type { GlobalConfig } from 'payload'
 import { pubblico, soloRedazione } from '../access'
 import { area, immagine, link, numeri, seoField, testo } from '../fields'
 
-/** Template: template/Serralunga Contract Home v2.dc.html (slider) e v3 (hero video). */
+/** Template: template/Serralunga Contract Home - Hero fullscreen.dc.html */
 export const Home: GlobalConfig = {
   slug: 'home',
   label: 'Home',
@@ -17,152 +17,130 @@ export const Home: GlobalConfig = {
         {
           label: 'Apertura',
           fields: [
-            testo('h1', 'H1 della pagina', {
-              required: true,
+            {
+              name: 'hero',
+              type: 'group',
+              label: 'Immagine a tutto schermo',
               admin: {
                 description:
-                  'Con l’apertura a slide l’H1 è nascosto alla vista ma letto da motori e assistenti. Con il video è il titolo grande.',
+                  'L’immagine è sempre visibile. Se carichi un video (mp4, muto) parte in loop sopra l’immagine e compare il pulsante play/pausa.',
               },
-            }),
-            {
-              name: 'tipoApertura',
-              type: 'radio',
-              label: 'Tipo di apertura',
-              defaultValue: 'slide',
-              options: [
-                { label: 'Slide con riquadro (Home v2)', value: 'slide' },
-                { label: 'Video a tutto schermo (Home v3)', value: 'video' },
-              ],
-            },
-            {
-              name: 'slide',
-              type: 'array',
-              label: 'Slide',
-              minRows: 1,
-              maxRows: 6,
-              admin: { condition: (_, s) => s?.tipoApertura !== 'video' },
-              labels: { singular: 'Slide', plural: 'Slide' },
               fields: [
-                immagine('immagine', 'Immagine'),
-                testo('kicker', 'Kicker'),
-                area('titolo', 'Titolo', { required: true }),
-                area('testo', 'Testo'),
+                immagine('immagine', 'Immagine a tutto schermo'),
+                immagine('video', 'Video facoltativo (mp4, muto, in loop)'),
                 {
-                  type: 'row',
-                  fields: [testo('linkEtichetta', 'Testo del link'), link('link', 'Link')],
+                  name: 'notaVideo',
+                  type: 'checkbox',
+                  label: 'Mostra la nota "video da fornire" finché manca il video',
+                  defaultValue: false,
                 },
-              ],
-            },
-            {
-              name: 'video',
-              type: 'group',
-              label: 'Video',
-              admin: { condition: (_, s) => s?.tipoApertura === 'video' },
-              fields: [
-                immagine('file', 'File video (mp4, muto, in loop)'),
-                immagine('poster', 'Immagine mostrata prima del video'),
                 testo('kicker', 'Kicker'),
-                area('titolo', 'Titolo grande (se vuoto si usa l’H1)'),
+                area('titolo', 'Titolo grande (H1)', { required: true }),
                 area('testo', 'Testo'),
-                {
-                  type: 'row',
-                  fields: [testo('linkEtichetta', 'Testo del pulsante'), link('link', 'Link')],
-                },
+                { type: 'row', fields: [testo('link1Etichetta', 'Primo pulsante'), link('link1', 'Link')] },
+                { type: 'row', fields: [testo('link2Etichetta', 'Secondo pulsante (pieno)'), link('link2', 'Link')] },
               ],
             },
           ],
         },
         {
-          label: 'Racconto',
+          label: 'Progetti e chi siamo',
           fields: [
             {
-              name: 'manifesto',
-              type: 'group',
-              label: 'Il nostro sguardo',
-              fields: [testo('kicker', 'Kicker'), area('testo', 'Testo')],
-            },
-            {
-              name: 'luoghi',
+              name: 'progetti',
               type: 'array',
-              label: 'I luoghi (capitoli foto + testo)',
-              labels: { singular: 'Capitolo', plural: 'Capitoli' },
-              fields: [
-                {
-                  type: 'row',
-                  fields: [testo('numero', 'Numero romano'), testo('kicker', 'Kicker')],
-                },
-                area('titolo', 'Titolo', { required: true }),
-                area('testo', 'Testo'),
-                testo('didascalia', 'Didascalia'),
-                immagine('immagine', 'Immagine'),
-              ],
+              label: 'Tre ambiti (01, 02, 03)',
+              maxRows: 3,
+              labels: { singular: 'Ambito', plural: 'Ambiti' },
+              fields: [testo('titolo', 'Titolo', { required: true }), area('testo', 'Testo'), link('link', 'Link della freccia')],
             },
             {
-              name: 'banner',
+              name: 'chiSiamo',
               type: 'group',
-              label: 'Capitolo a tutto schermo',
+              label: 'Chi siamo',
               fields: [
-                {
-                  type: 'row',
-                  fields: [testo('numero', 'Numero romano'), testo('kicker', 'Kicker')],
-                },
-                area('titolo', 'Titolo'),
-                area('testo', 'Testo'),
-                immagine('immagine', 'Immagine'),
-              ],
-            },
-            {
-              name: 'materia',
-              type: 'group',
-              label: 'La materia',
-              fields: [
+                testo('sfondo', 'Numero grande sullo sfondo', { localized: false, defaultValue: '1825' }),
+                immagine('immagine', 'Immagine (verticale 3:4)'),
                 testo('kicker', 'Kicker'),
                 area('titolo', 'Titolo'),
                 area('testo', 'Testo'),
                 {
-                  name: 'schede',
+                  name: 'punti',
                   type: 'array',
-                  label: 'Schede',
-                  maxRows: 3,
-                  fields: [immagine('immagine', 'Immagine'), testo('titolo', 'Titolo'), area('testo', 'Testo')],
+                  label: 'Punti numerati',
+                  maxRows: 6,
+                  fields: [testo('testo', 'Testo', { required: true })],
                 },
-                numeri('numeri', 'Numeri'),
+                { type: 'row', fields: [testo('pulsante', 'Testo del pulsante'), link('link', 'Link')] },
+              ],
+            },
+            numeri('numeri', 'Numeri (fascia scura)'),
+          ],
+        },
+        {
+          label: 'Installazioni',
+          fields: [
+            {
+              name: 'installazioni',
+              type: 'group',
+              label: 'Installazioni',
+              fields: [
+                testo('sfondo', 'Parola grande sullo sfondo'),
+                area('testoSinistra', 'Testo a sinistra'),
+                area('testoDestra', 'Testo a destra'),
+                {
+                  name: 'voci',
+                  type: 'array',
+                  label: 'Ambientazioni',
+                  labels: { singular: 'Ambientazione', plural: 'Ambientazioni' },
+                  fields: [
+                    immagine('immagine', 'Immagine'),
+                    testo('titolo', 'Titolo', { required: true }),
+                    testo('sottotitolo', 'Luogo e prodotti'),
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          name: 'categoria',
+                          type: 'select',
+                          label: 'Categoria (filtro)',
+                          defaultValue: 'hotel',
+                          options: [
+                            { label: 'Hotel', value: 'hotel' },
+                            { label: 'Ristorazione', value: 'risto' },
+                            { label: 'Spa & Piscine', value: 'spa' },
+                            { label: 'Residenze', value: 'resid' },
+                          ],
+                        },
+                        {
+                          name: 'formato',
+                          type: 'select',
+                          label: 'Formato nella griglia',
+                          defaultValue: 'media',
+                          options: [
+                            { label: 'Alta (due righe)', value: 'alta' },
+                            { label: 'Bassa', value: 'bassa' },
+                            { label: 'Media', value: 'media' },
+                            { label: 'Larga (due colonne)', value: 'larga' },
+                          ],
+                        },
+                      ],
+                    },
+                    link('link', 'Link'),
+                  ],
+                },
+                { type: 'row', fields: [testo('pulsante', 'Testo del pulsante'), link('link', 'Link')] },
               ],
             },
           ],
         },
         {
-          label: 'Designer e prodotti',
+          label: 'Collezioni e contract',
           fields: [
-            {
-              name: 'designer',
-              type: 'group',
-              label: 'I designer',
-              fields: [
-                testo('kicker', 'Kicker'),
-                area('titolo', 'Titolo'),
-                area('testo', 'Testo'),
-                {
-                  name: 'elenco',
-                  type: 'relationship',
-                  relationTo: 'designer',
-                  hasMany: true,
-                  label: 'Designer da mostrare',
-                },
-                {
-                  name: 'segnaposto',
-                  type: 'number',
-                  label: 'Card segnaposto "ritratto designer da fornire"',
-                  defaultValue: 0,
-                  min: 0,
-                  max: 6,
-                },
-              ],
-            },
             {
               name: 'collezioni',
               type: 'group',
-              label: 'Collezioni',
+              label: 'Le collezioni',
               fields: [
                 area('titolo', 'Titolo'),
                 area('testo', 'Testo'),
@@ -171,51 +149,50 @@ export const Home: GlobalConfig = {
                   type: 'array',
                   label: 'Tessere',
                   maxRows: 4,
-                  fields: [testo('etichetta', 'Etichetta', { required: true }), immagine('immagine', 'Immagine'), link('link', 'Link')],
+                  fields: [
+                    testo('etichetta', 'Etichetta', { required: true }),
+                    immagine('immagine', 'Immagine'),
+                    { name: 'scritta', type: 'select', label: 'Colore della scritta', defaultValue: 'scura', options: [{ label: 'Scura', value: 'scura' }, { label: 'Chiara (su foto scure)', value: 'chiara' }] },
+                    link('link', 'Link'),
+                  ],
                 },
               ],
             },
             {
-              name: 'portfolio',
+              name: 'contract',
               type: 'group',
-              label: 'Portfolio prodotti',
+              label: 'Serralunga Contract',
               fields: [
+                immagine('immagine', 'Immagine'),
                 testo('kicker', 'Kicker'),
                 area('titolo', 'Titolo'),
-                area('testo', 'Testo'),
                 {
-                  name: 'prodotti',
-                  type: 'relationship',
-                  relationTo: 'prodotti',
-                  hasMany: true,
-                  label: 'Prodotti da mostrare',
+                  name: 'servizi',
+                  type: 'array',
+                  label: 'Servizi numerati',
+                  maxRows: 6,
+                  fields: [testo('titolo', 'Titolo', { required: true }), area('testo', 'Testo')],
                 },
               ],
-            },
-            {
-              name: 'citazione',
-              type: 'group',
-              label: 'Citazione',
-              fields: [area('testo', 'Citazione'), testo('firma', 'Firma'), immagine('immagine', 'Immagine (quadrata)')],
             },
           ],
         },
         {
-          label: 'Invito',
+          label: 'Catalogo',
           fields: [
             {
-              name: 'invito',
+              name: 'catalogo',
               type: 'group',
-              label: 'Raccontateci il vostro luogo',
+              label: 'Richiesta catalogo e listino',
               fields: [
+                immagine('immagine', 'Immagine del catalogo'),
                 testo('kicker', 'Kicker'),
                 area('titolo', 'Titolo'),
                 area('testo', 'Testo'),
-                testo('pulsante', 'Testo del pulsante', { defaultValue: 'Richiedi il volume' }),
+                testo('pulsante', 'Testo del pulsante', { defaultValue: 'Richiesta catalogo' }),
                 area('grazie', 'Messaggio dopo l’invio', {
-                  defaultValue: 'Grazie: vi ricontatteremo a breve con il volume Serralunga.',
+                  defaultValue: 'Grazie: riceverete catalogo e listino entro 24 ore lavorative.',
                 }),
-                immagine('immagine', 'Immagine di sfondo'),
               ],
             },
           ],

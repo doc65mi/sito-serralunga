@@ -1,9 +1,11 @@
 ---
 /** Frecce che fanno scorrere un carosello (data-rail = id del carosello). */
 interface Props { rail: string }
+import { traduttore } from '../lib/lingua'
 const { rail } = Astro.props
+const t = traduttore(Astro.locals.lingua)
 ---
 <div class="frecce" data-frecce={rail}>
-  <button type="button" class="freccia" data-dir="-1" aria-controls={rail} aria-label="Scorri indietro">←</button>
-  <button type="button" class="freccia" data-dir="1" aria-controls={rail} aria-label="Scorri avanti">→</button>
+  <button type="button" class="freccia" data-dir="-1" aria-controls={rail} aria-label={t('Scorri indietro')}>←</button>
+  <button type="button" class="freccia" data-dir="1" aria-controls={rail} aria-label={t('Scorri avanti')}>→</button>
 </div>

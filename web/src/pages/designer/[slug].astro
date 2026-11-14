@@ -8,11 +8,15 @@ import CardProdotto from '../../components/CardProdotto.astro'
 import { elenco, perSlug, type Doc } from '../../lib/cms'
 import { isMedia, src } from '../../lib/media'
 import { piatto } from '../../lib/testo'
+import { percorso, traduttore } from '../../lib/lingua'
 
-const d = await perSlug('designer', Astro.params.slug || '', 1)
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const d = await perSlug('designer', Astro.params.slug || '', 1, L)
 if (!d || !d.schedaPubblicata) return Astro.rewrite('/404')
 
-const pezzi = await elenco('prodotti', { 'where[designer][equals]': d.id, depth: 1 })
+const pezzi = await elenco('prodotti', { 'where[designer][equals]': d.id, depth: 1 }, L)
 const segnaposto = Array.from({ length: d.pezziSegnaposto || 0 })
 
 const jsonld = [{
@@ -28,32 +32,33 @@ const jsonld = [{
   titolo={d.seo?.titolo || `${d.nome} | Serralunga`}
   descrizione={d.seo?.descrizione || d.estratto}
   immagine={d.seo?.immagine || d.ritratto}
-  percorso={[{ nome: 'I designer', url: '/designer/' }, { nome: d.nome, url: `/designer/${d.slug}/` }]}
+  percorso={[{ nome: t('I designer'), url: '/designer/' }, { nome: d.nome, url: `/designer/${d.slug}/` }]}
   jsonld={jsonld}
   pagina={`designer-${d.slug}`}
+  doc={`collections/designer/${d.id}`}
 >
   <section class="bio" id="designer-bio">
     <div class="wrap bio__griglia">
-      {d.ritratto && !d.ritrattoProvvisorio ? (
-        <div class="foto r-34 bio__ritratto"><Img media={d.ritratto} priorita sizes="(max-width: 900px) 100vw, 40vw" larghezza={1000} /></div>
+      {isMedia(d.ritratto) ? (
+        <div class="foto r-34 bio__ritratto"><Img campo="ritratto" media={d.ritratto} priorita sizes="(max-width: 900px) 100vw, 40vw" larghezza={1000} /></div>
       ) : (
         <div class="foto r-34 segnaposto bio__ritratto">
-          <Img media={d.ritratto} class="ritratto-tondo ritratto-tondo--xl" priorita sizes="180px" larghezza={400} />
-          <span class="nota-mono">{'ritratto in alta risoluzione\nda fornire'}</span>
+          <Img campo="ritratto" media={d.ritratto} class="ritratto-tondo ritratto-tondo--xl" priorita sizes="180px" larghezza={400} />
+          <span class="nota-mono">{t('ritratto in alta risoluzione\nda fornire')}</span>
         </div>
       )}
       <div class="bio__testi">
-        {d.provenienza && <span class="kicker">{d.provenienza}</span>}
-        <h1>{d.nome}</h1>
-        <Testo class="bio__citazione" t={d.citazione} />
-        {(d.biografia || []).map((p: Doc) => <Testo class="testo" t={p.testo} />)}
+        {d.provenienza && <span class="kicker" data-campo="provenienza">{d.provenienza}</span>}
+        <h1 data-campo="nome">{d.nome}</h1>
+        <Testo class="bio__citazione" campo="citazione" t={d.citazione} />
+        {(d.biografia || []).map((p: Doc, k: number) => <Testo class="testo" campo={`biografia.${k}.testo`} t={p.testo} />)}
         {(d.numeri || []).length > 0 && (
           <div class="numeri-riga">
             {d.numeri.map((n: Doc) => <div><div class="numeri-riga__valore">{n.valore}</div><div class="etichetta">{n.etichetta}</div></div>)}
           </div>
         )}
         {(d.premi || []).length > 0 && (
-          <ul class="premi" aria-label="Premi e riconoscimenti">
+          <ul class="premi" aria-label={t('Premi e riconoscimenti')}>
             {d.premi.map((p: Doc) => <li><span>{p.anno}</span><span>{p.titolo}</span></li>)}
           </ul>
         )}
@@ -62,25 +67,25 @@ const jsonld = [{
   </section>
 
   {d.banner?.frase && (
-    <section class="banner-frase" id="designer-banner" aria-label="Fotografia">
-      <Img media={d.banner.immagine} larghezza={2600} />
+    <section class="banner-frase" id="designer-banner" aria-label={t('Fotografia')}>
+      <Img campo="banner.immagine" media={d.banner.immagine} larghezza={2600} />
       <div class="velo velo--banner"></div>
-      <Testo t={d.banner.frase} />
+      <Testo campo="banner.frase" t={d.banner.frase} />
     </section>
   )}
 
   {(pezzi.length > 0 || segnaposto.length > 0) && (
     <section class="sez-pezzi" id="designer-pezzi">
       <div class="wrap pad intesta">
-        <Testo as="h2" class="titolo titolo--l" t={d.titoloPezzi || 'I pezzi\nper Serralunga'} />
+        <Testo as="h2" class="titolo titolo--l" campo="titoloPezzi" t={d.titoloPezzi || t('I pezzi\nper Serralunga')} />
         <Frecce rail="rail-opere" />
       </div>
-      <div class="rail" id="rail-opere" tabindex="0" aria-label={`Pezzi di ${d.nome}`}>
+      <div class="rail" id="rail-opere" tabindex="0" aria-label={`${t('Pezzi di')} ${d.nome}`}>
         {pezzi.map((p) => <CardProdotto p={p} sotto={p.categoria?.split('—')[0]?.trim() || p.etichettaCard} />)}
         {segnaposto.map(() => (
           <div class="card card--vuota">
-            <div class="foto r-45 segnaposto"><span class="nota-mono">{'altri pezzi\nda confermare'}</span></div>
-            <div class="card__piede"><div><div class="card__nome">Nome prodotto</div><div class="card__sotto">Collezione</div></div></div>
+            <div class="foto r-45 segnaposto"><span class="nota-mono">{t('altri pezzi\nda confermare')}</span></div>
+            <div class="card__piede"><div><div class="card__nome">{t('Nome prodotto')}</div><div class="card__sotto">{t('Collezione')}</div></div></div>
           </div>
         ))}
       </div>
@@ -89,11 +94,11 @@ const jsonld = [{
 
   <section class="sez-int pad scuro" id="designer-cta">
     <div class="centro centro--s">
-      <span class="kicker kicker--largo">{d.cta?.kicker || 'Progetti su misura'}</span>
-      <Testo as="h2" class="titolo titolo--cta" t={d.cta?.titolo || 'Lavoriamo con i designer,\nper il vostro luogo'} />
+      <span class="kicker kicker--largo">{d.cta?.kicker || t('Progetti su misura')}</span>
+      <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={d.cta?.titolo || t('Lavoriamo con i designer,\nper il vostro luogo')} />
       <div class="btn-riga btn-riga--centro">
-        <a href="/#invito" class="btn btn--chiaro">Parliamo del progetto</a>
-        <a href="/designer/" class="btn btn--bordo-chiaro">Tutti i designer</a>
+        <a href={u('/#listino')} class="btn btn--chiaro">{t('Parliamo del progetto')}</a>
+        <a href={u('/designer/')} class="btn btn--bordo-chiaro">{t('Tutti i designer')}</a>
       </div>
     </div>
   </section>

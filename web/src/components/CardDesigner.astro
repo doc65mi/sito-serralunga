@@ -1,28 +1,33 @@
 ---
 /** Card designer: home (carosello) e pagina "I designer". Senza dati mostra il segnaposto. */
 import Img from './Img.astro'
+import { isMedia } from '../lib/media'
 import type { Doc } from '../lib/cms'
+import { percorso, traduttore } from '../lib/lingua'
 interface Props { d?: Doc | null; home?: boolean; link?: boolean }
 const { d, home = false, link = false } = Astro.props
-const testo = d ? (home ? d.estrattoHome || d.estratto : d.estratto) : 'Nota biografica e collezione firmata.'
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const testo = d ? (home ? d.estrattoHome || d.estratto : d.estratto) : t('Nota biografica e collezione firmata.')
 const Tag = link ? 'a' : 'div'
-const destinazione = d?.schedaPubblicata ? `/designer/${d.slug}/` : '#richiesta'
+const destinazione = d?.schedaPubblicata ? u(`/designer/${d.slug}/`) : '#richiesta'
 ---
 <Tag href={link ? destinazione : undefined} class:list={['card-designer', !d && 'card-designer--vuota']}>
-  {d && d.ritratto && !d.ritrattoProvvisorio ? (
+  {d && isMedia(d.ritratto) ? (
     <div class="foto r-34 bn"><Img media={d.ritratto} sizes="(max-width: 560px) 100vw, 30vw" larghezza={1000} /></div>
   ) : d && d.ritratto ? (
     <div class="foto r-34 segnaposto">
       <Img media={d.ritratto} class:list={['ritratto-tondo', !home && 'ritratto-tondo--l']} sizes="170px" larghezza={400} />
-      <span class="nota-mono">{home ? 'ritratto in alta risoluzione\nda fornire' : 'ritratto hi-res da fornire'}</span>
+      <span class="nota-mono">{t(home ? 'ritratto in alta risoluzione\nda fornire' : 'ritratto hi-res da fornire')}</span>
     </div>
   ) : (
-    <div class="foto r-34 segnaposto"><span class="nota-mono">{'ritratto designer\nda fornire'}</span></div>
+    <div class="foto r-34 segnaposto"><span class="nota-mono">{t('ritratto designer\nda fornire')}</span></div>
   )}
   <div class="card-designer__testi">
-    <div class="card-designer__nome">{d?.nome || 'Nome designer'}</div>
-    <div class="ruolo-riga"><span>{d?.ruolo || 'Ruolo'}</span></div>
+    <div class="card-designer__nome">{d?.nome || t('Nome designer')}</div>
+    <div class="ruolo-riga"><span>{d?.ruolo || t('Ruolo')}</span></div>
     <p class="testo testo--card" data-didascalia={home ? '' : undefined}>{testo}</p>
-    {link && d && <span class="card__azione">{d.schedaPubblicata ? 'Scheda designer →' : 'Scheda in arrivo'}</span>}
+    {link && d && <span class="card__azione">{t(d.schedaPubblicata ? 'Scheda designer →' : 'Scheda in arrivo')}</span>}
   </div>
 </Tag>

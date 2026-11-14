@@ -94,7 +94,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | 'it' | 'it'[];
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('it' | 'en') | ('it' | 'en')[];
   globals: {
     home: Home;
     'pagina-designer': PaginaDesigner;
@@ -105,7 +105,7 @@ export interface Config {
     'pagina-designer': PaginaDesignerSelect<false> | PaginaDesignerSelect<true>;
     impostazioni: ImpostazioniSelect<false> | ImpostazioniSelect<true>;
   };
-  locale: 'it';
+  locale: 'it' | 'en';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -274,7 +274,7 @@ export interface Prodotti {
         sottotitolo?: string | null;
         immagine?: (number | null) | Media;
         /**
-         * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+         * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
          */
         link?: string | null;
         id?: string | null;
@@ -1210,33 +1210,49 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Home {
   id: number;
   /**
-   * Con l’apertura a slide l’H1 è nascosto alla vista ma letto da motori e assistenti. Con il video è il titolo grande.
+   * L’immagine è sempre visibile. Se carichi un video (mp4, muto) parte in loop sopra l’immagine e compare il pulsante play/pausa.
    */
-  h1: string;
-  tipoApertura?: ('slide' | 'video') | null;
-  slide?:
+  hero: {
+    immagine?: (number | null) | Media;
+    video?: (number | null) | Media;
+    notaVideo?: boolean | null;
+    kicker?: string | null;
+    /**
+     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     */
+    titolo: string;
+    /**
+     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     */
+    testo?: string | null;
+    link1Etichetta?: string | null;
+    /**
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+     */
+    link1?: string | null;
+    link2Etichetta?: string | null;
+    /**
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+     */
+    link2?: string | null;
+  };
+  progetti?:
     | {
-        immagine?: (number | null) | Media;
-        kicker?: string | null;
-        /**
-         * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-         */
         titolo: string;
         /**
          * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
          */
         testo?: string | null;
-        linkEtichetta?: string | null;
         /**
-         * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+         * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
          */
         link?: string | null;
         id?: string | null;
       }[]
     | null;
-  video?: {
-    file?: (number | null) | Media;
-    poster?: (number | null) | Media;
+  chiSiamo?: {
+    sfondo?: string | null;
+    immagine?: (number | null) | Media;
     kicker?: string | null;
     /**
      * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
@@ -1246,90 +1262,54 @@ export interface Home {
      * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
      */
     testo?: string | null;
-    linkEtichetta?: string | null;
+    punti?:
+      | {
+          testo: string;
+          id?: string | null;
+        }[]
+      | null;
+    pulsante?: string | null;
     /**
-     * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
      */
     link?: string | null;
   };
-  manifesto?: {
-    kicker?: string | null;
-    /**
-     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-     */
-    testo?: string | null;
-  };
-  luoghi?:
+  numeri?:
     | {
-        numero?: string | null;
-        kicker?: string | null;
-        /**
-         * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-         */
-        titolo: string;
-        /**
-         * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-         */
-        testo?: string | null;
-        didascalia?: string | null;
-        immagine?: (number | null) | Media;
+        valore: string;
+        etichetta: string;
         id?: string | null;
       }[]
     | null;
-  banner?: {
-    numero?: string | null;
-    kicker?: string | null;
+  installazioni?: {
+    sfondo?: string | null;
     /**
      * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
      */
-    titolo?: string | null;
+    testoSinistra?: string | null;
     /**
      * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
      */
-    testo?: string | null;
-    immagine?: (number | null) | Media;
-  };
-  materia?: {
-    kicker?: string | null;
-    /**
-     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-     */
-    titolo?: string | null;
-    /**
-     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-     */
-    testo?: string | null;
-    schede?:
+    testoDestra?: string | null;
+    voci?:
       | {
           immagine?: (number | null) | Media;
-          titolo?: string | null;
+          titolo: string;
+          sottotitolo?: string | null;
+          categoria?: ('hotel' | 'risto' | 'spa' | 'resid') | null;
+          formato?: ('alta' | 'bassa' | 'media' | 'larga') | null;
           /**
-           * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+           * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
            */
-          testo?: string | null;
+          link?: string | null;
           id?: string | null;
         }[]
       | null;
-    numeri?:
-      | {
-          valore: string;
-          etichetta: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  designer?: {
-    kicker?: string | null;
+    pulsante?: string | null;
     /**
-     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
      */
-    titolo?: string | null;
-    /**
-     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-     */
-    testo?: string | null;
-    elenco?: (number | Designer)[] | null;
-    segnaposto?: number | null;
+    link?: string | null;
   };
   collezioni?: {
     /**
@@ -1344,35 +1324,35 @@ export interface Home {
       | {
           etichetta: string;
           immagine?: (number | null) | Media;
+          scritta?: ('scura' | 'chiara') | null;
           /**
-           * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+           * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
            */
           link?: string | null;
           id?: string | null;
         }[]
       | null;
   };
-  portfolio?: {
+  contract?: {
+    immagine?: (number | null) | Media;
     kicker?: string | null;
     /**
      * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
      */
     titolo?: string | null;
-    /**
-     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-     */
-    testo?: string | null;
-    prodotti?: (number | Prodotti)[] | null;
+    servizi?:
+      | {
+          titolo: string;
+          /**
+           * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+           */
+          testo?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
-  citazione?: {
-    /**
-     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
-     */
-    testo?: string | null;
-    firma?: string | null;
+  catalogo?: {
     immagine?: (number | null) | Media;
-  };
-  invito?: {
     kicker?: string | null;
     /**
      * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
@@ -1387,7 +1367,6 @@ export interface Home {
      * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
      */
     grazie?: string | null;
-    immagine?: (number | null) | Media;
   };
   /**
    * Regole in file-md/seo.md: title fino a 60 caratteri, description 140–160.
@@ -1429,7 +1408,7 @@ export interface PaginaDesigner {
     testo?: string | null;
     pulsante?: string | null;
     /**
-     * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
      */
     link?: string | null;
   };
@@ -1458,11 +1437,19 @@ export interface Impostazioni {
   accento?: ('#A08A5F' | '#8C8B7A' | '#7C6A4E' | '#B4553B') | null;
   rivelaAlloScorrimento?: boolean | null;
   mostraDidascalie?: boolean | null;
+  barra?: {
+    testo?: string | null;
+    linkEtichetta?: string | null;
+    /**
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+     */
+    link?: string | null;
+  };
   menu?:
     | {
         etichetta: string;
         /**
-         * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+         * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
          */
         link?: string | null;
         evidenza?: boolean | null;
@@ -1480,7 +1467,7 @@ export interface Impostazioni {
           | {
               etichetta: string;
               /**
-               * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+               * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
                */
               link?: string | null;
               id?: string | null;
@@ -1494,7 +1481,7 @@ export interface Impostazioni {
     | {
         etichetta: string;
         /**
-         * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+         * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
          */
         link?: string | null;
         id?: string | null;
@@ -1514,7 +1501,7 @@ export interface Impostazioni {
     rea?: string | null;
     fondazione?: string | null;
     /**
-     * Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
      */
     sitoUfficiale?: string | null;
   };
@@ -1526,86 +1513,71 @@ export interface Impostazioni {
  * via the `definition` "home_select".
  */
 export interface HomeSelect<T extends boolean = true> {
-  h1?: T;
-  tipoApertura?: T;
-  slide?:
+  hero?:
     | T
     | {
         immagine?: T;
+        video?: T;
+        notaVideo?: T;
         kicker?: T;
         titolo?: T;
         testo?: T;
-        linkEtichetta?: T;
+        link1Etichetta?: T;
+        link1?: T;
+        link2Etichetta?: T;
+        link2?: T;
+      };
+  progetti?:
+    | T
+    | {
+        titolo?: T;
+        testo?: T;
         link?: T;
         id?: T;
       };
-  video?:
+  chiSiamo?:
     | T
     | {
-        file?: T;
-        poster?: T;
+        sfondo?: T;
+        immagine?: T;
         kicker?: T;
         titolo?: T;
         testo?: T;
-        linkEtichetta?: T;
+        punti?:
+          | T
+          | {
+              testo?: T;
+              id?: T;
+            };
+        pulsante?: T;
         link?: T;
       };
-  manifesto?:
+  numeri?:
     | T
     | {
-        kicker?: T;
-        testo?: T;
-      };
-  luoghi?:
-    | T
-    | {
-        numero?: T;
-        kicker?: T;
-        titolo?: T;
-        testo?: T;
-        didascalia?: T;
-        immagine?: T;
+        valore?: T;
+        etichetta?: T;
         id?: T;
       };
-  banner?:
+  installazioni?:
     | T
     | {
-        numero?: T;
-        kicker?: T;
-        titolo?: T;
-        testo?: T;
-        immagine?: T;
-      };
-  materia?:
-    | T
-    | {
-        kicker?: T;
-        titolo?: T;
-        testo?: T;
-        schede?:
+        sfondo?: T;
+        testoSinistra?: T;
+        testoDestra?: T;
+        voci?:
           | T
           | {
               immagine?: T;
               titolo?: T;
-              testo?: T;
+              sottotitolo?: T;
+              categoria?: T;
+              formato?: T;
+              link?: T;
               id?: T;
             };
-        numeri?:
-          | T
-          | {
-              valore?: T;
-              etichetta?: T;
-              id?: T;
-            };
-      };
-  designer?:
-    | T
-    | {
-        kicker?: T;
-        titolo?: T;
-        testo?: T;
-        elenco?: T;
-        segnaposto?: T;
+        pulsante?: T;
+        link?: T;
       };
   collezioni?:
     | T
@@ -1617,34 +1589,34 @@ export interface HomeSelect<T extends boolean = true> {
           | {
               etichetta?: T;
               immagine?: T;
+              scritta?: T;
               link?: T;
               id?: T;
             };
       };
-  portfolio?:
+  contract?:
     | T
     | {
+        immagine?: T;
         kicker?: T;
         titolo?: T;
-        testo?: T;
-        prodotti?: T;
+        servizi?:
+          | T
+          | {
+              titolo?: T;
+              testo?: T;
+              id?: T;
+            };
       };
-  citazione?:
+  catalogo?:
     | T
     | {
-        testo?: T;
-        firma?: T;
         immagine?: T;
-      };
-  invito?:
-    | T
-    | {
         kicker?: T;
         titolo?: T;
         testo?: T;
         pulsante?: T;
         grazie?: T;
-        immagine?: T;
       };
   seo?:
     | T
@@ -1697,6 +1669,13 @@ export interface ImpostazioniSelect<T extends boolean = true> {
   accento?: T;
   rivelaAlloScorrimento?: T;
   mostraDidascalie?: T;
+  barra?:
+    | T
+    | {
+        testo?: T;
+        linkEtichetta?: T;
+        link?: T;
+      };
   menu?:
     | T
     | {

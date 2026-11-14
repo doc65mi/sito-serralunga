@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { en } from '@payloadcms/translations/languages/en'
 import { it } from '@payloadcms/translations/languages/it'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
@@ -64,10 +65,13 @@ export default buildConfig({
       ],
     },
   },
-  i18n: { supportedLanguages: { it }, fallbackLanguage: 'it' },
-  // Pronto per l'inglese: basta aggiungere { code: 'en', label: 'English' } ai locales.
+  i18n: { supportedLanguages: { it, en }, fallbackLanguage: 'it' },
+  // Contenuti in italiano e inglese: un campo inglese vuoto mostra il testo italiano.
   localization: {
-    locales: [{ code: 'it', label: 'Italiano' }],
+    locales: [
+      { code: 'it', label: 'Italiano' },
+      { code: 'en', label: 'English' },
+    ],
     defaultLocale: 'it',
     fallback: true,
   },

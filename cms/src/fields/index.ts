@@ -130,12 +130,12 @@ export const paragrafi = (name = 'paragrafi', label = 'Paragrafi'): Field => ({
   fields: [area('testo', 'Testo', { required: true })],
 })
 
-/** Link: percorso interno (/designer/marc-sadler), ancora (#invito) o URL completo. */
+/** Link: percorso interno (/designer/marc-sadler), ancora (#listino) o URL completo. */
 export const link = (name = 'link', label = 'Link'): Field => ({
   name,
   label,
   type: 'text',
-  admin: { description: 'Percorso relativo (/designer/), ancora (/#invito) o indirizzo completo.' },
+  admin: { description: 'Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.' },
 })
 
 export const ordine: Field = {

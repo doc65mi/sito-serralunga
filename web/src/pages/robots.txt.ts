@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro'
-import { env } from '../lib/cms'
+import { env, SITO } from '../lib/cms'
 
-export const GET: APIRoute = ({ site }) => {
-  const base = (site?.toString() || '').replace(/\/$/, '')
+export const GET: APIRoute = () => {
+  const base = SITO
   // Finché il sito è in prova si può bloccare l'indicizzazione con BLOCCA_INDICIZZAZIONE=1
   const blocca = env('BLOCCA_INDICIZZAZIONE') === '1'
   return new Response(`User-agent: *\n${blocca ? 'Disallow: /' : 'Allow: /'}\n\nSitemap: ${base}/sitemap.xml\n`, {

@@ -9,41 +9,46 @@ export const impostazioniDati = async (m: Media) => ({
   accento: '#A08A5F',
   rivelaAlloScorrimento: true,
   mostraDidascalie: true,
+  barra: {
+    testo: 'Contract & Hospitality — Made in Italy dal 1825',
+    linkEtichetta: 'Area riservata rivenditori',
+    link: '/#listino',
+  },
   menu: [
-    { etichetta: 'Il nostro sguardo', link: '/#manifesto' },
-    { etichetta: 'I luoghi', link: '/#luoghi' },
-    { etichetta: 'Case history', link: '/case-history/la-loge-du-massif/' },
-    { etichetta: 'La materia', link: '/#materia' },
-    { etichetta: 'I designer', link: '/designer/' },
-    { etichetta: 'Collezioni', link: '/#collezioni' },
-    { etichetta: 'Prodotti', link: '/#portfolio' },
-    { etichetta: 'Contract', link: '/#invito' },
+    { etichetta: 'Progetti', link: '/#progetti' },
+    { etichetta: 'Installazioni', link: '/#collezioni' },
+    { etichetta: 'Contract', link: '/#contract' },
+    { etichetta: 'Materiali', link: '/#materiali' },
+    { etichetta: 'Designer', link: '/designer/' },
+    { etichetta: 'Listino B2B', link: '/#listino' },
+    { etichetta: 'Richiedi il catalogo', link: '/#listino', evidenza: true },
   ],
-  descrizione: "Arredi, illuminazione e fioriere di design, 100% made in Italy, per l'ospitalità e il contract.",
+  descrizione:
+    'Mobili, illuminazione, fioriere e oggetti di design 100% made in Italy per interni ed esterni, hospitality e contract.',
   colonne: [
     {
-      titolo: 'Racconto',
+      titolo: 'Prodotti',
       link: [
-        { etichetta: 'Il nostro sguardo', link: '/#manifesto' },
-        { etichetta: 'I luoghi', link: '/#luoghi' },
-        { etichetta: 'Case history', link: '/case-history/la-loge-du-massif/' },
-        { etichetta: 'I designer', link: '/designer/' },
+        { etichetta: 'Vasi e fioriere', link: '/#collezioni' },
+        { etichetta: 'Arredo', link: '/#collezioni' },
+        { etichetta: 'Illuminazione', link: '/#collezioni' },
+        { etichetta: 'Accessori', link: '/#collezioni' },
+        { etichetta: 'Cartella colori', link: '/#collezioni' },
       ],
     },
     {
       titolo: 'Professionisti',
       link: [
-        { etichetta: 'Prodotti', link: '/#portfolio' },
-        { etichetta: 'Serralunga Contract', link: '/#invito' },
-        { etichetta: 'Campionature', link: '/#invito' },
+        { etichetta: 'Serralunga Contract', link: '/#contract' },
+        { etichetta: 'I designer', link: '/designer/' },
+        { etichetta: 'Listino riservato', link: '/#listino' },
+        { etichetta: 'Condizioni di vendita', link: '/#listino' },
       ],
     },
   ],
   copyright: '© {anno} Serralunga — 1825 S.R.L.',
-  legali: [
-    { etichetta: 'Privacy', link: '/privacy/' },
-    { etichetta: 'Cookie', link: '/cookie/' },
-  ],
+  // Le pagine legali non esistono ancora: voci senza link finché non vengono create.
+  legali: [{ etichetta: 'Privacy' }, { etichetta: 'Cookie' }, { etichetta: 'Termini' }],
   azienda: {
     ragioneSociale: '1825 S.R.L.',
     marchio: 'Serralunga',
@@ -61,195 +66,184 @@ export const impostazioniDati = async (m: Media) => ({
   },
 })
 
-export const homeDati = async (
-  m: Media,
-  designer: Record<string, number>,
-  prodotti: Record<string, number>,
-) => {
-  const fioreOrizzontale = await m(
-    `${S}/files/Aqua_family_Fiore_di_lotto_Lifestyle_2_landscape_cea80197-cf2b-4040-bdd8-73a894da482e.jpg?width=2600`,
-    "Fiore di Loto sull'acqua della piscina",
-  )
-  const atmosfera = await m(
-    `${S}/products/Vastwo-AtmosferaandBig-Bolifestyle1.jpg?v=1771514307&width=2400`,
-    'Atmosfera e Big-Bo su una terrazza serale',
-  )
-  const estate = await m(`${S}/files/summer_serralunga.webp?v=1782985471&width=2400`, 'Arredi Serralunga in giardino al sole')
-
-  return {
-    h1: "Serralunga — arredi di design per l'ospitalità dal 1825",
-    tipoApertura: 'slide',
-    slide: [
+export const homeDati = async (m: Media) => ({
+  hero: {
+    immagine: await m(`${S}/files/summer_serralunga.webp?v=1782985471&width=2400`, 'Arredi Serralunga in un giardino al sole'),
+    notaVideo: false,
+    kicker: 'Living outdoor — Contract & Hospitality',
+    titolo: 'Il design\nprende il sole',
+    testo:
+      'Arredi outdoor su misura per hôtellerie, ristorazione e dimore di prestigio. Fioriere, sedute e illuminazione 100% made in Italy, dal 1825.',
+    link1Etichetta: 'Vedi la collezione',
+    link1: '#collezioni',
+    link2Etichetta: 'Richiedi il catalogo',
+    link2: '#listino',
+  },
+  progetti: [
+    {
+      titolo: 'Hôtellerie',
+      testo: 'Terrazze, roof e aree piscina: fioriere e sedute in LLDPE colorate su cartella, resistenti a sole, salsedine e gelo.',
+      link: '#contract',
+    },
+    {
+      titolo: 'Ristorazione',
+      testo: 'Dehors e separé vegetali: sistemi modulari per delimitare i coperti mantenendo leggerezza e identità del locale.',
+      link: '#contract',
+    },
+    {
+      titolo: 'Dimore di prestigio',
+      testo: "Pezzi d'autore e finiture laccate o Moleskin, sviluppati con studi di architettura e interior designer.",
+      link: '#contract',
+    },
+  ],
+  chiSiamo: {
+    sfondo: '1825',
+    immagine: await m(`${S}/files/storia_5e3ef214-3e06-4c94-ad73-ac8b8d312ce6.jpg?v=1667499580&width=1200`, 'La manifattura Serralunga'),
+    kicker: 'Chi siamo',
+    titolo: "Una passione per la bellezza,\nuna passione per l'innovazione",
+    testo:
+      'Dal 1825 lo spirito di ricerca e la tradizione produttiva sono le fondamenta del marchio. Stampaggio rotazionale in LLDPE, tinto in massa e riciclabile al 100%: prodotti pensati per resistere da −35 °C a +80 °C, negli spazi più esposti e più esigenti.',
+    punti: [
+      { testo: '100% Made in Italy' },
+      { testo: 'Materiale riciclabile al 100%' },
+      { testo: 'Cartella colori dedicata' },
+      { testo: 'Finitura Moleskin e laccature' },
+    ],
+    pulsante: 'Scopri Serralunga Contract',
+    link: '#contract',
+  },
+  numeri: [
+    { valore: '200', etichetta: 'Anni di manifattura' },
+    { valore: '500+', etichetta: 'Referenze a catalogo' },
+    { valore: '40', etichetta: 'Colori di cartella' },
+    { valore: '60', etichetta: 'Paesi serviti' },
+  ],
+  installazioni: {
+    sfondo: 'INSTALLAZIONI',
+    testoSinistra:
+      "Terrazze d'albergo, dehors, aree piscina e ville private: luoghi in cui il disegno italiano incontra la vita all'aperto.",
+    testoDestra:
+      "Una selezione di ambientazioni realizzate con studi di architettura e strutture ricettive in Italia e all'estero.",
+    voci: [
       {
-        immagine: estate,
-        kicker: 'Biella, Italia — dal 1825',
-        titolo: 'Il tempo passa.\n_La bellezza_ resta.',
-        testo: 'Duecento anni di manifattura italiana per i luoghi che ospitano le persone.',
-        linkEtichetta: 'Il nostro sguardo',
-        link: '#luoghi',
+        immagine: await m(`${S}/products/bigbo-pag170_hi.jpg?v=1771514306&width=1400`, 'Big-Bo in ambientazione alberghiera'),
+        titolo: 'Corte d’ingresso, hotel de charme',
+        sottotitolo: 'Piemonte — Big-Bo, Luisa Bocchietto',
+        categoria: 'hotel',
+        formato: 'alta',
+        link: '#progetti',
       },
       {
-        immagine: fioreOrizzontale,
-        kicker: 'Spa & piscine',
-        titolo: 'Una luce\nche _galleggia_',
-        testo: "Al tramonto la vasca smette di essere un impianto e diventa paesaggio.",
-        linkEtichetta: 'Vedi il capitolo',
-        link: '#luoghi',
+        immagine: await m(`${S}/products/Vastwo-AtmosferaandBig-Bolifestyle1.jpg?v=1771514307&width=1400`, 'Atmosfera e Big-Bo su rooftop'),
+        titolo: 'Rooftop bar',
+        sottotitolo: 'Milano — Atmosfera, Vas-One Family',
+        categoria: 'risto',
+        formato: 'bassa',
+        link: '#progetti',
       },
       {
-        immagine: atmosfera,
-        kicker: 'Hôtellerie',
-        titolo: "L'accoglienza\ncomincia _fuori_",
-        testo: "Volumi generosi che segnano l'arrivo e restituiscono scala all'architettura.",
-        linkEtichetta: 'Vedi il capitolo',
-        link: '#luoghi',
+        immagine: await m(`${S}/files/Fioredilotostilllife2.jpg?v=1771515672&width=1200`, 'Fiore di Loto galleggiante'),
+        titolo: 'Vasca esterna, spa',
+        sottotitolo: 'Riviera Ligure — Fiore di Loto',
+        categoria: 'spa',
+        formato: 'bassa',
+        link: '#progetti',
+      },
+      {
+        immagine: await m(`${S}/files/RIVIERA.png?v=1760515750&width=1600`, 'Divano Riviera'),
+        titolo: 'Lounge esterna',
+        sottotitolo: 'Costa Smeralda — Divano Riviera',
+        categoria: 'hotel',
+        formato: 'media',
+        link: '#progetti',
+      },
+      {
+        immagine: await m(`${S}/files/AquafamilyFioredilottoLifestyle2square2.jpg?v=1771515674&width=1200`, 'Collezione Aqua a bordo piscina'),
+        titolo: 'Bordo piscina',
+        sottotitolo: 'Lago di Garda — Collezione Aqua',
+        categoria: 'spa',
+        formato: 'media',
+        link: '#progetti',
+      },
+      {
+        immagine: await m(`${S}/products/vastwo-pag168_hi.jpg?v=1771514310&width=1400`, 'Vas-Two in giardino privato'),
+        titolo: 'Giardino privato',
+        sottotitolo: 'Brianza — Vas-Two',
+        categoria: 'resid',
+        formato: 'media',
+        link: '#progetti',
+      },
+      {
+        immagine: await m(`${S}/files/the_vases-_The_Vases_3.jpg?v=1727867232&width=1600`, 'Vasi della tradizione italiana'),
+        titolo: 'Loggiato di una dimora storica',
+        sottotitolo: 'Toscana — Decorati, Festonato, Orcio',
+        categoria: 'resid',
+        formato: 'larga',
+        link: '#progetti',
       },
     ],
-    video: {
-      poster: estate,
-      kicker: 'Biella, Italia — dal 1825',
-      titolo: 'Il tempo passa.\n_La bellezza_ resta.',
-      testo:
-        'Duecento anni di manifattura italiana al servizio dei luoghi che ospitano le persone: alberghi, tavole, giardini e dimore dove ogni dettaglio è chiamato a durare.',
-      linkEtichetta: 'Il nostro sguardo',
-      link: '#luoghi',
-    },
-    manifesto: {
-      kicker: 'Il nostro sguardo',
-      testo:
-        "Non disegniamo oggetti da guardare: disegniamo _soglie, ombre e attese_. Un vaso all'ingresso di un albergo è la prima frase di un racconto che l'ospite ricorderà.",
-    },
-    luoghi: [
+    pulsante: 'Vedi tutte le installazioni',
+    link: '#listino',
+  },
+  collezioni: {
+    titolo: 'Le collezioni',
+    testo:
+      "Quattro famiglie di prodotto, un'unica grammatica formale: forme scultoree, colore tinto in massa, resistenza da esterno.",
+    tessere: [
       {
-        numero: 'I',
-        kicker: 'Hôtellerie',
-        titolo: "L'accoglienza\ncomincia fuori",
-        testo:
-          "Prima della hall c'è una corte, un viale, una terrazza. Volumi generosi — fino a due metri di diametro — segnano l'arrivo e restituiscono scala all'architettura, resistendo al sole, alla salsedine e al gelo senza perdere colore.",
-        didascalia: 'Big-Bo — disegno di Luisa Bocchietto',
-        immagine: await m(`${S}/products/bigbo-pag170_hi.jpg?v=1771514306&width=2000`, "Big-Bo nella corte di un albergo"),
+        etichetta: 'Vasi',
+        scritta: 'chiara',
+        immagine: await m(`${S}/collections/cce7fa6d7ecfc83a8378e2587c3fd0dc.webp?v=1771580637&width=1200`, 'Vasi'),
+        link: '#collezioni',
+      },
+      { etichetta: 'Arredo', scritta: 'scura', immagine: await m(`${S}/files/RIVIERA.png?v=1760515750&width=1600`, 'Arredo'), link: '#collezioni' },
+      {
+        etichetta: 'Illuminazione',
+        scritta: 'scura',
+        immagine: await m(`${S}/files/Fioredilotowhite.jpg?v=1771515630&width=1200`, 'Illuminazione'),
+        link: '#collezioni',
       },
       {
-        numero: 'II',
-        kicker: 'Ristorazione',
-        titolo: 'Il verde\ncome architettura',
-        testo:
-          'Dehors che diventano sale, tavoli protetti senza pareti. Le fioriere modulari disegnano percorsi e intimità, e la sera la luce diffusa dai vasi opalini sostituisce le candele.',
-        didascalia: 'Atmosfera, Vas-One Family',
-        immagine: atmosfera,
+        etichetta: 'Accessori',
+        scritta: 'scura',
+        immagine: await m(`${S}/files/Fioredilotogreen.jpg?v=1771515669&width=1200`, 'Accessori'),
+        link: '#collezioni',
       },
     ],
-    banner: {
-      numero: 'III',
-      kicker: 'Spa & piscine',
-      titolo: 'Una luce che galleggia',
-      testo:
-        "Fiore di Loto nasce da un simbolo di rinascita e si posa sull'acqua senza peso: al tramonto la vasca smette di essere un impianto e diventa paesaggio.",
-      immagine: fioreOrizzontale,
-    },
-    materia: {
-      kicker: 'La materia',
-      titolo: 'Fatto per\nrestare bello',
-      testo:
-        "Stampaggio rotazionale, polietilene tinto in massa, spessori pieni: il colore non è una vernice, è il corpo stesso dell'oggetto. Da −35 °C a +80 °C, riciclabile al 100%, con la stessa presenza dopo dieci stagioni all'aperto.",
-      schede: [
-        {
-          immagine: await m(
-            `${S}/files/storia_5e3ef214-3e06-4c94-ad73-ac8b8d312ce6.jpg?v=1667499580&width=1200`,
-            'La manifattura di Biella',
-          ),
-          titolo: 'La mano di Biella',
-          testo: "Dal cuoio all'attuale polimero: due secoli di lavorazioni nello stesso luogo.",
-        },
-        {
-          immagine: await m(`${S}/files/Fioredilotostilllife2.jpg?v=1771515672&width=1400`, 'Dettaglio luminoso del Fiore di Loto'),
-          titolo: 'Il colore, in profondità',
-          testo: 'Quaranta tonalità di cartella, laccature e la finitura Moleskin da accarezzare.',
-        },
-        {
-          immagine: await m(`${S}/products/vastwo-copertina_hi_1.jpg?v=1771514311&width=1400`, 'Vas-Two, dettaglio di forma'),
-          titolo: "Forme d'autore",
-          testo: 'Progetti firmati da designer e architetti italiani, in produzione da decenni.',
-        },
-      ],
-      numeri: [
-        { valore: '200', etichetta: 'Anni di manifattura' },
-        { valore: '500+', etichetta: 'Progetti a catalogo' },
-        { valore: '40', etichetta: 'Colori di cartella' },
-        { valore: '60', etichetta: 'Paesi nel mondo' },
-      ],
-    },
-    designer: {
-      kicker: 'Le firme',
-      titolo: 'I designer\nche ci hanno dato forma',
-      testo:
-        'Architetti e designer italiani che da decenni interpretano la materia Serralunga: ogni pezzo porta il nome di chi lo ha pensato.',
-      elenco: [designer['luisa-bocchietto'], designer['marta-sansoni']],
-      segnaposto: 3,
-    },
-    collezioni: {
-      titolo: 'Quattro famiglie,\nuna sola grammatica',
-      testo: 'Vasi, arredo, illuminazione e oggetti: pezzi che convivono nello stesso spazio senza mai alzare la voce.',
-      tessere: [
-        {
-          etichetta: 'Vasi',
-          immagine: await m(`${S}/collections/cce7fa6d7ecfc83a8378e2587c3fd0dc.webp?v=1771580637&width=1400`, 'Vasi e fioriere'),
-          link: '#invito',
-        },
-        {
-          etichetta: 'Arredo',
-          immagine: await m(`${S}/files/RIVIERA.png?v=1760515750&width=1600`, 'Divano Riviera'),
-          link: '#invito',
-        },
-        {
-          etichetta: 'Illuminazione',
-          immagine: await m(
-            `${S}/files/AquafamilyFioredilottoLifestyle2square2.jpg?v=1771515674&width=1400`,
-            'Fiore di Loto a bordo piscina',
-          ),
-          link: '#invito',
-        },
-        {
-          etichetta: 'Tradizione',
-          immagine: await m(`${S}/files/the_vases-_The_Vases_3.jpg?v=1727867232&width=1600`, 'Vasi della tradizione italiana'),
-          link: '#invito',
-        },
-      ],
-    },
-    portfolio: {
-      kicker: 'Portfolio prodotti',
-      titolo: 'Pezzi da specificare\na capitolato',
-      testo:
-        'Ogni prodotto ha la sua scheda tecnica: dimensioni, materiali, cartella colori, disegni quotati e documentazione per il progetto.',
-      prodotti: ['aqua-lounger', 'big-bo', 'fiore-di-loto', 'riviera', 'vas-two', 'tradizione-italiana']
-        .map((s) => prodotti[s])
-        .filter(Boolean),
-    },
-    citazione: {
-      testo:
-        "«Chiediamo a un oggetto d'esterno la stessa cura che chiederemmo a un mobile di casa: è lì che si misura la qualità di un luogo.»",
-      firma: 'Serralunga Contract',
-      immagine: await m(`${S}/products/vastwo-pag168_hi.jpg?v=1771514310&width=1600`, 'Vas-Two in un giardino privato'),
-    },
-    invito: {
-      kicker: 'Un invito',
-      titolo: 'Raccontateci\nil vostro luogo',
-      testo:
-        'Lavoriamo al fianco di studi di architettura, general contractor e strutture ricettive: sopralluogo del progetto, campionature fisiche, colori e dimensioni dedicate. Vi inviamo il volume Serralunga e la cartella colori.',
-      pulsante: 'Richiedi il volume',
-      grazie: 'Grazie: vi ricontatteremo a breve con il volume Serralunga e la cartella colori.',
-      immagine: await m(
-        `${S}/files/ResidentialContractFurniture.jpg?v=1663588678&width=2400`,
-        'Ambientazione contract Serralunga',
-      ),
-    },
-    seo: {
-      titolo: 'Serralunga Contract, arredi outdoor dal 1825',
-      descrizione:
-        "Vasi, arredi e luci di design made in Italy per hotel, ristoranti e spa: scopri i progetti Serralunga e richiedi il volume e la cartella colori per il tuo luogo.",
-    },
-  }
-}
+  },
+  contract: {
+    immagine: await m(`${S}/files/ResidentialContractFurniture.jpg?v=1663588678&width=1600`, 'Serralunga Contract'),
+    kicker: 'Serralunga Contract',
+    titolo: 'Al servizio\ndel progetto',
+    servizi: [
+      { titolo: 'Consulenza progettuale', testo: 'Affiancamento a studi e general contractor dalla fase di concept al capitolato.' },
+      {
+        titolo: 'Colori e finiture su misura',
+        testo: "Campionature fisiche, laccature, metallizzati e finitura Moleskin coordinati all'identità della struttura.",
+      },
+      {
+        titolo: 'Grandi volumi e logistica',
+        testo: 'Produzione su commessa, spedizioni pallettizzate e consegne programmate per fasi di cantiere.',
+      },
+      // Nel template il testo è un segnaposto ("bla bla"): da scrivere nel pannello.
+      { titolo: 'Lavoro conto terzi', testo: '' },
+    ],
+  },
+  catalogo: {
+    immagine: await m(`${S}/files/Serralunga_catalog_front.jpg?v=1750701072&width=1312`, 'Catalogo Serralunga'),
+    kicker: 'Catalogo & listino B2B',
+    titolo: 'Richiedi il catalogo\ne le condizioni riservate',
+    testo:
+      'Riservato ad alberghi, ristoranti, studi di architettura e rivenditori. Riceverai catalogo, cartella colori e listino dedicato entro 24 ore lavorative.',
+    pulsante: 'Richiesta catalogo',
+    grazie: 'Grazie: riceverete catalogo, cartella colori e listino entro 24 ore lavorative.',
+  },
+  seo: {
+    titolo: 'Serralunga Contract — arredi outdoor dal 1825',
+    descrizione:
+      'Arredi outdoor su misura per hôtellerie, ristorazione e dimore di prestigio: fioriere, sedute e illuminazione 100% made in Italy, dal 1825.',
+  },
+})
 
 export const paginaDesignerDati = async () => ({
   kicker: 'Le firme',
@@ -262,7 +256,7 @@ export const paginaDesignerDati = async () => ({
     titolo: 'Un pezzo disegnato\nper il vostro luogo',
     testo: 'Per i progetti contract sviluppiamo con i nostri designer dimensioni, colori e finiture dedicate.',
     pulsante: 'Parliamo del progetto',
-    link: '/#invito',
+    link: '/#listino',
   },
   seo: {
     titolo: 'I designer Serralunga',

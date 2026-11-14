@@ -23,6 +23,6 @@ export function chiaro(hex: string): boolean {
   return 0.299 * r + 0.587 * g + 0.114 * b > 215
 }
 
-/** Link del CMS: "#invito" resta ancora, "/x" percorso, "https://" esterno. */
+/** Link del CMS: "#listino" resta ancora, "/x" percorso, "https://" esterno. */
 export const href = (l?: string | null) => l || '#'
 export const esterno = (l?: string | null) => !!l && /^https?:\/\//.test(l)

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
 import { CMS_INTERNAL, env } from '../../lib/cms'
+import { lingua, traduttore } from '../../lib/lingua'
 
 /**
  * Riceve il modulo del sito e lo salva nella collezione "richieste" di Payload.
@@ -25,8 +26,14 @@ const stessoSito = (request: Request) => {
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   const vuole = (request.headers.get('accept') || '').includes('application/json')
-  const risposta = (stato: number, corpo: Record<string, unknown>) =>
-    vuole ? new Response(JSON.stringify(corpo), { status: stato, headers: { 'Content-Type': 'application/json' } }) : redirect(stato < 300 ? '/?richiesta=ok#invito' : '/?richiesta=errore#invito', 303)
+  let t = traduttore('it')
+  let home = '/'
+  const risposta = (stato: number, corpo: Record<string, unknown>) => {
+    if (typeof corpo.errore === 'string') corpo.errore = t(corpo.errore)
+    return vuole
+      ? new Response(JSON.stringify(corpo), { status: stato, headers: { 'Content-Type': 'application/json' } })
+      : redirect(`${home}?richiesta=${stato < 300 ? 'ok' : 'errore'}#listino`, 303)
+  }
 
   if (!stessoSito(request)) return risposta(403, { errore: 'Invio non consentito' })
   let dati: FormData
@@ -35,6 +42,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   } catch {
     return risposta(400, { errore: 'Modulo non valido' })
   }
+  const L = lingua(dati.get('lingua'))
+  t = traduttore(L)
+  home = L === 'en' ? '/en/' : '/'
 
   // Campo trappola per i bot: se è compilato fingiamo che sia andata bene.
   if (String(dati.get('sito_web') || '')) return risposta(200, { ok: true })
@@ -52,7 +62,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
         referente: campo('referente'),
         email,
         citta: campo('citta'),
-        messaggio: campo('messaggio'),
+        messaggio: [campo('tipologia') && `Tipologia di struttura: ${campo('tipologia')}`, campo('messaggio')].filter(Boolean).join('\n'),
         pagina: campo('pagina'),
       }),
     })

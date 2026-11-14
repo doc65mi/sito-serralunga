@@ -1,6 +1,6 @@
 # struttura.md — struttura del sito Serralunga
 
-Version: 2.00
+Version: 2.01
 Data: 2026-11-14
 Ambito: cartelle, stack, schema dei contenuti, regole di costruzione delle pagine. Sostituisce la versione PcFrog/WordPress (archiviata in `storico/struttura-pcfrog-1.28.md`).
 Regola: se questo file e un altro `.md` non coincidono, valgono `design.md` per l'aspetto e `cliente.md` per fatti e URL.
@@ -29,7 +29,7 @@ Repository `doc65mi/sito-serralunga`, copia locale `C:\laragon\www\sito-serralun
 | Tipo | Nome | Pagina |
 |---|---|---|
 | Globale | Impostazioni | logo, menu, footer, dati azienda, colore accento, didascalie |
-| Globale | Home | tutte le sezioni della home |
+| Globale | Home | tutte le sezioni della home (template "Hero fullscreen": apertura, tre ambiti, chi siamo, numeri, installazioni, collezioni, contract, catalogo) |
 | Globale | Pagina designer | intro e CTA di `/designer/` |
 | Collezione | Prodotti | `/prodotti/{slug}/` e card |
 | Collezione | Designer | `/designer/{slug}/` e card |
@@ -46,3 +46,6 @@ Repository `doc65mi/sito-serralunga`, copia locale `C:\laragon\www\sito-serralun
 3. Un solo H1 per pagina; dati strutturati JSON-LD in `Base.astro` (Organization, BreadcrumbList, Product/Person/Article).
 4. Foto mancanti = segnaposto a strisce con nota, mai immagini inventate.
 5. Nuovi campi nel CMS → migrazione (`npx payload migrate:create`) e aggiornamento di questo file.
+6. Lingue: italiano senza prefisso, inglese sotto `/en/` (stesse pagine, lingua scelta in `web/src/middleware.ts`); testi fissi in `web/src/lib/lingua.ts`.
+7. Modifica dalla pagina: gli elementi con `data-campo` (testi) e `data-campo-img` (foto) sono modificabili da chi è collegato al pannello (`web/src/scripts/modifica.ts`). Ogni nuovo testo o foto di pagina va marcato con il percorso del campo.
+8. La home ha testata e footer propri (classi `hf-*` in `site.css`), identici al template; le altre pagine usano `Header.astro` e `Footer.astro`.

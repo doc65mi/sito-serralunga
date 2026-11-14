@@ -54,7 +54,7 @@ export const Designer: CollectionConfig = {
             {
               name: 'ritrattoProvvisorio',
               type: 'checkbox',
-              label: 'Ritratto provvisorio (piccolo e tondo, con nota "da fornire")',
+              label: 'Ritratto da sostituire in alta risoluzione (promemoria per la redazione: la foto si vede comunque a tutto riquadro)',
               defaultValue: false,
             },
             area('estratto', 'Testo della card (pagina designer)'),

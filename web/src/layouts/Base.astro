@@ -15,9 +15,10 @@ import '../styles/site.css'
 
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
-import { impostazioni, type Doc } from '../lib/cms'
+import { impostazioni, SITO, type Doc } from '../lib/cms'
 import { isMedia, src } from '../lib/media'
 import { piatto } from '../lib/testo'
+import { INFO, LINGUE, percorso as inLingua, senzaLingua, traduttore } from '../lib/lingua'
 
 interface Props {
   titolo: string
@@ -27,12 +28,24 @@ interface Props {
   jsonld?: Doc[]
   footerBreve?: boolean
   pagina?: string
+  /** Documento del CMS mostrato dalla pagina, per la modifica dalla pagina: 'globals/home' o 'collections/prodotti/12'. */
+  doc?: string
+  /** La pagina porta la propria testata e il proprio footer (slot "testata" e "piede"): è il caso della home. */
+  nudo?: boolean
 }
-const { titolo, descrizione, immagine, percorso = [], jsonld = [], footerBreve = false, pagina } = Astro.props
-const imp = await impostazioni()
+const { titolo, descrizione, immagine, percorso = [], jsonld = [], footerBreve = false, pagina, doc, nudo = false } = Astro.props
+// Chi ha fatto l'accesso al pannello (stesso indirizzo) riceve anche lo strumento di modifica.
+const redazione = Astro.cookies.has('payload-token')
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => inLingua(L, p)
+const imp = await impostazioni(L)
 const a = imp.azienda || {}
-const sito = (Astro.site?.toString() || 'http://localhost:4321/').replace(/\/$/, '')
-const canonico = `${sito}${Astro.url.pathname}`
+const sito = SITO
+// Astro.url è già senza /en (vedi middleware): si ricostruisce l'indirizzo di ogni lingua.
+const base = senzaLingua(Astro.url.pathname)
+const alternative = LINGUE.map((l) => ({ l, href: `${sito}${inLingua(l, base)}` }))
+const canonico = `${sito}${u(base)}`
 const og = isMedia(immagine) ? src(immagine, 1800) : undefined
 
 const organizzazione = {
@@ -61,50 +74,53 @@ const briciole = percorso.length
   ? [{
       '@type': 'BreadcrumbList',
       itemListElement: [{ nome: 'Serralunga', url: '/' }, ...percorso].map((p, i) => ({
-        '@type': 'ListItem', position: i + 1, name: p.nome, item: `${sito}${p.url}`,
+        '@type': 'ListItem', position: i + 1, name: p.nome, item: `${sito}${u(p.url)}`,
       })),
     }]
   : []
-const grafo = JSON.stringify({ '@context': 'https://schema.org', '@graph': [organizzazione, ...briciole, ...jsonld] })
+const grafo = JSON.stringify({ '@context': 'https://schema.org', '@graph': [organizzazione, ...briciole, ...jsonld.map((j) => ({ inLanguage: INFO[L].html, ...j }))] })
   .replace(/</g, '\\u003c')
 const accento = imp.accento || '#A08A5F'
 ---
 <!doctype html>
-<html lang="it" class={imp.rivelaAlloScorrimento !== false ? 'rivela' : undefined} style={`--accent:${accento}`}>
+<html lang={INFO[L].html} data-redazione={redazione ? '' : undefined} class={imp.rivelaAlloScorrimento !== false ? 'rivela' : undefined} style={`--accent:${accento}`}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{piatto(titolo)}</title>
     {descrizione && <meta name="description" content={piatto(descrizione)} />}
     <link rel="canonical" href={canonico} />
+    {alternative.map((a) => <link rel="alternate" hreflang={INFO[a.l].html} href={a.href} />)}
+    <link rel="alternate" hreflang="x-default" href={alternative[0].href} />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="it_IT" />
+    <meta property="og:locale" content={INFO[L].og} />
     <meta property="og:site_name" content={imp.nomeSito || 'Serralunga'} />
     <meta property="og:title" content={piatto(titolo)} />
     {descrizione && <meta property="og:description" content={piatto(descrizione)} />}
     <meta property="og:url" content={canonico} />
     {og && <meta property="og:image" content={og} />}
+    {LINGUE.filter((l) => l !== L).map((l) => <meta property="og:locale:alternate" content={INFO[l].og} />)}
     <meta name="theme-color" content="#16150F" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script type="application/ld+json" set:html={grafo} />
     <script is:inline>document.documentElement.classList.contains('rivela')&&document.documentElement.classList.add('js-rivela')</script>
   </head>
   <body>
-    <a class="salta" href="#contenuto">Vai al contenuto</a>
-    <div class:list={['pagina', imp.mostraDidascalie === false && 'senza-didascalie']}>
-      <Header imp={imp} corrente={Astro.url.pathname} />
+    <a class="salta" href="#contenuto">{t('Vai al contenuto')}</a>
+    <div class:list={['pagina', nudo && 'pagina--home', imp.mostraDidascalie === false && 'senza-didascalie']}>
+      {nudo ? <slot name="testata" /> : <Header imp={imp} corrente={base} />}
       {percorso.length > 0 && (
-        <nav aria-label="Percorso">
+        <nav aria-label={t('Percorso')}>
           <ol class="percorso">
-            <li><a href="/">Serralunga</a></li>
-            {percorso.map((p, i) => i === percorso.length - 1 ? <li><span aria-current="page">{p.nome}</span></li> : <li><a href={p.url}>{p.nome}</a></li>)}
+            <li><a href={u('/')}>Serralunga</a></li>
+            {percorso.map((p, i) => i === percorso.length - 1 ? <li><span aria-current="page">{p.nome}</span></li> : <li><a href={u(p.url)}>{p.nome}</a></li>)}
           </ol>
         </nav>
       )}
-      <main id="contenuto" data-pagina={pagina}>
+      <main id="contenuto" data-pagina={pagina} data-doc={doc} data-lingua={L}>
         <slot />
       </main>
-      <Footer imp={imp} breve={footerBreve} />
+      {nudo ? <slot name="piede" /> : <Footer imp={imp} breve={footerBreve} />}
     </div>
     <script src="../scripts/site.ts"></script>
   </body>

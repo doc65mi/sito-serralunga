@@ -1,7 +1,10 @@
 ---
-/** Testo dal CMS con la convenzione "_corsivo_" e a capo. */
+/**
+ * Testo dal CMS con la convenzione "_corsivo_" e a capo.
+ * campo: percorso del campo nel documento (es. "manifesto.testo"), serve alla modifica dalla pagina.
+ */
 import { fmt } from '../lib/testo'
-interface Props { t?: string | null; as?: string; class?: string; [k: string]: unknown }
-const { t, as: Tag = 'p', class: cls, ...rest } = Astro.props
+interface Props { t?: string | null; as?: string; class?: string; campo?: string; [k: string]: unknown }
+const { t, as: Tag = 'p', class: cls, campo, ...rest } = Astro.props
 ---
-{t ? <Tag class={cls} {...rest} set:html={fmt(t)} /> : null}
+{t ? <Tag class={cls} data-campo={campo} data-testo={campo ? '' : undefined} {...rest} set:html={fmt(t)} /> : null}

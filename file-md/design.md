@@ -1,6 +1,6 @@
 # design.md — aspetto del sito Serralunga
 
-Version: 1.00
+Version: 1.01
 Data: 2026-11-14
 Ambito: token, tipografia, componenti e ricette di pagina. Fonte grafica: i template in `template/` (Home v2 è il riferimento; v3 per l'apertura video). Codice: `web/src/styles/site.css` (unico foglio di stile).
 Regola: se questo file e `site.css` non coincidono, vale il template; poi si aggiornano entrambi.
@@ -58,7 +58,7 @@ Breakpoint: 1100, 900, 800, 560px. `prefers-reduced-motion` spegne Ken Burns, sl
 
 ## 5. Ricette di pagina
 
-- **Home** (v2): apertura → manifesto "Il nostro sguardo" → I luoghi (capitoli I–III) → capitolo a tutto schermo → La materia (3 schede + cifre) → I designer → Collezioni (4 tessere) → Portfolio (rail) → Citazione → Invito con modulo.
+- **Home** (template "Hero fullscreen"): barra scura + testata → immagine a tutto schermo con video facoltativo → tre ambiti (01–03) → Chi siamo → numeri → Installazioni con filtri → Le collezioni (4 tessere) → Serralunga Contract (servizi) → Catalogo e listino con modulo → footer a quattro colonne. Classi `hf-*`, fondo #F5F3EF, margine 40px.
 - **Prodotto** (Aqua Lounger): galleria + info (colori, misure, pulsante) → specifiche → disegno tecnico → ambiente → firma del progetto → case history → correlati → richiesta.
 - **Case history** (La Loge): apertura Ken Burns → progetto + scheda → citazione su foto → tre passi → coppia di immagini → protagonista (scuro) → diario (rail mini) → prodotti usati → contatto (notte).
 - **Designer**: intro → griglia card. **Scheda designer**: bio con ritratto → banner frase → pezzi (rail) → CTA scura.

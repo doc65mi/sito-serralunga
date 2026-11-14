@@ -1,193 +1,209 @@
 ---
-/** Home — template: template/Serralunga Contract Home v2.dc.html (slide) e v3 (video). */
+/**
+ * Home — template: template/Serralunga Contract Home - Hero fullscreen.dc.html
+ * Struttura, misure e colori sono quelli del template (classi hf-* in site.css).
+ */
 import Base from '../layouts/Base.astro'
 import Img from '../components/Img.astro'
 import Testo from '../components/Testo.astro'
-import Frecce from '../components/Frecce.astro'
-import CardDesigner from '../components/CardDesigner.astro'
-import CardProdotto from '../components/CardProdotto.astro'
-import ModuloRichiesta from '../components/ModuloRichiesta.astro'
-import { globale, type Doc } from '../lib/cms'
+import { globale, impostazioni, type Doc } from '../lib/cms'
 import { isMedia, urlFile } from '../lib/media'
-import { piatto } from '../lib/testo'
+import { piatto, esterno } from '../lib/testo'
+import { INFO, LINGUE, percorso, traduttore } from '../lib/lingua'
 
-const h = await globale('home', 2)
-const slide: Doc[] = h.slide || []
-const video = h.video || {}
-const designer: Doc[] = (h.designer?.elenco || []).filter((d: unknown) => typeof d === 'object')
-const segnaposto = Array.from({ length: h.designer?.segnaposto || 0 })
-const prodotti: Doc[] = (h.portfolio?.prodotti || []).filter((p: unknown) => typeof p === 'object')
-const usaVideo = h.tipoApertura === 'video'
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+/** In home i link alle sezioni della home restano ancore (#listino), senza ricaricare la pagina. */
+const qui = (p?: string | null) => (p && p.startsWith('/#') ? p.slice(1) : u(p || '#'))
+
+const [h, imp] = await Promise.all([globale('home', 2, L), impostazioni(L)])
+const hero = h.hero || {}
+const chi = h.chiSiamo || {}
+const inst = h.installazioni || {}
+const coll = h.collezioni || {}
+const con = h.contract || {}
+const cat = h.catalogo || {}
+const a = imp.azienda || {}
+const logo = isMedia(imp.logo) ? imp.logo : null
+const menu: Doc[] = (imp.menu || []).filter((v: Doc) => !v.evidenza)
+const inEvidenza: Doc[] = (imp.menu || []).filter((v: Doc) => v.evidenza)
+const video = isMedia(hero.video) ? hero.video : null
+const numero = (k: number) => String(k + 1).padStart(2, '0')
+const categorie = [
+  { v: 'hotel', n: 'Hotel' },
+  { v: 'risto', n: 'Ristorazione' },
+  { v: 'spa', n: 'Spa & Piscine' },
+  { v: 'resid', n: 'Residenze' },
+]
+const copyright = (imp.copyright || '© {anno} Serralunga').replace('{anno}', String(new Date().getFullYear()))
+const tel = (a.telefono || '').replace(/[^+\d]/g, '')
 ---
 <Base
-  titolo={h.seo?.titolo || h.h1}
-  descrizione={h.seo?.descrizione}
-  immagine={h.seo?.immagine || slide[0]?.immagine}
+  titolo={h.seo?.titolo || piatto(hero.titolo)}
+  descrizione={h.seo?.descrizione || hero.testo}
+  immagine={h.seo?.immagine || hero.immagine}
   pagina="home"
+  doc="globals/home"
+  nudo
 >
-  {usaVideo ? (
-    <section class="hero-video" id="home-apertura" aria-label="Apertura">
-      <Img media={video.poster} priorita larghezza={2600} />
-      {isMedia(video.file) && (
-        <video id="hero-video" autoplay muted loop playsinline poster={isMedia(video.poster) ? urlFile(video.poster) : undefined}>
-          <source src={urlFile(video.file)} type={video.file.mimeType || 'video/mp4'} />
-        </video>
-      )}
-      <div class="velo velo--hero"></div>
-      <div class="hero-video__testi">
-        {video.kicker && <span class="kicker kicker--largo kicker--chiaro">{video.kicker}</span>}
-        <Testo as="h1" class="titolo-schermo" t={video.titolo || h.h1} />
-        <div class="riga-base">
-          <Testo t={video.testo} />
-          <div class="hero-video__azioni">
-            {video.linkEtichetta && <a href={video.link || '#luoghi'} class="btn btn--bordo-chiaro">{video.linkEtichetta}</a>}
-            {isMedia(video.file) && <button type="button" class="btn-play" data-play="hero-video" aria-label="Play o pausa del video">II</button>}
+  <Fragment slot="testata">
+    <div class="hf-barra">
+      <span>{imp.barra?.testo}</span>
+      <div class="hf-barra__dx">
+        {imp.barra?.linkEtichetta && <a href={qui(imp.barra.link)}>{imp.barra.linkEtichetta}</a>}
+        <span class="hf-lingue" role="group" aria-label={t('Cambia lingua')}>
+          {LINGUE.map((l, k) => (
+            <>
+              {k > 0 && <span aria-hidden="true">/</span>}
+              {l === L
+                ? <span aria-current="true">{INFO[l].sigla}</span>
+                : <a href={percorso(l, '/')} hreflang={INFO[l].html} lang={INFO[l].html} title={INFO[l].nome}>{INFO[l].sigla}</a>}
+            </>
+          ))}
+        </span>
+      </div>
+    </div>
+    <header class="hf-testa" data-header>
+      <div class="hf-testa__dentro">
+        <a href={u('/')} class="hf-logo" aria-label={`${imp.nomeSito || 'Serralunga'}, home`}>
+          {logo ? <img src={urlFile(logo)} alt={imp.nomeSito || 'Serralunga'} width={logo.width} height={logo.height} /> : <span class="logo__testo">{imp.nomeSito || 'Serralunga'}</span>}
+        </a>
+        <button type="button" class="menu-apri" aria-expanded="false" aria-controls="menu-principale" data-menu>{t('Menu')}</button>
+        <nav class="hf-nav" id="menu-principale" aria-label={t('Menu principale')}>
+          {menu.map((v) => (
+            <a href={qui(v.link)} target={esterno(v.link) ? '_blank' : undefined} rel={esterno(v.link) ? 'noopener' : undefined}>{v.etichetta}</a>
+          ))}
+        </nav>
+        <div class="hf-testa__azioni">
+          {inEvidenza.map((v) => <a href={qui(v.link)} class="hf-btn-bordo">{v.etichetta}</a>)}
+        </div>
+      </div>
+    </header>
+  </Fragment>
+
+  <section class="hf-hero" id="home-apertura" aria-label={t('Apertura')}>
+    <Img campo="hero.immagine" media={hero.immagine} priorita larghezza={2600} />
+    {video && (
+      <video id="hero-video" autoplay muted loop playsinline>
+        <source src={urlFile(video)} type={video.mimeType || 'video/mp4'} />
+      </video>
+    )}
+    <div class="hf-hero__velo"></div>
+    <div class="hf-hero__testi">
+      {hero.kicker && <span class="hf-hero__kicker" data-campo="hero.kicker">{hero.kicker}</span>}
+      <Testo as="h1" campo="hero.titolo" t={hero.titolo} />
+      <div class="hf-hero__riga">
+        <Testo campo="hero.testo" t={hero.testo} />
+        <div class="hf-hero__azioni">
+          {hero.link1Etichetta && <a href={qui(hero.link1)} class="hf-btn-vetro" data-campo="hero.link1Etichetta">{hero.link1Etichetta}</a>}
+          {hero.link2Etichetta && <a href={qui(hero.link2)} class="hf-btn-chiaro" data-campo="hero.link2Etichetta">{hero.link2Etichetta}</a>}
+          {video && <button type="button" class="hf-play" data-play="hero-video" aria-label={t('Play o pausa del video')}>❙❙</button>}
+        </div>
+      </div>
+    </div>
+    {hero.notaVideo && !video && (
+      <div class="hf-hero__nota"><span></span><span>{t('video da fornire — fermo immagine attivo')}</span></div>
+    )}
+  </section>
+
+  {(h.progetti || []).length > 0 && (
+    <section id="progetti" class="hf-progetti">
+      <div class="hf-progetti__griglia">
+        {h.progetti.map((p: Doc, k: number) => (
+          <div class="hf-ambito">
+            <span class="hf-ambito__n" aria-hidden="true">{numero(k)}</span>
+            <span class="hf-ambito__filo"></span>
+            <h3 data-campo={`progetti.${k}.titolo`}>{p.titolo}</h3>
+            <Testo campo={`progetti.${k}.testo`} t={p.testo} />
+            {p.link && <a href={qui(p.link)} class="hf-ambito__freccia" aria-label={p.titolo}>→</a>}
           </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {chi.titolo && (
+    <section id="materiali" class="hf-chi">
+      {chi.sfondo && <span class="hf-chi__sfondo" aria-hidden="true">{chi.sfondo}</span>}
+      <div class="hf-chi__griglia">
+        <div class="hf-chi__foto"><Img campo="chiSiamo.immagine" media={chi.immagine} sizes="(max-width: 900px) 100vw, 45vw" larghezza={1800} /></div>
+        <div class="hf-chi__testi">
+          {chi.kicker && <span class="hf-kicker" data-campo="chiSiamo.kicker">{chi.kicker}</span>}
+          <Testo as="h2" campo="chiSiamo.titolo" t={chi.titolo} />
+          <Testo campo="chiSiamo.testo" t={chi.testo} />
+          {(chi.punti || []).length > 0 && (
+            <div class="hf-punti">
+              {chi.punti.map((p: Doc, k: number) => (
+                <div><span aria-hidden="true">{numero(k)}</span><span data-campo={`chiSiamo.punti.${k}.testo`}>{p.testo}</span></div>
+              ))}
+            </div>
+          )}
+          {chi.pulsante && <a href={qui(chi.link)} class="hf-btn-scuro" data-campo="chiSiamo.pulsante">{chi.pulsante}</a>}
         </div>
       </div>
     </section>
-  ) : (
-    <section class="hero" id="home-apertura" aria-roledescription="carosello" aria-label="Apertura" data-hero>
-      <div class="hero__wrap">
-        <h1 class="sr-only">{piatto(h.h1)}</h1>
-        <div class="hero__palco">
-          {slide.map((s, k) => (
-            <div class:list={['hero__slide', k === 0 && 'attiva']} data-slide aria-hidden={k === 0 ? 'false' : 'true'} aria-roledescription="slide" aria-label={`${k + 1} di ${slide.length}`}>
-              <div class="hero__foto"><Img media={s.immagine} priorita={k === 0} larghezza={2600} sizes="(max-width: 800px) 100vw, 78vw" /></div>
-              <div class="hero__box">
-                {s.kicker && <span class="kicker">{s.kicker}</span>}
-                <Testo as="div" class="hero__titolo" t={s.titolo} />
-                <Testo t={s.testo} />
-                {s.linkEtichetta && <a href={s.link || '#luoghi'} class="link-freccia">{s.linkEtichetta}</a>}
+  )}
+
+  {(h.numeri || []).length > 0 && (
+    <section class="hf-numeri" id="home-numeri" aria-label={t('Numeri')}>
+      <div class="hf-numeri__griglia">
+        {h.numeri.map((n: Doc, k: number) => (
+          <div>
+            <div class="hf-numeri__valore" data-campo={`numeri.${k}.valore`}>{n.valore}</div>
+            <div class="hf-numeri__etichetta" data-campo={`numeri.${k}.etichetta`}>{n.etichetta}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {(inst.voci || []).length > 0 && (
+    <section id="collezioni" class="hf-inst">
+      {inst.sfondo && <span class="hf-inst__sfondo" aria-hidden="true">{inst.sfondo}</span>}
+      <div class="hf-inst__dentro">
+        <h2 class="sr-only">{t('Installazioni')}</h2>
+        <div class="hf-inst__intro">
+          <Testo campo="installazioni.testoSinistra" t={inst.testoSinistra} />
+          <Testo campo="installazioni.testoDestra" t={inst.testoDestra} />
+        </div>
+        <div class="hf-filtri" role="group" aria-label={t('Filtra le installazioni')} data-filtri>
+          <button type="button" data-filtro="all" aria-pressed="true">{t('Tutte')}</button>
+          {categorie.map((c) => <button type="button" data-filtro={c.v} aria-pressed="false">{t(c.n)}</button>)}
+        </div>
+        <div class="hf-inst__griglia">
+          {inst.voci.map((v: Doc, k: number) => (
+            <a href={qui(v.link)} class:list={['hf-voce', `hf-voce--${v.formato || 'media'}`]} data-cat={v.categoria}>
+              <div class="hf-voce__foto"><Img campo={`installazioni.voci.${k}.immagine`} media={v.immagine} sizes="(max-width: 800px) 100vw, (max-width: 1100px) 50vw, 33vw" larghezza={1800} /></div>
+              <div class="hf-voce__piede">
+                <div>
+                  <div class="hf-voce__titolo" data-campo={`installazioni.voci.${k}.titolo`}>{v.titolo}</div>
+                  {v.sottotitolo && <div class="hf-voce__sotto" data-didascalia data-campo={`installazioni.voci.${k}.sottotitolo`}>{v.sottotitolo}</div>}
+                </div>
+                <span class="hf-voce__freccia" aria-hidden="true">↗</span>
               </div>
-            </div>
+            </a>
           ))}
         </div>
-        {slide.length > 1 && (
-          <div class="hero__comandi">
-            <div class="hero__punti">
-              {slide.map((_, k) => (
-                <button type="button" class="hero__punto" data-vai aria-current={k === 0 ? 'true' : 'false'} aria-label={`Immagine ${k + 1}`}></button>
-              ))}
-              <span class="hero__conta"><span data-conta>01</span> / {String(slide.length).padStart(2, '0')}</span>
-            </div>
-            <div class="frecce">
-              <button type="button" class="freccia" data-prec aria-label="Precedente">←</button>
-              <button type="button" class="freccia" data-succ aria-label="Successiva">→</button>
-            </div>
-          </div>
+        {inst.pulsante && (
+          <div class="hf-inst__azione"><a href={qui(inst.link)} class="hf-btn-largo" data-campo="installazioni.pulsante">{inst.pulsante}</a></div>
         )}
       </div>
     </section>
   )}
 
-  {h.manifesto?.testo && (
-    <section id="manifesto" class="manifesto fondo-paper" aria-label={h.manifesto.kicker || 'Il nostro sguardo'}>
-      <div class="manifesto__dentro" data-reveal>
-        {h.manifesto.kicker && <span class="kicker">{h.manifesto.kicker}</span>}
-        <Testo t={h.manifesto.testo} />
-        <span class="manifesto__filo"></span>
-      </div>
-    </section>
-  )}
-
-  {(h.luoghi || []).length > 0 && (
-    <section id="luoghi" class="luoghi fondo-paper" aria-label="I luoghi">
-      {h.luoghi.map((c: Doc, k: number) => (
-        <div class:list={['capitolo', k % 2 === 1 && 'capitolo--inverso']} data-reveal>
-          <div class="foto foto--sand capitolo__foto"><Img media={c.immagine} sizes="(max-width: 900px) 100vw, 55vw" larghezza={1800} /></div>
-          <div class="capitolo__testi">
-            {c.numero && <span class="numero-romano" aria-hidden="true">{c.numero}</span>}
-            {c.kicker && <span class="kicker">{c.kicker}</span>}
-            <Testo as="h2" class="titolo titolo--xl" t={c.titolo} />
-            <Testo class="testo" t={c.testo} />
-            {c.didascalia && <span class="didascalia">{c.didascalia}</span>}
-          </div>
+  {(coll.tessere || []).length > 0 && (
+    <section class="hf-coll" id="home-collezioni">
+      <div class="hf-coll__dentro">
+        <div class="hf-coll__testa">
+          <Testo as="h2" campo="collezioni.titolo" t={coll.titolo} />
+          <Testo campo="collezioni.testo" t={coll.testo} />
         </div>
-      ))}
-    </section>
-  )}
-
-  {h.banner?.titolo && (
-    <section class="banner" id="home-banner" aria-label={piatto(h.banner.titolo)}>
-      <Img media={h.banner.immagine} larghezza={2600} />
-      <div class="velo velo--banner"></div>
-      <div class="banner__testi">
-        <div class="banner__sx">
-          {h.banner.numero && <span class="numero-romano" aria-hidden="true">{h.banner.numero}</span>}
-          {h.banner.kicker && <span class="kicker">{h.banner.kicker}</span>}
-          <Testo as="h2" class="banner__titolo" t={h.banner.titolo} />
-        </div>
-        <Testo t={h.banner.testo} />
-      </div>
-    </section>
-  )}
-
-  {h.materia?.titolo && (
-    <section id="materia" class="materia scuro">
-      <div class="wrap materia__dentro">
-        <div class="due-col" data-reveal>
-          <div class="due-col__sx">
-            {h.materia.kicker && <span class="kicker">{h.materia.kicker}</span>}
-            <Testo as="h2" class="titolo" t={h.materia.titolo} />
-          </div>
-          <Testo class="testo" t={h.materia.testo} />
-        </div>
-        {(h.materia.schede || []).length > 0 && (
-          <div class="tre-col" data-reveal>
-            {h.materia.schede.map((s: Doc) => (
-              <div class="scheda-materia">
-                <div class="foto foto--scura r-45"><Img media={s.immagine} sizes="(max-width: 900px) 100vw, 33vw" larghezza={1000} /></div>
-                <div>
-                  <h3>{s.titolo}</h3>
-                  <Testo t={s.testo} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        {(h.materia.numeri || []).length > 0 && (
-          <div class="cifre">
-            {h.materia.numeri.map((n: Doc) => (
-              <div><div class="cifra__valore">{n.valore}</div><div class="cifra__etichetta">{n.etichetta}</div></div>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  )}
-
-  {(designer.length > 0 || segnaposto.length > 0) && (
-    <section id="designer" class="sez fondo-paper">
-      <div class="wrap pad intesta" data-reveal>
-        <div class="intesta__sx">
-          {h.designer.kicker && <span class="kicker">{h.designer.kicker}</span>}
-          <Testo as="h2" class="titolo titolo--xl" t={h.designer.titolo} />
-        </div>
-        <div class="intesta__dx">
-          <Testo class="testo" t={h.designer.testo} />
-          <Frecce rail="rail-designer" />
-        </div>
-      </div>
-      <div class="rail" id="rail-designer" tabindex="0" aria-label="Designer">
-        {designer.map((d) => <CardDesigner d={d} home link={d.schedaPubblicata} />)}
-        {segnaposto.map(() => <CardDesigner home />)}
-      </div>
-    </section>
-  )}
-
-  {(h.collezioni?.tessere || []).length > 0 && (
-    <section id="collezioni" class="sez pad fondo-paper">
-      <div class="wrap">
-        <div class="intesta" data-reveal>
-          <Testo as="h2" class="titolo titolo--xl" t={h.collezioni.titolo} />
-          <Testo class="testo" t={h.collezioni.testo} />
-        </div>
-        <div class="tessere" data-reveal>
-          {h.collezioni.tessere.map((t: Doc) => (
-            <a href={t.link || '#invito'} class="tessera">
-              <Img media={t.immagine} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={1000} />
-              <span>{t.etichetta}</span>
+        <div class="hf-coll__griglia">
+          {coll.tessere.map((ts: Doc, k: number) => (
+            <a href={qui(ts.link)} class:list={['hf-tessera', ts.scritta === 'chiara' && 'hf-tessera--chiara']}>
+              <Img campo={`collezioni.tessere.${k}.immagine`} media={ts.immagine} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={1000} />
+              <span data-campo={`collezioni.tessere.${k}.etichetta`}>{ts.etichetta}</span>
             </a>
           ))}
         </div>
@@ -195,44 +211,95 @@ const usaVideo = h.tipoApertura === 'video'
     </section>
   )}
 
-  {prodotti.length > 0 && (
-    <section id="portfolio" class="sez pad fondo-chiaro">
-      <div class="wrap">
-        <div class="intesta" data-reveal>
-          <div class="intesta__sx">
-            {h.portfolio.kicker && <span class="kicker">{h.portfolio.kicker}</span>}
-            <Testo as="h2" class="titolo titolo--xl" t={h.portfolio.titolo} />
+  {con.titolo && (
+    <section id="contract" class="hf-contract">
+      <div class="hf-contract__griglia">
+        <div class="hf-contract__foto"><Img campo="contract.immagine" media={con.immagine} sizes="(max-width: 900px) 100vw, 50vw" larghezza={1800} /></div>
+        <div class="hf-contract__testi">
+          {con.kicker && <span class="hf-kicker" data-campo="contract.kicker">{con.kicker}</span>}
+          <Testo as="h2" campo="contract.titolo" t={con.titolo} />
+          {(con.servizi || []).length > 0 && (
+            <div class="hf-servizi">
+              {con.servizi.map((s: Doc, k: number) => (
+                <div class="hf-servizio">
+                  <span aria-hidden="true">{numero(k)}</span>
+                  <div>
+                    <h3 data-campo={`contract.servizi.${k}.titolo`}>{s.titolo}</h3>
+                    <Testo campo={`contract.servizi.${k}.testo`} t={s.testo} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section id="listino" class="hf-listino">
+    <div class="hf-listino__griglia">
+      <div class="hf-listino__foto"><Img campo="catalogo.immagine" media={cat.immagine} sizes="(max-width: 900px) 100vw, 45vw" larghezza={1800} /></div>
+      <div class="hf-listino__testi">
+        {cat.kicker && <span class="hf-kicker" data-campo="catalogo.kicker">{cat.kicker}</span>}
+        <Testo as="h2" campo="catalogo.titolo" t={cat.titolo} />
+        <Testo campo="catalogo.testo" t={cat.testo} />
+        <form
+          class="hf-modulo"
+          method="post"
+          action="/api/richiesta"
+          data-richiesta
+          data-grazie={cat.grazie || t('Grazie, vi ricontatteremo a breve.')}
+          data-email={a.email || 'info@serralunga.com'}
+          data-invio={t('Invio in corso…')}
+          data-errore={t('Invio non riuscito')}
+          data-anche={t('Potete scriverci anche a')}
+        >
+          <div class="hf-modulo__campi">
+            <label><span class="sr-only">{t('Ragione sociale')}</span><input type="text" name="struttura" placeholder={t('Ragione sociale')} autocomplete="organization" maxlength="200" /></label>
+            <label><span class="sr-only">{t('Referente')}</span><input type="text" name="referente" placeholder={t('Referente')} autocomplete="name" maxlength="200" /></label>
+            <label><span class="sr-only">{t('Email aziendale')}</span><input type="email" name="email" placeholder={t('Email aziendale')} autocomplete="email" required maxlength="200" /></label>
+            <label><span class="sr-only">{t('Tipologia di struttura')}</span><input type="text" name="tipologia" placeholder={t('Tipologia di struttura')} maxlength="200" /></label>
           </div>
-          <Testo class="testo" t={h.portfolio.testo} />
-        </div>
-        <div class="griglia-3" data-reveal>
-          {prodotti.map((p) => <CardProdotto p={p} ancoraRichiesta="#invito" />)}
-        </div>
-      </div>
-    </section>
-  )}
-
-  {h.citazione?.testo && (
-    <section class="sez pad fondo-paper" id="home-citazione" aria-label="Citazione">
-      <div class="citazione" data-reveal>
-        <div class="foto foto--sand r-11"><Img media={h.citazione.immagine} sizes="(max-width: 800px) 100vw, 50vw" larghezza={1000} /></div>
-        <blockquote>
-          <Testo t={h.citazione.testo} />
-          {h.citazione.firma && <span class="kicker">{h.citazione.firma}</span>}
-        </blockquote>
-      </div>
-    </section>
-  )}
-
-  <section id="invito" class="invito">
-    <Img media={h.invito?.immagine} larghezza={2600} />
-    <div class="invito__dentro">
-      <div class="centro">
-        {h.invito?.kicker && <span class="kicker kicker--largo">{h.invito.kicker}</span>}
-        <Testo as="h2" class="titolo" t={h.invito?.titolo} />
-        <Testo class="testo" t={h.invito?.testo} />
-        <ModuloRichiesta pulsante={h.invito?.pulsante} grazie={h.invito?.grazie} pagina="Home" />
+          <label class="modulo__trappola" aria-hidden="true">{t('Non compilare')}<input type="text" name="sito_web" tabindex="-1" autocomplete="off" /></label>
+          <input type="hidden" name="pagina" value={L === 'it' ? 'Home' : `Home (${L.toUpperCase()})`} />
+          <input type="hidden" name="lingua" value={L} />
+          <button type="submit" class="hf-btn-scuro">{cat.pulsante || t('Richiesta catalogo')}</button>
+          <p class="hf-modulo__esito" data-esito role="status" aria-live="polite"></p>
+        </form>
       </div>
     </div>
   </section>
+
+  <footer slot="piede" class="hf-piede">
+    <div class="hf-piede__griglia">
+      <div class="hf-piede__marchio">
+        {logo ? <img src={urlFile(logo)} alt={imp.nomeSito || 'Serralunga'} width={logo.width} height={logo.height} loading="lazy" /> : <span class="logo__testo">{imp.nomeSito}</span>}
+        {imp.descrizione && <p>{imp.descrizione}</p>}
+      </div>
+      {(imp.colonne || []).map((c: Doc) => (
+        <nav class="hf-piede__col" aria-label={c.titolo}>
+          <span class="hf-piede__titolo">{c.titolo}</span>
+          {(c.link || []).map((l: Doc) => <a href={qui(l.link)}>{l.etichetta}</a>)}
+        </nav>
+      ))}
+      <address class="hf-piede__col">
+        <span class="hf-piede__titolo">{t('Contatti')}</span>
+        <span>{a.ragioneSociale} — {a.indirizzo}<br />{a.cap} {a.citta}, {a.paese}</span>
+        {a.email && <a href={`mailto:${a.email}`}>{a.email}</a>}
+        {a.telefono && <a href={`tel:${tel}`}>{a.telefono}</a>}
+        {a.piva && <span>{t('P.IVA')} {a.piva}</span>}
+      </address>
+    </div>
+    <div class="hf-piede__fondo">
+      <span>{copyright}</span>
+      <span>
+        {(imp.legali || []).map((l: Doc, k: number) => (
+          <>
+            {k > 0 && ' · '}
+            {l.link ? <a href={u(l.link)}>{l.etichetta}</a> : l.etichetta}
+          </>
+        ))}
+      </span>
+    </div>
+  </footer>
 </Base>

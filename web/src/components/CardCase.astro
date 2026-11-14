@@ -2,23 +2,27 @@
 /** Card case history (scheda prodotto, carosello "Dove questo disegno è già di casa"). */
 import Img from './Img.astro'
 import type { Doc } from '../lib/cms'
+import { percorso, traduttore } from '../lib/lingua'
 interface Props { c?: Doc; segnaposto?: Doc }
 const { c, segnaposto } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
 const immagine = c ? c.card?.immagine || c.immagine : segnaposto?.immagine
 ---
 {c ? (
-  <a href={`/case-history/${c.slug}/`} class="card-case">
+  <a href={u(`/case-history/${c.slug}/`)} class="card-case">
     <div class="foto r-43 zoom"><Img media={immagine} sizes="(max-width: 560px) 90vw, 30vw" larghezza={1000} /></div>
     <div class="card-case__testi">
       <span class="card-case__etichetta">{c.card?.etichetta}</span>
       <div class="card-case__titolo">{c.card?.titolo || c.nome}</div>
-      <span class="card__azione">Leggi il progetto →</span>
+      <span class="card__azione">{t('Leggi il progetto →')}</span>
     </div>
   </a>
 ) : segnaposto ? (
   <div class="card-case">
     <div class="foto r-43">
-      <Img media={immagine} sizes="30vw" larghezza={1000} nota="prossima case history" />
+      <Img media={immagine} sizes="30vw" larghezza={1000} nota={t('prossima case history')} />
     </div>
     <div class="card-case__testi">
       <span class="card-case__etichetta">{segnaposto.etichetta}</span>

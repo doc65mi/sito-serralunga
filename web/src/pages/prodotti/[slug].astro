@@ -5,11 +5,15 @@ import Img from '../../components/Img.astro'
 import Testo from '../../components/Testo.astro'
 import Frecce from '../../components/Frecce.astro'
 import CardCase from '../../components/CardCase.astro'
-import { perSlug, type Doc } from '../../lib/cms'
+import { perSlug, SITO, type Doc } from '../../lib/cms'
 import { isMedia, src, urlFile } from '../../lib/media'
 import { chiaro, piatto } from '../../lib/testo'
+import { percorso, traduttore } from '../../lib/lingua'
 
-const p = await perSlug('prodotti', Astro.params.slug || '', 3)
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const p = await perSlug('prodotti', Astro.params.slug || '', 3, L)
 if (!p || !p.schedaPubblicata) return Astro.rewrite('/404')
 
 const d: Doc | null = typeof p.designer === 'object' ? p.designer : null
@@ -22,7 +26,7 @@ const correlati: Doc[] = (p.correlati || []).map((c: Doc) => {
     nome: c.nome || rel?.nome,
     sotto: c.sottotitolo || rel?.etichettaCard,
     immagine: c.immagine || rel?.immagine,
-    link: rel?.schedaPubblicata ? `/prodotti/${rel.slug}/` : c.link,
+    link: rel?.schedaPubblicata ? u(`/prodotti/${rel.slug}/`) : u(c.link),
   }
 })
 const pdf = isMedia(p.disegno?.file) ? urlFile(p.disegno.file) : null
@@ -32,7 +36,7 @@ const jsonld = [{
   name: p.nome,
   description: piatto(p.seo?.descrizione || p.descrizione),
   brand: { '@type': 'Brand', name: 'Serralunga' },
-  manufacturer: { '@id': `${(Astro.site?.toString() || '').replace(/\/$/, '')}/#organizzazione` },
+  manufacturer: { '@id': `${SITO}/#organizzazione` },
   category: p.categoria,
   image: viste.filter(isMedia).map((m) => src(m, 1800)),
   material: p.specifiche?.find((s: Doc) => /material/i.test(s.etichetta))?.valore,
@@ -43,10 +47,11 @@ const jsonld = [{
   titolo={p.seo?.titolo || `${p.nome} | Serralunga`}
   descrizione={p.seo?.descrizione}
   immagine={p.seo?.immagine || viste[0]}
-  percorso={[{ nome: 'Prodotti', url: '/#portfolio' }, { nome: p.nome, url: `/prodotti/${p.slug}/` }]}
+  percorso={[{ nome: t('Prodotti'), url: '/#collezioni' }, { nome: p.nome, url: `/prodotti/${p.slug}/` }]}
   jsonld={jsonld}
   footerBreve
   pagina={`prodotto-${p.slug}`}
+  doc={`collections/prodotti/${p.id}`}
 >
   <section class="prodotto" id="prodotto-scheda" aria-labelledby="prodotto-titolo">
     <div class="wrap prodotto__griglia">
@@ -59,7 +64,7 @@ const jsonld = [{
         {viste.length > 1 && (
           <div class="galleria__miniature">
             {viste.map((v, k) => (
-              <button type="button" data-mini aria-current={k === 0 ? 'true' : 'false'} aria-label={`Vista ${k + 1}`}>
+              <button type="button" data-mini aria-current={k === 0 ? 'true' : 'false'} aria-label={`${t('Vista')} ${k + 1}`}>
                 <Img media={v} alt="" sizes="120px" larghezza={400} />
               </button>
             ))}
@@ -69,20 +74,20 @@ const jsonld = [{
 
       <div class="prodotto__info">
         <div class="prodotto__testa">
-          {p.categoria && <span class="kicker">{p.categoria}</span>}
-          <h1 class="prodotto__h1" id="prodotto-titolo">{p.nome}</h1>
-          {(p.firma || d) && <div class="firma-riga"><span>{p.firma || `Disegno di ${d?.nome}`}</span></div>}
+          {p.categoria && <span class="kicker" data-campo="categoria">{p.categoria}</span>}
+          <h1 class="prodotto__h1" id="prodotto-titolo" data-campo="nome">{p.nome}</h1>
+          {(p.firma || d) && <div class="firma-riga"><span>{p.firma || `${t('Disegno di')} ${d?.nome}`}</span></div>}
         </div>
-        <Testo class="prodotto__descr" t={p.descrizione} />
+        <Testo class="prodotto__descr" campo="descrizione" t={p.descrizione} />
         {(p.colori || []).length > 0 && (
           <div class="colori">
-            <span class="etichetta">Cartella colori</span>
+            <span class="etichetta">{t('Cartella colori')}</span>
             <ul class="colori__elenco">
               {p.colori.map((c: Doc) => (
                 <li title={c.nome} class={chiaro(c.hex) ? 'chiaro' : undefined} style={`background:${c.hex}`}><span class="sr-only">{c.nome}</span></li>
               ))}
             </ul>
-            {p.notaColori && <span class="colori__nota">{p.notaColori}</span>}
+            {p.notaColori && <span class="colori__nota" data-campo="notaColori">{p.notaColori}</span>}
           </div>
         )}
         {(p.dimensioni || []).length > 0 && (
@@ -91,15 +96,15 @@ const jsonld = [{
           </dl>
         )}
         <div class="btn-riga">
-          <a href="#richiesta" class="btn btn--scuro">{p.pulsante || 'Richiedi scheda e campionatura'}</a>
-          {(p.disegno?.immagine || pdf) && <a href={pdf || '#disegno'} class="btn btn--bordo" download={pdf ? '' : undefined}>Disegno tecnico</a>}
+          <a href="#richiesta" class="btn btn--scuro">{p.pulsante || t('Richiedi scheda e campionatura')}</a>
+          {(p.disegno?.immagine || pdf) && <a href={pdf || '#disegno'} class="btn btn--bordo" download={pdf ? '' : undefined}>{t('Disegno tecnico')}</a>}
         </div>
       </div>
     </div>
   </section>
 
   {(p.specifiche || []).length > 0 && (
-    <section class="specifiche scuro" id="prodotto-specifiche" aria-label="Specifiche">
+    <section class="specifiche scuro" id="prodotto-specifiche" aria-label={t('Specifiche')}>
       <dl class="wrap">
         {p.specifiche.map((s: Doc) => <div><dt>{s.etichetta}</dt><dd>{s.valore}</dd></div>)}
       </dl>
@@ -110,10 +115,10 @@ const jsonld = [{
     <section id="disegno" class="sez-int pad">
       <div class="disegno">
         <div class="intesta">
-          <Testo as="h2" class="titolo" t={p.disegno.titolo} />
-          <Testo class="testo testo--s" t={p.disegno.testo} />
+          <Testo as="h2" class="titolo" campo="disegno.titolo" t={p.disegno.titolo} />
+          <Testo class="testo testo--s" campo="disegno.testo" t={p.disegno.testo} />
         </div>
-        <div class="disegno__tavola"><Img media={p.disegno.immagine} sizes="(max-width: 1180px) 100vw, 1060px" larghezza={1800} /></div>
+        <div class="disegno__tavola"><Img campo="disegno.immagine" media={p.disegno.immagine} sizes="(max-width: 1180px) 100vw, 1060px" larghezza={1800} /></div>
       </div>
     </section>
   )}
@@ -122,10 +127,10 @@ const jsonld = [{
     <section class="pad ambiente-sez" id="prodotto-ambiente">
       <div class="wrap ambiente">
         <div class="intesta">
-          <Testo as="h2" class="titolo titolo--m" t={p.ambiente.titolo} />
-          <Testo class="testo testo--s" t={p.ambiente.testo} />
+          <Testo as="h2" class="titolo titolo--m" campo="ambiente.titolo" t={p.ambiente.titolo} />
+          <Testo class="testo testo--s" campo="ambiente.testo" t={p.ambiente.testo} />
         </div>
-        {isMedia(p.ambiente.immagineGrande) && <div class="foto r-219"><Img media={p.ambiente.immagineGrande} larghezza={2600} /></div>}
+        {isMedia(p.ambiente.immagineGrande) && <div class="foto r-219"><Img campo="ambiente.immagineGrande" media={p.ambiente.immagineGrande} larghezza={2600} /></div>}
         {(p.ambiente.immagini || []).length > 0 && (
           <div class="tre-col">
             {p.ambiente.immagini.map((i: Doc) => <div class="foto r-43"><Img media={i.immagine} sizes="(max-width: 900px) 100vw, 33vw" larghezza={1000} /></div>)}
@@ -139,25 +144,25 @@ const jsonld = [{
     <section class="sez-int pad scuro" id="prodotto-designer">
       <div class="wrap firma">
         <div>
-          {d.ritratto && !d.ritrattoProvvisorio ? (
+          {isMedia(d.ritratto) ? (
             <div class="foto foto--scura r-45"><Img media={d.ritratto} sizes="(max-width: 900px) 100vw, 40vw" larghezza={1000} /></div>
           ) : (
             <div class="foto r-45 segnaposto segnaposto--scuro">
               <Img media={d.ritratto} class="ritratto-tondo ritratto-tondo--l" sizes="170px" larghezza={400} />
-              <span class="nota-mono">{'ritratto in alta risoluzione\nda fornire'}</span>
+              <span class="nota-mono">{t('ritratto in alta risoluzione\nda fornire')}</span>
             </div>
           )}
         </div>
         <div class="firma__testi">
-          <span class="kicker">{p.firmaProgetto?.kicker || 'La firma del progetto'}</span>
+          <span class="kicker">{p.firmaProgetto?.kicker || t('La firma del progetto')}</span>
           <h2 class="titolo">{d.nome}</h2>
-          {(p.firmaProgetto?.testi || []).map((t: Doc) => <Testo class="testo" t={t.testo} />)}
+          {(p.firmaProgetto?.testi || []).map((tx: Doc, k: number) => <Testo class="testo" campo={`firmaProgetto.testi.${k}.testo`} t={tx.testo} />)}
           {(d.numeri || []).length > 0 && (
             <div class="numeri-riga">
               {d.numeri.map((n: Doc) => <div><div class="numeri-riga__valore">{n.valore}</div><div class="etichetta">{n.etichetta}</div></div>)}
             </div>
           )}
-          <a href={d.schedaPubblicata ? `/designer/${d.slug}/` : '/designer/'} class="btn btn--bordo-chiaro">{d.schedaPubblicata ? `Scheda di ${d.nome}` : 'Tutti i designer Serralunga'}</a>
+          <a href={u(d.schedaPubblicata ? `/designer/${d.slug}/` : '/designer/')} class="btn btn--bordo-chiaro">{d.schedaPubblicata ? `${t('Scheda di')} ${d.nome}` : t('Tutti i designer Serralunga')}</a>
         </div>
       </div>
     </section>
@@ -167,12 +172,12 @@ const jsonld = [{
     <section id="case" class="sez-int fondo-paper">
       <div class="wrap pad intesta">
         <div class="intesta__sx">
-          <span class="kicker">Case history</span>
-          <h2 class="titolo titolo--l">Dove questo<br />disegno è già di casa</h2>
+          <span class="kicker">{t('Case history')}</span>
+          <Testo as="h2" class="titolo titolo--l" t={t('Dove questo\ndisegno è già di casa')} />
         </div>
         <Frecce rail="rail-case" />
       </div>
-      <div class="rail rail--largo" id="rail-case" tabindex="0" aria-label="Case history">
+      <div class="rail rail--largo" id="rail-case" tabindex="0" aria-label={t('Case history')}>
         {casi.map((c) => <CardCase c={c} />)}
         {(p.caseSegnaposto || []).map((s: Doc) => <CardCase segnaposto={s} />)}
       </div>
@@ -183,8 +188,8 @@ const jsonld = [{
     <section class="sez-int pad fondo-chiaro" id="prodotto-correlati">
       <div class="wrap">
         <div class="intesta">
-          <h2 class="titolo titolo--l">Prodotti correlati</h2>
-          <Testo class="testo testo--s" t={p.correlatiTesto} />
+          <h2 class="titolo titolo--l">{t('Prodotti correlati')}</h2>
+          <Testo class="testo testo--s" campo="correlatiTesto" t={p.correlatiTesto} />
         </div>
         <div class="griglia-4">
           {correlati.map((c) => {
@@ -205,15 +210,15 @@ const jsonld = [{
   )}
 
   <section id="richiesta" class="fascia-finale">
-    <Img media={p.richiesta?.immagine || p.immagine} larghezza={2600} />
+    <Img campo="richiesta.immagine" media={p.richiesta?.immagine || p.immagine} larghezza={2600} />
     <div class="fascia-finale__dentro">
       <div class="centro centro--s">
-        <span class="kicker kicker--largo">{p.richiesta?.kicker || 'Documentazione contract'}</span>
-        <Testo as="h2" class="titolo" t={p.richiesta?.titolo || 'Scheda tecnica,\ndisegni e campioni'} />
-        <Testo class="testo" t={p.richiesta?.testo} />
+        <span class="kicker kicker--largo">{p.richiesta?.kicker || t('Documentazione contract')}</span>
+        <Testo as="h2" class="titolo" campo="richiesta.titolo" t={p.richiesta?.titolo || t('Scheda tecnica,\ndisegni e campioni')} />
+        <Testo class="testo" campo="richiesta.testo" t={p.richiesta?.testo} />
         <div class="btn-riga btn-riga--centro">
-          <a href="/#invito" class="btn btn--chiaro">Richiedi la documentazione</a>
-          <a href="/#portfolio" class="btn btn--bordo-chiaro">Torna al portfolio</a>
+          <a href={u('/#listino')} class="btn btn--chiaro">{t('Richiedi la documentazione')}</a>
+          <a href={u('/#collezioni')} class="btn btn--bordo-chiaro">{t('Torna al portfolio')}</a>
         </div>
       </div>
     </div>
