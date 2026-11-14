@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+.env
+*.log
+template/Homepage B2B SerraLunga.zip
+media/

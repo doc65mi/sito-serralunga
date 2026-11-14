@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#0E0D0A; -webkit-font-smoothing:antialiased; }
+  a { color:inherit; text-decoration:none; }
+  a:hover { color: var(--accent, #A08A5F); }
+  ::selection { background:#A08A5F; color:#fff; }
+  @keyframes kbSlow { from { transform:scale(1.03) } to { transform:scale(1.12) } }
+  #diario::-webkit-scrollbar { height:0; }
+  #diario { scrollbar-width:none; }
+</style>
+</helmet>
+
+<div style="font-family:'Jost',sans-serif;color:#16150F;background:#F3F0EA;overflow-x:hidden">
+
+  <header style="position:fixed;top:0;left:0;right:0;z-index:60;padding:26px 48px;display:flex;align-items:center;justify-content:space-between;gap:40px;background:linear-gradient(180deg,rgba(14,13,10,0.72),rgba(14,13,10,0.10) 78%,rgba(14,13,10,0))">
+    <a href="Serralunga Contract Home v2.dc.html" style="display:flex;align-items:center"><img src="https://serralunga.com/cdn/shop/files/Serralunga_logo_200_2.png?v=1750251076&width=500" alt="Serralunga" style="height:46px;width:auto;display:block;filter:brightness(0) invert(1)" /></a>
+    <nav style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px clamp(14px,1.9vw,34px);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:300;color:#F3F0EA">
+      <a href="Serralunga Contract Home v2.dc.html#luoghi" style="white-space:nowrap">I luoghi</a>
+      <a href="Designer.dc.html" style="white-space:nowrap">I designer</a>
+      <a href="#prodotti" style="white-space:nowrap">Prodotti a progetto</a>
+      <a href="#contatto" style="white-space:nowrap;color:var(--accent,#A08A5F)">Contract</a>
+    </nav>
+  </header>
+
+  <section style="position:relative;height:100vh;min-height:680px;overflow:hidden;background:#0E0D0A">
+    <img src="assets/loge-02.jpg" alt="La Loge du Massif, terrazza sulle piste di Courmayeur" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;animation:kbSlow 30s ease-in-out infinite alternate" />
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,13,10,0.52) 0%,rgba(14,13,10,0.22) 42%,rgba(14,13,10,0.86) 100%)"></div>
+    <div style="position:absolute;left:48px;right:48px;bottom:80px;color:#F3F0EA;display:flex;flex-direction:column;gap:30px">
+      <span style="font-size:11px;letter-spacing:0.34em;text-transform:uppercase;color:#F3F0EA;text-shadow:0 1px 18px rgba(14,13,10,0.75)">Case history — Courmayeur, Valle d'Aosta</span>
+      <h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(50px,7.6vw,132px);line-height:0.96;letter-spacing:-0.02em">La Loge<br />du Massif</h1>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:60px;border-top:1px solid rgba(243,240,234,0.24);padding-top:26px">
+        <p style="margin:0;max-width:50ch;font-size:17px;line-height:1.85;font-weight:300;color:rgba(243,240,234,0.88);text-wrap:pretty">Una terrazza a quota 1.700 sul Monte Bianco: arredarla significa resistere a due metri di neve e restare eleganti quando il sole torna a batterci sopra.</p>
+        <span style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(243,240,234,0.6)">Poltrone Canisse</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#F3F0EA;padding:clamp(90px,11vw,150px) 48px">
+    <div style="max-width:1560px;margin:0 auto;display:grid;grid-template-columns:1fr 0.75fr;gap:clamp(50px,7vw,120px)" data-reveal="">
+      <div style="display:flex;flex-direction:column;gap:32px;max-width:640px">
+        <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">Il progetto</span>
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(34px,4vw,58px);line-height:1.1">Sedersi<br />davanti al Massiccio</h2>
+        <p style="margin:0;font-size:17px;line-height:1.9;font-weight:300;color:#3E3B34;text-wrap:pretty">Chalet in legno affacciato sulle piste, cucina d'altura e un dehors che d'inverno diventa il salotto più ambìto della valle. La committenza chiedeva sedute che non temessero gelo, sale antineve e sbalzi termici, ma che al tramonto avessero la morbidezza di un divano da interni.</p>
+        <p style="margin:0;font-size:17px;line-height:1.9;font-weight:300;color:#3E3B34;text-wrap:pretty">La risposta è Canisse: la poltrona a canne verticali in polietilene tinto in massa, disposta a corona intorno al braciere. Un disegno che cita le stuoie di canne dei rifugi, ma nasce dallo stesso stampaggio rotazionale dei nostri vasi monumentali.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;border-top:1px solid rgba(22,21,15,0.16)">
+        <div style="display:flex;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid rgba(22,21,15,0.12)"><span style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8478">Luogo</span><span style="font-size:16px;font-weight:300;text-align:right">Courmayeur, Plan Chécrouit</span></div>
+        <div style="display:flex;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid rgba(22,21,15,0.12)"><span style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8478">Quota</span><span style="font-size:16px;font-weight:300;text-align:right">1.700 m s.l.m.</span></div>
+        <div style="display:flex;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid rgba(22,21,15,0.12)"><span style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8478">Tipologia</span><span style="font-size:16px;font-weight:300;text-align:right">Ristorante &amp; lounge sulle piste</span></div>
+        <div style="display:flex;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid rgba(22,21,15,0.12)"><span style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8478">Prodotti</span><span style="font-size:16px;font-weight:300;text-align:right">Poltrone Canisse</span></div>
+        <div style="display:flex;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid rgba(22,21,15,0.12)"><span style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8478">Uso</span><span style="font-size:16px;font-weight:300;text-align:right">Dehors, tutto l'anno</span></div>
+        <div style="display:flex;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid rgba(22,21,15,0.12)"><span style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8478">Escursione termica</span><span style="font-size:16px;font-weight:300;text-align:right">Da −20 °C al sole d'agosto</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="position:relative;overflow:hidden;background:#0E0D0A;height:clamp(560px,88vh,980px)" data-reveal="">
+    <img src="assets/loge-04.jpg" alt="La terrazza al crepuscolo con il braciere accesso" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block" />
+    <div style="position:absolute;inset:auto 0 0 0;height:45%;background:linear-gradient(180deg,rgba(14,13,10,0) 0%,rgba(14,13,10,0.72) 100%)"></div>
+    <p style="position:absolute;left:48px;right:48px;bottom:56px;margin:0;max-width:24ch;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(28px,3.4vw,52px);line-height:1.24;color:#F3F0EA">«Alle cinque del pomeriggio la terrazza è il posto più caldo della montagna.»</p>
+  </section>
+
+  <section style="background:#F3F0EA;padding:clamp(90px,11vw,150px) 48px">
+    <div style="max-width:1560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(40px,5vw,90px)" data-reveal="">
+      <div style="display:flex;flex-direction:column;gap:18px"><span style="font-family:'Cormorant Garamond',serif;font-size:64px;line-height:1;font-weight:300;color:var(--accent,#A08A5F)">01</span><h3 style="margin:0;font-size:19px;font-weight:400;letter-spacing:0.04em">La sfida</h3><p style="margin:0;font-size:16px;line-height:1.85;font-weight:300;color:#5F5B52;text-wrap:pretty">Sedute lasciate fuori tutto l'inverno, sepolte dalla neve e scoperte al primo sole: nessun tessuto, nessuna verniciatura che possa sfogliarsi.</p></div>
+      <div style="display:flex;flex-direction:column;gap:18px"><span style="font-family:'Cormorant Garamond',serif;font-size:64px;line-height:1;font-weight:300;color:var(--accent,#A08A5F)">02</span><h3 style="margin:0;font-size:19px;font-weight:400;letter-spacing:0.04em">La scelta</h3><p style="margin:0;font-size:16px;line-height:1.85;font-weight:300;color:#5F5B52;text-wrap:pretty">Polietilene tinto in massa, resistente da −35 °C a +80 °C: il colore è il corpo dell'oggetto, i graffi della stagione non lo scoprono mai.</p></div>
+      <div style="display:flex;flex-direction:column;gap:18px"><span style="font-family:'Cormorant Garamond',serif;font-size:64px;line-height:1;font-weight:300;color:var(--accent,#A08A5F)">03</span><h3 style="margin:0;font-size:19px;font-weight:400;letter-spacing:0.04em">Il risultato</h3><p style="margin:0;font-size:16px;line-height:1.85;font-weight:300;color:#5F5B52;text-wrap:pretty">Una corona di poltrone intorno al fuoco, spostabili in pochi secondi e impilabili a fine stagione: il dehors cambia scena con il servizio.</p></div>
+    </div>
+  </section>
+
+  <section style="background:#F3F0EA;padding:0 0 clamp(60px,7vw,100px)">
+    <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(16px,1.8vw,28px);padding:0 clamp(16px,1.8vw,28px)" data-reveal="">
+      <div style="aspect-ratio:16/8;overflow:hidden;background:#E7E2D8"><img src="assets/loge-08.jpg" alt="Lo chalet illuminato di notte" style="width:100%;height:100%;object-fit:cover;object-position:50% 100%;display:block" /></div>
+      <div style="aspect-ratio:16/8;overflow:hidden;background:#E7E2D8"><img src="assets/loge-01.jpg" alt="La terrazza nel sole del mattino" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+    </div>
+  </section>
+
+  <section style="background:#16150F;color:#F3F0EA;padding:clamp(90px,11vw,150px) 48px">
+    <div style="max-width:1560px;margin:0 auto;display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(50px,7vw,110px);align-items:center" data-reveal="">
+      <div style="display:flex;flex-direction:column;gap:30px;max-width:560px">
+        <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">Il pezzo protagonista</span>
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(34px,4.2vw,60px);line-height:1.08">Canisse,<br />una stuoia che accoglie</h2>
+        <p style="margin:0;font-size:16px;line-height:1.9;font-weight:300;color:#9A9488;text-wrap:pretty">Canne verticali che avvolgono la seduta come una recinzione domestica: leggerezza visiva, massa sufficiente a non muoversi col vento di cresta. In antracite si legge come un elemento d'arredo e non come un complemento tecnico.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px;border-top:1px solid rgba(243,240,234,0.16);padding-top:26px">
+          <div><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8B8578">Materiale</div><div style="font-size:16px;font-weight:300;margin-top:8px">LLDPE tinto in massa</div></div>
+          <div><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8B8578">Produzione</div><div style="font-size:16px;font-weight:300;margin-top:8px">Stampaggio rotazionale, Biella</div></div>
+          <div><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8B8578">Manutenzione</div><div style="font-size:16px;font-weight:300;margin-top:8px">Panno umido e detergente neutro</div></div>
+          <div><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8B8578">Stoccaggio</div><div style="font-size:16px;font-weight:300;margin-top:8px">Impilabile a fine stagione</div></div>
+        </div>
+      </div>
+      <div style="aspect-ratio:16/9;overflow:hidden;background:#221F1A"><img src="assets/loge-10.jpg" alt="Le poltrone Canisse in corona attorno al braciere" style="width:100%;height:100%;object-fit:cover;object-position:50% 0%;display:block" /></div>
+    </div>
+  </section>
+
+  <section style="background:#F3F0EA;padding:clamp(80px,10vw,130px) 0">
+    <div style="max-width:1560px;margin:0 auto;padding:0 48px;display:flex;justify-content:space-between;align-items:flex-end;gap:50px;margin-bottom:36px" data-reveal="">
+      <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(30px,3.4vw,46px);line-height:1.1">Il diario<br />della stagione</h2>
+      <p style="margin:0;max-width:40ch;font-size:15px;line-height:1.85;font-weight:300;color:#5F5B52">Scatti di servizio dal cantiere e dalle prime aperture: la stessa terrazza dall'alba alla notte.</p>
+    </div>
+    <div id="diario" style="display:flex;gap:16px;overflow-x:auto;padding:0 48px 8px;scroll-snap-type:x mandatory">
+      <div style="flex:0 0 260px;height:170px;overflow:hidden;background:#E7E2D8;scroll-snap-align:start"><img src="assets/loge-06.jpg" alt="La terrazza vista dall'alto" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+      <div style="flex:0 0 260px;height:170px;overflow:hidden;background:#E7E2D8;scroll-snap-align:start"><img src="assets/loge-03.jpg" alt="Tavoli e poltrone al crepuscolo" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+      <div style="flex:0 0 260px;height:170px;overflow:hidden;background:#E7E2D8;scroll-snap-align:start"><img src="assets/loge-07.jpg" alt="Il dehors nel pomeriggio" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+      <div style="flex:0 0 260px;height:170px;overflow:hidden;background:#E7E2D8;scroll-snap-align:start"><img src="assets/loge-05.jpg" alt="Lo chalet illuminato" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+      <div style="flex:0 0 260px;height:170px;overflow:hidden;background:#E7E2D8;scroll-snap-align:start"><img src="assets/loge-09.jpg" alt="La facciata di notte" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+      <div style="flex:0 0 260px;height:170px;background:repeating-linear-gradient(135deg,#E7E2D8 0 10px,#EEEAE2 10px 20px);display:flex;align-items:center;justify-content:center;scroll-snap-align:start;text-align:center"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.12em;color:#8A8478;padding:0 18px">altri scatti<br />in alta risoluzione</span></div>
+    </div>
+  </section>
+
+  <section id="prodotti" style="background:#FBFAF8;padding:clamp(100px,12vw,170px) 48px">
+    <div style="max-width:1560px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:60px;margin-bottom:clamp(44px,5vw,68px)" data-reveal="">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">Prodotti utilizzati</span>
+          <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(34px,4.2vw,60px);line-height:1.06">Cosa c'è<br />su questa terrazza</h2>
+        </div>
+        <p style="margin:0;max-width:40ch;font-size:16px;line-height:1.9;font-weight:300;color:#5F5B52;text-wrap:pretty">La fornitura per La Loge du Massif: le poltrone Canisse in antracite, disposte a corona intorno al braciere e sui tavoli del dehors.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,2.6vw,44px);align-items:start" data-reveal="">
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div style="aspect-ratio:4/3;overflow:hidden;background:#E7E2D8"><img src="assets/loge-04.jpg" alt="Dettaglio delle poltrone Canisse attorno al braciere" style="width:100%;height:100%;object-fit:cover;display:block;transform:scale(2.6);transform-origin:50% 62%;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(2.75)" /></div>
+          <div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid rgba(22,21,15,0.14);padding-top:16px;min-height:132px">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300">Poltrona Canisse</div>
+            <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478">Arredo outdoor · LLDPE tinto in massa · antracite</div>
+            <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.12em;color:#8A8478">quantità in opera da confermare</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div style="aspect-ratio:4/3;background:repeating-linear-gradient(135deg,#E7E2D8 0 10px,#EEEAE2 10px 20px);display:flex;align-items:center;justify-content:center"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.14em;color:#8A8478;text-align:center;padding:0 22px">immagine prodotto<br />cuscino di seduta — da fornire</span></div>
+          <div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid rgba(22,21,15,0.14);padding-top:16px;min-height:132px">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300">Cuscini di seduta</div>
+            <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478">Complemento · tessuto outdoor sfoderabile</div>
+            <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.12em;color:#8A8478">codice e quantità da confermare</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-top:clamp(44px,5vw,70px)" data-reveal="">
+        <a href="Serralunga Contract Home v2.dc.html#portfolio" style="border:1px solid #16150F;color:#16150F;padding:19px 52px;font-size:11px;letter-spacing:0.24em;text-transform:uppercase" style-hover="background:#16150F;color:#F3F0EA">Vedi tutto il portfolio</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="contatto" style="background:#0E0D0A;color:#F3F0EA;padding:clamp(100px,12vw,170px) 48px">
+    <div style="max-width:840px;margin:0 auto;text-align:center;display:flex;flex-direction:column;gap:28px;align-items:center">
+      <span style="font-size:11px;letter-spacing:0.34em;text-transform:uppercase;color:var(--accent,#A08A5F)">Il prossimo progetto</span>
+      <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(34px,4.4vw,64px);line-height:1.08">Dove lo apriamo,<br />la prossima stagione?</h2>
+      <p style="margin:0;max-width:54ch;font-size:16px;line-height:1.9;font-weight:300;color:rgba(243,240,234,0.82)">Sopralluogo, selezione dei pezzi, colori dedicati e consegne programmate per fasi di cantiere.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:10px">
+        <a href="Serralunga Contract Home v2.dc.html#invito" style="background:#F3F0EA;color:#16150F;padding:19px 42px;font-size:11px;letter-spacing:0.24em;text-transform:uppercase" style-hover="background:var(--accent,#A08A5F);color:#F3F0EA">Parliamo del progetto</a>
+        <a href="Serralunga Contract Home v2.dc.html" style="border:1px solid rgba(243,240,234,0.4);padding:19px 34px;font-size:11px;letter-spacing:0.24em;text-transform:uppercase" style-hover="border-color:#F3F0EA">Torna alla home</a>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background:#0E0D0A;color:#8B8578;padding:40px 48px;border-top:1px solid rgba(243,240,234,0.10)">
+    <div style="max-width:1560px;margin:0 auto;display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;font-size:11px;letter-spacing:0.16em;text-transform:uppercase">
+      <span>© 2026 Serralunga — Mockup B2B</span>
+      <span>1825 S.R.L. — Biella, Italia · info@serralunga.com</span>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A08A5F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#A08A5F&quot;,&quot;#8C8B7A&quot;,&quot;#7C6A4E&quot;,&quot;#B4553B&quot;],&quot;section&quot;:&quot;Brand&quot;},&quot;rivelaAlloScorrimento&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Movimento&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    this.applyAccent();
+    this.setupReveal();
+  }
+  componentDidUpdate(prev) {
+    if (prev.accentColor !== this.props.accentColor) this.applyAccent();
+    if (prev.rivelaAlloScorrimento !== this.props.rivelaAlloScorrimento) this.setupReveal();
+  }
+  componentWillUnmount() {
+    if (this.io) this.io.disconnect();
+    if (this.sweepBound) window.removeEventListener('scroll', this.sweepBound);
+  }
+  applyAccent() {
+    document.documentElement.style.setProperty('--accent', this.props.accentColor || '#A08A5F');
+  }
+  setupReveal() {
+    if (this.io) this.io.disconnect();
+    const els = Array.from(document.querySelectorAll('[data-reveal]'));
+    if (!(this.props.rivelaAlloScorrimento ?? true)) {
+      els.forEach(el => { el.style.opacity = ''; el.style.transform = ''; });
+      return;
+    }
+    const reveal = el => { el.style.opacity = '1'; el.style.transform = 'none'; if (this.io) this.io.unobserve(el); };
+    this.io = new IntersectionObserver(es => {
+      es.forEach(e => { if (e.isIntersecting || e.boundingClientRect.bottom < 0) reveal(e.target); });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(el => {
+      el.style.transition = 'opacity 1100ms cubic-bezier(.2,.7,.2,1), transform 1100ms cubic-bezier(.2,.7,.2,1)';
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) { reveal(el); return; }
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      this.io.observe(el);
+    });
+    this.sweepBound = () => window.requestAnimationFrame(() => {
+      document.querySelectorAll('[data-reveal]').forEach(el => {
+        if (el.style.opacity !== '1' && el.getBoundingClientRect().top < window.innerHeight * 0.95) reveal(el);
+      });
+    });
+    window.addEventListener('scroll', this.sweepBound, { passive: true });
+  }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

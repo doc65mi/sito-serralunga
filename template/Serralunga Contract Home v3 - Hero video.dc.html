@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#0E0D0A; -webkit-font-smoothing:antialiased; }
+  a { color:inherit; text-decoration:none; }
+  a:hover { color: var(--accent, #A08A5F); }
+  ::selection { background:#A08A5F; color:#fff; }
+  #invito input::placeholder { color: rgba(243,240,234,0.66); opacity:1; }
+  #rail-designer::-webkit-scrollbar { height:0; }
+  #rail-designer { scrollbar-width:none; }
+  @keyframes kb { from { transform:scale(1.04) } to { transform:scale(1.16) } }
+  @keyframes drift { 0%,100% { transform:translateY(0) } 50% { transform:translateY(9px) } }
+</style>
+</helmet>
+
+<div style="font-family:'Jost',sans-serif;color:#16150F;background:#F3F0EA;overflow-x:hidden">
+
+  <header id="v2-header" style="position:sticky;top:0;z-index:60;background:rgba(243,240,234,0.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(22,21,15,0.10);padding:22px 48px;display:flex;align-items:center;justify-content:space-between;gap:40px">
+    <a href="#" style="display:flex;align-items:center"><img src="https://serralunga.com/cdn/shop/files/Serralunga_logo_200_2.png?v=1750251076&width=500" alt="Serralunga" style="height:48px;width:auto;display:block;filter:brightness(0)" /></a>
+    <nav style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px clamp(14px,1.9vw,36px);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:300;color:#16150F">
+      <a href="#manifesto" style="white-space:nowrap">Il nostro sguardo</a>
+      <a href="#luoghi" style="white-space:nowrap">I luoghi</a>
+      <a href="Case History — La Loge du Massif.dc.html" style="white-space:nowrap">Case history</a>
+      <a href="#materia" style="white-space:nowrap">La materia</a>
+      <a href="#designer" style="white-space:nowrap">I designer</a>
+      <a href="#collezioni" style="white-space:nowrap">Collezioni</a>
+      <a href="#portfolio" style="white-space:nowrap">Prodotti</a>
+      <a href="#invito" style="white-space:nowrap">Contract</a>
+    </nav>
+  </header>
+
+  <section style="position:relative;height:100vh;min-height:640px;overflow:hidden;background:#0E0D0A">
+    <img src="https://serralunga.com/cdn/shop/files/summer_serralunga.webp?v=1782985471&width=2400" alt="Arredi Serralunga in un giardino al sole" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block" />
+    <video id="hero-video" autoplay="" muted="" loop="" playsinline="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block"></video>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,13,10,0.58) 0%,rgba(14,13,10,0.16) 42%,rgba(14,13,10,0.80) 100%)"></div>
+
+    <div style="position:absolute;left:48px;right:48px;bottom:84px;color:#F3F0EA;display:flex;flex-direction:column;gap:32px">
+      <span style="font-size:11px;letter-spacing:0.34em;text-transform:uppercase;color:#F3F0EA;text-shadow:0 1px 18px rgba(14,13,10,0.7)">Biella, Italia — dal 1825</span>
+      <h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(52px,8vw,140px);line-height:0.94;letter-spacing:-0.02em;max-width:16ch">Il tempo passa.<br /><em style="font-style:italic;color:var(--accent,#A08A5F)">La bellezza</em> resta.</h1>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:60px;border-top:1px solid rgba(243,240,234,0.24);padding-top:28px;flex-wrap:wrap">
+        <p style="margin:0;max-width:52ch;font-size:16px;line-height:1.85;font-weight:300;color:rgba(243,240,234,0.88);text-wrap:pretty">Duecento anni di manifattura italiana al servizio dei luoghi che ospitano le persone: alberghi, tavole, giardini e dimore dove ogni dettaglio è chiamato a durare.</p>
+        <div style="display:flex;align-items:center;gap:16px">
+          <a href="#luoghi" style="border:1px solid rgba(243,240,234,0.5);color:#F3F0EA;padding:17px 34px;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;white-space:nowrap" style-hover="background:#F3F0EA;color:#16150F">Il nostro sguardo</a>
+          <button onClick="{{ toggleVideo }}" aria-label="Play o pausa del video" style="{{ dPlay }}width:52px;height:52px;border:1px solid rgba(243,240,234,0.5);background:transparent;color:#F3F0EA;cursor:pointer;font-size:13px;font-family:inherit" style-hover="background:#F3F0EA;color:#16150F">{{ playIcon }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:absolute;right:48px;top:104px;align-items:center;gap:12px;color:rgba(243,240,234,0.72);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;background:rgba(14,13,10,0.42);padding:9px 14px;{{ dNotaVideo }}">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--accent,#A08A5F);display:block"></span>
+      <span>video da fornire — fermo immagine attivo</span>
+    </div>
+  </section>
+
+  <section id="manifesto" style="background:#F3F0EA;padding:clamp(110px,14vw,190px) 48px">
+    <div style="max-width:1080px;margin:0 auto;text-align:center;display:flex;flex-direction:column;gap:44px;align-items:center" data-reveal="">
+      <span style="font-size:11px;letter-spacing:0.34em;text-transform:uppercase;color:var(--accent,#A08A5F)">Il nostro sguardo</span>
+      <p style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(30px,3.6vw,52px);line-height:1.32;letter-spacing:-0.01em;text-wrap:pretty">Non disegniamo oggetti da guardare: disegniamo <em style="font-style:italic;color:var(--accent,#A08A5F)">soglie, ombre e attese</em>. Un vaso all'ingresso di un albergo è la prima frase di un racconto che l'ospite ricorderà.</p>
+      <span style="width:1px;height:70px;background:rgba(22,21,15,0.22);display:block"></span>
+    </div>
+  </section>
+
+  <section id="luoghi" style="background:#F3F0EA;padding:0 0 clamp(90px,10vw,150px)">
+
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;align-items:center;gap:clamp(40px,6vw,110px);padding-right:48px" data-reveal="">
+      <div style="position:relative;height:clamp(520px,72vh,860px);overflow:hidden;background:#E4DFD5">
+        <img src="https://serralunga.com/cdn/shop/products/bigbo-pag170_hi.jpg?v=1771514306&width=2000" alt="Big-Bo nella corte di un albergo" style="width:100%;height:100%;object-fit:cover;display:block" />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:30px;max-width:520px">
+        <span style="font-family:'Cormorant Garamond',serif;font-size:80px;line-height:1;color:rgba(22,21,15,0.14);font-style:italic">I</span>
+        <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">Hôtellerie</span>
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(38px,4.4vw,64px);line-height:1.08">L'accoglienza<br />comincia fuori</h2>
+        <p style="margin:0;font-size:16px;line-height:1.9;font-weight:300;color:#5F5B52;text-wrap:pretty">Prima della hall c'è una corte, un viale, una terrazza. Volumi generosi — fino a due metri di diametro — segnano l'arrivo e restituiscono scala all'architettura, resistendo al sole, alla salsedine e al gelo senza perdere colore.</p>
+        <span style="font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#8A8478;{{ dDidascalie }}">Big-Bo — disegno di Luisa Bocchietto</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1.15fr;align-items:center;gap:clamp(40px,6vw,110px);padding-left:48px;margin-top:clamp(90px,11vw,170px)" data-reveal="">
+      <div style="display:flex;flex-direction:column;gap:30px;max-width:520px;justify-self:end">
+        <span style="font-family:'Cormorant Garamond',serif;font-size:80px;line-height:1;color:rgba(22,21,15,0.14);font-style:italic">II</span>
+        <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">Ristorazione</span>
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(38px,4.4vw,64px);line-height:1.08">Il verde<br />come architettura</h2>
+        <p style="margin:0;font-size:16px;line-height:1.9;font-weight:300;color:#5F5B52;text-wrap:pretty">Dehors che diventano sale, tavoli protetti senza pareti. Le fioriere modulari disegnano percorsi e intimità, e la sera la luce diffusa dai vasi opalini sostituisce le candele.</p>
+        <span style="font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#8A8478;{{ dDidascalie }}">Atmosfera, Vas-One Family</span>
+      </div>
+      <div style="position:relative;height:clamp(520px,72vh,860px);overflow:hidden;background:#E4DFD5">
+        <img src="https://serralunga.com/cdn/shop/products/Vastwo-AtmosferaandBig-Bolifestyle1.jpg?v=1771514307&width=2000" alt="Atmosfera e Big-Bo su una terrazza serale" style="width:100%;height:100%;object-fit:cover;display:block" />
+      </div>
+    </div>
+  </section>
+
+  <section style="position:relative;height:clamp(560px,86vh,940px);overflow:hidden;background:#0E0D0A">
+    <img src="https://serralunga.com/cdn/shop/files/Aqua_family_Fiore_di_lotto_Lifestyle_2_landscape_cea80197-cf2b-4040-bdd8-73a894da482e.jpg?width=2600" alt="Fiore di Loto sull'acqua della piscina" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block" />
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,13,10,0.30) 0%,rgba(14,13,10,0.10) 45%,rgba(14,13,10,0.78) 100%)"></div>
+    <div style="position:absolute;left:48px;right:48px;bottom:76px;color:#F3F0EA;display:flex;justify-content:space-between;align-items:flex-end;gap:70px">
+      <div style="display:flex;flex-direction:column;gap:26px;max-width:720px">
+        <span style="font-family:'Cormorant Garamond',serif;font-size:70px;line-height:1;color:rgba(243,240,234,0.32);font-style:italic">III</span>
+        <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">Spa &amp; piscine</span>
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(38px,5vw,76px);line-height:1.04">Una luce che galleggia</h2>
+      </div>
+      <p style="margin:0;max-width:38ch;font-size:16px;line-height:1.9;font-weight:300;color:rgba(243,240,234,0.82);text-wrap:pretty">Fiore di Loto nasce da un simbolo di rinascita e si posa sull'acqua senza peso: al tramonto la vasca smette di essere un impianto e diventa paesaggio.</p>
+    </div>
+  </section>
+
+  <section id="materia" style="background:#16150F;color:#F3F0EA;padding:clamp(110px,14vw,180px) 48px">
+    <div style="max-width:1560px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(60px,7vw,100px)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,110px);align-items:end" data-reveal="">
+        <div style="display:flex;flex-direction:column;gap:28px">
+          <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">La materia</span>
+          <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(38px,4.6vw,70px);line-height:1.06">Fatto per<br />restare bello</h2>
+        </div>
+        <p style="margin:0;font-size:16px;line-height:1.95;font-weight:300;color:#9A9488;text-wrap:pretty">Stampaggio rotazionale, polietilene tinto in massa, spessori pieni: il colore non è una vernice, è il corpo stesso dell'oggetto. Da −35 °C a +80 °C, riciclabile al 100%, con la stessa presenza dopo dieci stagioni all'aperto.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,2.4vw,40px)" data-reveal="">
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#221F1A"><img src="https://serralunga.com/cdn/shop/files/storia_5e3ef214-3e06-4c94-ad73-ac8b8d312ce6.jpg?v=1667499580&width=1200" alt="La manifattura di Biella" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+          <div><div style="font-size:17px;font-weight:300">La mano di Biella</div><div style="font-size:14px;line-height:1.75;font-weight:300;color:#8B8578;margin-top:10px">Dal cuoio all'attuale polimero: due secoli di lavorazioni nello stesso luogo.</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#221F1A"><img src="https://serralunga.com/cdn/shop/files/Fioredilotostilllife2.jpg?v=1771515672&width=1400" alt="Dettaglio luminoso del Fiore di Loto" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+          <div><div style="font-size:17px;font-weight:300">Il colore, in profondità</div><div style="font-size:14px;line-height:1.75;font-weight:300;color:#8B8578;margin-top:10px">Quaranta tonalità di cartella, laccature e la finitura Moleskin da accarezzare.</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#221F1A"><img src="https://serralunga.com/cdn/shop/products/vastwo-copertina_hi_1.jpg?v=1771514311&width=1400" alt="Vas-Two, dettaglio di forma" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+          <div><div style="font-size:17px;font-weight:300">Forme d'autore</div><div style="font-size:14px;line-height:1.75;font-weight:300;color:#8B8578;margin-top:10px">Progetti firmati da designer e architetti italiani, in produzione da decenni.</div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(243,240,234,0.16);padding-top:44px">
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:54px;line-height:1;font-weight:300">200</div><div style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#8B8578;margin-top:12px">Anni di manifattura</div></div>
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:54px;line-height:1;font-weight:300">500+</div><div style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#8B8578;margin-top:12px">Progetti a catalogo</div></div>
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:54px;line-height:1;font-weight:300">40</div><div style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#8B8578;margin-top:12px">Colori di cartella</div></div>
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:54px;line-height:1;font-weight:300">60</div><div style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#8B8578;margin-top:12px">Paesi nel mondo</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="designer" style="background:#F3F0EA;padding:clamp(110px,13vw,180px) 0">
+    <div style="max-width:1560px;margin:0 auto;padding:0 48px;display:flex;justify-content:space-between;align-items:flex-end;gap:60px;margin-bottom:clamp(44px,5vw,68px)" data-reveal="">
+      <div style="display:flex;flex-direction:column;gap:26px">
+        <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">Le firme</span>
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(38px,4.4vw,64px);line-height:1.06">I designer<br />che ci hanno dato forma</h2>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:26px;align-items:flex-end">
+        <p style="margin:0;max-width:44ch;font-size:16px;line-height:1.9;font-weight:300;color:#5F5B52;text-wrap:pretty">Architetti e designer italiani che da decenni interpretano la materia Serralunga: ogni pezzo porta il nome di chi lo ha pensato.</p>
+        <div style="display:flex">
+          <button onClick="{{ railPrev }}" aria-label="Scorri indietro" style="width:52px;height:52px;border:1px solid rgba(22,21,15,0.18);background:transparent;cursor:pointer;font-size:15px;color:#16150F" style-hover="background:#16150F;color:#F3F0EA">←</button>
+          <button onClick="{{ railNext }}" aria-label="Scorri avanti" style="width:52px;height:52px;border:1px solid rgba(22,21,15,0.18);border-left:0;background:transparent;cursor:pointer;font-size:15px;color:#16150F" style-hover="background:#16150F;color:#F3F0EA">→</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rail-designer" style="display:flex;gap:clamp(20px,2.4vw,40px);overflow-x:auto;scroll-snap-type:x mandatory;padding:0 48px 10px;scroll-padding-left:48px">
+
+      <div style="flex:0 0 clamp(280px,26vw,400px);scroll-snap-align:start;display:flex;flex-direction:column;gap:22px">
+        <div style="aspect-ratio:3/4;overflow:hidden;background:repeating-linear-gradient(135deg,#E7E2D8 0 10px,#EEEAE2 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px">
+          <img src="https://serralunga.com/cdn/shop/files/Luisa_Bocchiettto_8d7d7247-c9af-44ac-89e7-ec26bf157f3f.webp?v=1676378763&width=225" alt="Ritratto di Luisa Bocchietto" style="width:150px;height:150px;object-fit:cover;object-position:center top;border-radius:50%;filter:grayscale(1) contrast(1.05);display:block" />
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.14em;color:#8A8478;text-align:center">ritratto in alta risoluzione<br />da fornire</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300">Luisa Bocchietto</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--accent,#A08A5F)">Architetto</span><span style="flex:1;height:1px;background:rgba(22,21,15,0.18);display:block"></span></div>
+          <p style="margin:0;font-size:14px;line-height:1.8;font-weight:300;color:#5F5B52;{{ dDidascalie }}">Direzione artistica della collezione e disegno della Vas-One Family, da Big-Bo ai volumi fuori scala.</p>
+        </div>
+      </div>
+
+      <div style="flex:0 0 clamp(280px,26vw,400px);scroll-snap-align:start;display:flex;flex-direction:column;gap:22px">
+        <div style="aspect-ratio:3/4;overflow:hidden;background:#16150F"><img src="https://serralunga.com/cdn/shop/files/ritrattomarta.jpg?v=1683278005&width=1080" alt="Ritratto di Marta Sansoni" style="width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);display:block;transition:filter 900ms ease, transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="filter:grayscale(0);transform:scale(1.04)" /></div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300">Marta Sansoni</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--accent,#A08A5F)">Designer</span><span style="flex:1;height:1px;background:rgba(22,21,15,0.18);display:block"></span></div>
+          <p style="margin:0;font-size:14px;line-height:1.8;font-weight:300;color:#5F5B52;{{ dDidascalie }}">Autrice del Fiore di Loto: geometria, monocromia e un rapporto armonioso fra luce, oggetto e spazio.</p>
+        </div>
+      </div>
+
+      <div style="flex:0 0 clamp(280px,26vw,400px);scroll-snap-align:start;display:flex;flex-direction:column;gap:22px">
+        <div style="aspect-ratio:3/4;background:repeating-linear-gradient(135deg,#E7E2D8 0 10px,#EEEAE2 10px 20px);display:flex;align-items:center;justify-content:center"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.14em;color:#8A8478;text-align:center;padding:0 20px">ritratto designer<br />da fornire</span></div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#8A8478">Nome designer</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--accent,#A08A5F)">Ruolo</span><span style="flex:1;height:1px;background:rgba(22,21,15,0.18);display:block"></span></div>
+          <p style="margin:0;font-size:14px;line-height:1.8;font-weight:300;color:#8A8478;{{ dDidascalie }}">Breve nota biografica e collezione firmata.</p>
+        </div>
+      </div>
+
+      <div style="flex:0 0 clamp(280px,26vw,400px);scroll-snap-align:start;display:flex;flex-direction:column;gap:22px">
+        <div style="aspect-ratio:3/4;background:repeating-linear-gradient(135deg,#E7E2D8 0 10px,#EEEAE2 10px 20px);display:flex;align-items:center;justify-content:center"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.14em;color:#8A8478;text-align:center;padding:0 20px">ritratto designer<br />da fornire</span></div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#8A8478">Nome designer</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--accent,#A08A5F)">Ruolo</span><span style="flex:1;height:1px;background:rgba(22,21,15,0.18);display:block"></span></div>
+          <p style="margin:0;font-size:14px;line-height:1.8;font-weight:300;color:#8A8478;{{ dDidascalie }}">Breve nota biografica e collezione firmata.</p>
+        </div>
+      </div>
+
+      <div style="flex:0 0 clamp(280px,26vw,400px);scroll-snap-align:start;display:flex;flex-direction:column;gap:22px">
+        <div style="aspect-ratio:3/4;background:repeating-linear-gradient(135deg,#E7E2D8 0 10px,#EEEAE2 10px 20px);display:flex;align-items:center;justify-content:center"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.14em;color:#8A8478;text-align:center;padding:0 20px">ritratto designer<br />da fornire</span></div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#8A8478">Nome designer</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--accent,#A08A5F)">Ruolo</span><span style="flex:1;height:1px;background:rgba(22,21,15,0.18);display:block"></span></div>
+          <p style="margin:0;font-size:14px;line-height:1.8;font-weight:300;color:#8A8478;{{ dDidascalie }}">Breve nota biografica e collezione firmata.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="collezioni" style="background:#F3F0EA;padding:clamp(110px,13vw,180px) 48px">
+    <div style="max-width:1560px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:60px;margin-bottom:clamp(44px,5vw,72px)" data-reveal="">
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(38px,4.4vw,64px);line-height:1.06">Quattro famiglie,<br />una sola grammatica</h2>
+        <p style="margin:0;max-width:42ch;font-size:16px;line-height:1.9;font-weight:300;color:#5F5B52;text-wrap:pretty">Vasi, arredo, illuminazione e oggetti: pezzi che convivono nello stesso spazio senza mai alzare la voce.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,1.8vw,30px)" data-reveal="">
+        <a href="#invito" style="position:relative;display:block;height:clamp(360px,52vh,620px);overflow:hidden;background:#E4DFD5">
+          <img src="https://serralunga.com/cdn/shop/collections/cce7fa6d7ecfc83a8378e2587c3fd0dc.webp?v=1771580637&width=1400" alt="Vasi e fioriere" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.06)" />
+          <span style="position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(180deg,rgba(14,13,10,0) 0%,rgba(14,13,10,0.72) 100%);display:block"></span>
+          <span style="position:absolute;left:26px;bottom:26px;color:#F3F0EA;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300">Vasi</span>
+        </a>
+        <a href="#invito" style="position:relative;display:block;height:clamp(360px,52vh,620px);overflow:hidden;background:#E4DFD5">
+          <img src="https://serralunga.com/cdn/shop/files/RIVIERA.png?v=1760515750&width=1600" alt="Divano Riviera" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.06)" />
+          <span style="position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(180deg,rgba(14,13,10,0) 0%,rgba(14,13,10,0.60) 100%);display:block"></span>
+          <span style="position:absolute;left:26px;bottom:26px;color:#F3F0EA;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300">Arredo</span>
+        </a>
+        <a href="#invito" style="position:relative;display:block;height:clamp(360px,52vh,620px);overflow:hidden;background:#E4DFD5">
+          <img src="https://serralunga.com/cdn/shop/files/AquafamilyFioredilottoLifestyle2square2.jpg?v=1771515674&width=1400" alt="Fiore di Loto a bordo piscina" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.06)" />
+          <span style="position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(180deg,rgba(14,13,10,0) 0%,rgba(14,13,10,0.68) 100%);display:block"></span>
+          <span style="position:absolute;left:26px;bottom:26px;color:#F3F0EA;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300">Illuminazione</span>
+        </a>
+        <a href="#invito" style="position:relative;display:block;height:clamp(360px,52vh,620px);overflow:hidden;background:#E4DFD5">
+          <img src="https://serralunga.com/cdn/shop/files/the_vases-_The_Vases_3.jpg?v=1727867232&width=1600" alt="Vasi della tradizione italiana" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.06)" />
+          <span style="position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(180deg,rgba(14,13,10,0) 0%,rgba(14,13,10,0.68) 100%);display:block"></span>
+          <span style="position:absolute;left:26px;bottom:26px;color:#F3F0EA;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300">Tradizione</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolio" style="background:#FBFAF8;padding:clamp(110px,13vw,180px) 48px">
+    <div style="max-width:1560px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:60px;margin-bottom:clamp(44px,5vw,68px)" data-reveal="">
+        <div style="display:flex;flex-direction:column;gap:26px">
+          <span style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent,#A08A5F)">Portfolio prodotti</span>
+          <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(38px,4.4vw,64px);line-height:1.06">Pezzi da specificare<br />a capitolato</h2>
+        </div>
+        <p style="margin:0;max-width:42ch;font-size:16px;line-height:1.9;font-weight:300;color:#5F5B52;text-wrap:pretty">Ogni prodotto ha la sua scheda tecnica: dimensioni, materiali, cartella colori, disegni quotati e documentazione per il progetto.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,2.6vw,44px)" data-reveal="">
+
+        <a href="Aqua Lounger — Scheda tecnica.dc.html" style="display:flex;flex-direction:column;gap:20px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#E7E2D8"><img src="https://serralunga.com/cdn/shop/products/Aquasunloungersquare1.jpg?v=1771512693&width=1400" alt="Aqua Lounger" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)" /></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-top:1px solid rgba(22,21,15,0.14);padding-top:16px">
+            <div><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300">Aqua Lounger</div><div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;margin-top:8px;{{ dDidascalie }}">Piscina — Marc Sadler</div></div>
+            <span style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent,#A08A5F);white-space:nowrap">Scheda →</span>
+          </div>
+        </a>
+
+        <a href="#invito" style="display:flex;flex-direction:column;gap:20px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#E7E2D8"><img src="https://serralunga.com/cdn/shop/products/Big_Bo_Planter_BIGBO-WH.jpg?v=1771514300&width=1400" alt="Vaso Big-Bo" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)" /></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-top:1px solid rgba(22,21,15,0.14);padding-top:16px">
+            <div><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300">Big-Bo</div><div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;margin-top:8px;{{ dDidascalie }}">Vasi — Luisa Bocchietto</div></div>
+            <span style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;white-space:nowrap">In arrivo</span>
+          </div>
+        </a>
+
+        <a href="#invito" style="display:flex;flex-direction:column;gap:20px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#E7E2D8"><img src="https://serralunga.com/cdn/shop/files/Fioredilotowhite.jpg?v=1771515630&width=1400" alt="Fiore di Loto" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)" /></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-top:1px solid rgba(22,21,15,0.14);padding-top:16px">
+            <div><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300">Fiore di Loto</div><div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;margin-top:8px;{{ dDidascalie }}">Illuminazione — Marta Sansoni</div></div>
+            <span style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;white-space:nowrap">In arrivo</span>
+          </div>
+        </a>
+
+        <a href="#invito" style="display:flex;flex-direction:column;gap:20px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#E7E2D8"><img src="https://serralunga.com/cdn/shop/files/RIVIERA.png?v=1760515750&width=1600" alt="Divano Riviera" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)" /></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-top:1px solid rgba(22,21,15,0.14);padding-top:16px">
+            <div><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300">Riviera</div><div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;margin-top:8px;{{ dDidascalie }}">Divani — modulare</div></div>
+            <span style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;white-space:nowrap">In arrivo</span>
+          </div>
+        </a>
+
+        <a href="#invito" style="display:flex;flex-direction:column;gap:20px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#E7E2D8"><img src="https://serralunga.com/cdn/shop/products/vastwo-copertina_hi_1.jpg?v=1771514311&width=1400" alt="Vas-Two" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)" /></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-top:1px solid rgba(22,21,15,0.14);padding-top:16px">
+            <div><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300">Vas-Two</div><div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;margin-top:8px;{{ dDidascalie }}">Vasi — Vas-One Family</div></div>
+            <span style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;white-space:nowrap">In arrivo</span>
+          </div>
+        </a>
+
+        <a href="#invito" style="display:flex;flex-direction:column;gap:20px">
+          <div style="aspect-ratio:4/5;overflow:hidden;background:#E7E2D8"><img src="https://serralunga.com/cdn/shop/files/the_vases-_The_Vases_3.jpg?v=1727867232&width=1600" alt="Vasi della tradizione italiana" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 1400ms cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)" /></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-top:1px solid rgba(22,21,15,0.14);padding-top:16px">
+            <div><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300">Tradizione Italiana</div><div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;margin-top:8px;{{ dDidascalie }}">Vasi — Decorati</div></div>
+            <span style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8478;white-space:nowrap">In arrivo</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#F3F0EA;padding:clamp(110px,13vw,180px) 48px clamp(110px,13vw,180px)">
+    <div style="max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,90px);align-items:center" data-reveal="">
+      <div style="aspect-ratio:1/1;overflow:hidden;background:#E4DFD5"><img src="https://serralunga.com/cdn/shop/products/vastwo-pag168_hi.jpg?v=1771514310&width=1600" alt="Vas-Two in un giardino privato" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+      <blockquote style="margin:0;display:flex;flex-direction:column;gap:30px">
+        <p style="margin:0;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(26px,2.8vw,40px);line-height:1.4;text-wrap:pretty">«Chiediamo a un oggetto d'esterno la stessa cura che chiederemmo a un mobile di casa: è lì che si misura la qualità di un luogo.»</p>
+        <span style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:var(--accent,#A08A5F)">Serralunga Contract</span>
+      </blockquote>
+    </div>
+  </section>
+
+  <section id="invito" style="position:relative;overflow:hidden;background:#0E0D0A">
+    <img src="https://serralunga.com/cdn/shop/files/ResidentialContractFurniture.jpg?v=1663588678&width=2400" alt="Ambientazione contract Serralunga" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0.42" />
+    <div style="position:relative;padding:clamp(110px,14vw,190px) 48px;color:#F3F0EA">
+      <div style="max-width:900px;margin:0 auto;text-align:center;display:flex;flex-direction:column;gap:34px;align-items:center">
+        <span style="font-size:11px;letter-spacing:0.34em;text-transform:uppercase;color:var(--accent,#A08A5F)">Un invito</span>
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(38px,5vw,74px);line-height:1.06">Raccontateci<br />il vostro luogo</h2>
+        <p style="margin:0;max-width:56ch;font-size:16px;line-height:1.9;font-weight:300;color:rgba(243,240,234,0.82);text-wrap:pretty">Lavoriamo al fianco di studi di architettura, general contractor e strutture ricettive: sopralluogo del progetto, campionature fisiche, colori e dimensioni dedicate. Vi inviamo il volume Serralunga e la cartella colori.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 26px;width:100%;max-width:640px;margin-top:14px">
+          <input type="text" placeholder="Struttura o studio" style="border:0;border-bottom:1px solid rgba(243,240,234,0.34);background:transparent;padding:14px 0;font-family:inherit;font-size:15px;font-weight:300;color:#F3F0EA;outline:none" />
+          <input type="text" placeholder="Referente" style="border:0;border-bottom:1px solid rgba(243,240,234,0.34);background:transparent;padding:14px 0;font-family:inherit;font-size:15px;font-weight:300;color:#F3F0EA;outline:none" />
+          <input type="email" placeholder="Email" style="border:0;border-bottom:1px solid rgba(243,240,234,0.34);background:transparent;padding:14px 0;font-family:inherit;font-size:15px;font-weight:300;color:#F3F0EA;outline:none" />
+          <input type="text" placeholder="Città del progetto" style="border:0;border-bottom:1px solid rgba(243,240,234,0.34);background:transparent;padding:14px 0;font-family:inherit;font-size:15px;font-weight:300;color:#F3F0EA;outline:none" />
+        </div>
+        <button style="margin-top:16px;background:#F3F0EA;color:#16150F;border:0;padding:20px 56px;font-family:inherit;font-size:11px;letter-spacing:0.26em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--accent,#A08A5F);color:#F3F0EA">Richiedi il volume</button>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background:#0E0D0A;color:#8B8578;padding:80px 48px 40px;border-top:1px solid rgba(243,240,234,0.10)">
+    <div style="max-width:1560px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1.1fr;gap:60px;padding-bottom:60px">
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <img src="https://serralunga.com/cdn/shop/files/Serralunga_logo_200_2.png?v=1750251076&width=500" alt="Serralunga" style="height:44px;width:auto;filter:brightness(0) invert(1);align-self:flex-start;opacity:0.9" />
+        <p style="margin:0;font-size:14px;line-height:1.85;font-weight:300;max-width:330px">Arredi, illuminazione e fioriere di design, 100% made in Italy, per l'ospitalità e il contract.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;font-size:14px;font-weight:300">
+        <span style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#F3F0EA;margin-bottom:8px">Racconto</span>
+        <a href="#manifesto">Il nostro sguardo</a>
+        <a href="#luoghi">I luoghi</a>
+        <a href="#materia">La materia</a>
+        <a href="#collezioni">Collezioni</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;font-size:14px;font-weight:300">
+        <span style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#F3F0EA;margin-bottom:8px">Professionisti</span>
+        <a href="#invito">Serralunga Contract</a>
+        <a href="#invito">Campionature</a>
+        <a href="#invito">Area riservata</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;font-size:14px;font-weight:300">
+        <span style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#F3F0EA;margin-bottom:8px">Contatti</span>
+        <span>1825 S.R.L. — Via Serralunga 9<br />13900 Biella, Italia</span>
+        <span>info@serralunga.com</span>
+        <span>+39 015 2435711</span>
+      </div>
+    </div>
+    <div style="max-width:1560px;margin:0 auto;padding-top:26px;border-top:1px solid rgba(243,240,234,0.10);display:flex;justify-content:space-between;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5F5B52">
+      <span>© 2026 Serralunga — Mockup B2B</span>
+      <span>Privacy · Cookie · Termini</span>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;videoUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A08A5F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#A08A5F&quot;,&quot;#8C8B7A&quot;,&quot;#7C6A4E&quot;,&quot;#B4553B&quot;],&quot;section&quot;:&quot;Brand&quot;},&quot;mostraNotaVideo&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;rivelaAlloScorrimento&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Movimento&quot;},&quot;mostraDidascalie&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contenuti&quot;}}">
+class Component extends DCLogic {
+  state = { playing: true };
+
+  componentDidMount() {
+    this.applyAccent();
+    this.setupReveal();
+    this.loadVideo();
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.accentColor !== this.props.accentColor) this.applyAccent();
+    if (prev.rivelaAlloScorrimento !== this.props.rivelaAlloScorrimento) this.setupReveal();
+    if (prev.videoUrl !== this.props.videoUrl) this.loadVideo();
+  }
+
+  componentWillUnmount() {
+    if (this.io) this.io.disconnect();
+    if (this.sweepBound) {
+      window.removeEventListener('scroll', this.sweepBound);
+      window.removeEventListener('hashchange', this.sweepBound);
+    }
+  }
+
+  railScroll(dir) {
+    const r = document.getElementById('rail-designer');
+    if (r) r.scrollBy({ left: dir * Math.min(r.clientWidth * 0.8, 900), behavior: 'smooth' });
+  }
+
+  loadVideo() {
+    const src = this.props.videoUrl;
+    const v = document.getElementById('hero-video');
+    if (!v) return;
+    if (!src) { v.style.display = 'none'; return; }
+    v.style.display = 'block';
+    v.src = src;
+    v.play().catch(() => {});
+  }
+
+  toggleVideo() {
+    const v = document.getElementById('hero-video');
+    if (!v) return;
+    if (v.paused) { v.play(); this.setState({ playing: true }); }
+    else { v.pause(); this.setState({ playing: false }); }
+  }
+
+  applyAccent() {
+    document.documentElement.style.setProperty('--accent', this.props.accentColor || '#A08A5F');
+  }
+
+  setupReveal() {
+    if (this.io) this.io.disconnect();
+    const els = Array.from(document.querySelectorAll('[data-reveal]'));
+    const on = this.props.rivelaAlloScorrimento ?? true;
+    if (!on) {
+      els.forEach(el => { el.style.opacity = ''; el.style.transform = ''; });
+      return;
+    }
+    const reveal = el => {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      if (this.io) this.io.unobserve(el);
+    };
+    this.io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting || e.boundingClientRect.bottom < 0) reveal(e.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    this.sweep = () => {
+      document.querySelectorAll('[data-reveal]').forEach(el => {
+        if (el.style.opacity !== '1' && el.getBoundingClientRect().top < window.innerHeight * 0.95) reveal(el);
+      });
+    };
+    window.removeEventListener('scroll', this.sweepBound || (() => {}));
+    this.sweepBound = () => window.requestAnimationFrame(this.sweep);
+    window.addEventListener('scroll', this.sweepBound, { passive: true });
+    window.addEventListener('hashchange', this.sweepBound);
+    els.forEach(el => {
+      el.style.transition = 'opacity 1100ms cubic-bezier(.2,.7,.2,1), transform 1100ms cubic-bezier(.2,.7,.2,1)';
+      const seen = el.getBoundingClientRect().top < window.innerHeight * 0.9;
+      if (seen) { el.style.opacity = '1'; el.style.transform = 'none'; return; }
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      this.io.observe(el);
+    });
+  }
+
+  renderVals() {
+    return {
+      toggleVideo: () => this.toggleVideo(),
+      playIcon: this.state.playing ? '❙❙' : '▶',
+      dPlay: this.props.videoUrl ? 'display:block;' : 'display:none;',
+      dNotaVideo: ((this.props.mostraNotaVideo ?? true) && !this.props.videoUrl) ? 'display:flex' : 'display:none',
+      dDidascalie: (this.props.mostraDidascalie ?? true) ? 'display:block' : 'display:none'
+    };
+  }
+}
+</script>
+</body>
+</html>
