@@ -1,10 +1,12 @@
 /**
- * Traduzione inglese dei contenuti di partenza (Version: 1.00).
+ * Traduzione inglese dei contenuti di partenza (Version: 1.01).
  * Chiave = testo italiano del seed, valore = testo inglese. Dopo il seed italiano,
  * `applicaInglese` riempie i campi inglesi ancora vuoti; quelli già scritti dal pannello restano.
  * Nomi propri, misure e codici uguali nelle due lingue non servono qui.
  */
 import type { Payload } from 'payload'
+
+import { designerInglese } from './designer-altri'
 
 export const EN: Record<string, string> = {
   // Impostazioni
@@ -278,6 +280,9 @@ export const EN: Record<string, string> = {
   'Vasi — Decorati': 'Vases — Decorati',
 }
 
+// Schede di tutti i designer (designer-altri.ts)
+Object.assign(EN, designerInglese())
+
 const SALTA = new Set(['id', 'slug', 'createdAt', 'updatedAt', '_status', 'link', 'link1', 'link2', 'hex', 'email', 'url'])
 
 /** Unisce italiano e inglese: resta l'inglese già scritto, altrimenti la traduzione, altrimenti l'italiano. */
@@ -303,13 +308,13 @@ const pulisci = (d: Record<string, unknown>) => {
   return resto
 }
 
-export async function applicaInglese(payload: Payload, log: (m: string) => void) {
-  for (const slug of ['impostazioni', 'home', 'pagina-designer'] as const) {
+export async function applicaInglese(payload: Payload, log: (m: string) => void, soloDesigner = false) {
+  for (const slug of soloDesigner ? [] : (['impostazioni', 'home', 'pagina-designer'] as const)) {
     const it = (await payload.findGlobal({ slug, locale: 'it', depth: 0 })) as unknown as Record<string, unknown>
     const en = (await payload.findGlobal({ slug, locale: 'en', fallbackLocale: false, depth: 0 })) as unknown as Record<string, unknown>
     await payload.updateGlobal({ slug, locale: 'en', data: pulisci(unisci(it, en) as Record<string, unknown>) as never })
   }
-  for (const collection of ['designer', 'case-history', 'prodotti'] as const) {
+  for (const collection of soloDesigner ? (['designer'] as const) : (['designer', 'case-history', 'prodotti'] as const)) {
     const it = await payload.find({ collection, locale: 'it', depth: 0, limit: 500, draft: false })
     for (const doc of it.docs as unknown as Record<string, unknown>[]) {
       const en = (await payload.findByID({ collection, id: doc.id as number, locale: 'en', fallbackLocale: false, depth: 0 })) as unknown as Record<string, unknown>

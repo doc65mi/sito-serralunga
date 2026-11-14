@@ -1,6 +1,6 @@
 # Avvio e pubblicazione
 
-Version: 1.03
+Version: 1.04
 
 Quattro servizi Docker: `db` (PostgreSQL 16), `cms` (Payload), `web` (Astro) e `proxy` (Caddy). Solo il proxy è aperto verso l'esterno: **sito e pannello stanno sulla stessa porta**, il pannello su `/admin`.
 Il database e le foto caricate stanno in due volumi: `db-dati` e `media`. **Sono gli unici da salvare nei backup.**
@@ -93,6 +93,7 @@ Requisiti del server: almeno 2 GB di RAM liberi durante la compilazione (meglio 
 
 A ogni invio su GitHub nel ramo scelto Coolify ricompila e ripubblica da solo (se è attivo l'Auto Deploy), altrimenti si preme **Redeploy**. I dati restano nei volumi. Le modifiche allo schema del CMS arrivano come migrazioni e si applicano all'avvio.
 Il seed **non** va rilanciato dopo aver modificato i testi: riporta quelli italiani ai valori di partenza.
+Per aggiungere solo le schede dei designer a un sito già avviato c'è `npm run seed:designer` (dal terminale del servizio `cms`, in locale `docker compose exec cms npm run seed:designer`): crea le schede mancanti con i ritratti e non tocca il resto.
 
 ### Cambio di dominio (dalla prova al lancio)
 

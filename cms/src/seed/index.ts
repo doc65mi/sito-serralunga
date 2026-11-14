@@ -5,6 +5,8 @@
  * - Crea l'utente amministratore da SEED_EMAIL / SEED_PASSWORD se non ci sono utenti.
  * - Carica le foto: quelle in template/ dal disco, quelle di serralunga.com scaricandole.
  *   Se una foto non si scarica, il campo resta vuoto e il sito mostra il segnaposto.
+ * - `npm run seed:designer` aggiunge solo le schede dei designer che mancano, senza toccare
+ *   gli altri contenuti (home, prodotti, testi già modificati).
  * - Si può rilanciare: i documenti esistenti con lo stesso slug vengono aggiornati, non duplicati.
  */
 import fs from 'fs'
@@ -14,6 +16,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 
 import { aquaLounger, caseLoge, designerDati, prodottiCard } from './dati'
+import { designerAltri, GIA_PRESENTI } from './designer-altri'
 import { homeDati, impostazioniDati, paginaDesignerDati } from './globali'
 import { applicaInglese } from './inglese'
 
@@ -89,6 +92,22 @@ async function salva(collection: Slugged, data: Record<string, unknown>): Promis
   return doc.id as number
 }
 
+// Solo designer: aggiunge le schede mancanti e completa quelle non ancora pubblicate.
+// Non tocca le schede già pubblicate né gli altri contenuti.
+if (process.env.SEED_SOLO === 'designer') {
+  for (const d of await designerAltri(media)) {
+    const trovato = await payload.find({ collection: 'designer', where: { slug: { equals: d.slug } }, limit: 1, depth: 0, draft: true })
+    const doc = trovato.docs[0] as { id: number; schedaPubblicata?: boolean } | undefined
+    if (doc?.schedaPubblicata) log(`designer/${d.slug} già pubblicata: lasciata com'è`)
+    else await salva('designer', d)
+  }
+  // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
+  await payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never })
+  await applicaInglese(payload, log, true)
+  log('fatto (solo designer)')
+  process.exit(0)
+}
+
 // 1. Utente amministratore
 const utenti = await payload.count({ collection: 'users' })
 if (utenti.totalDocs === 0 && process.env.SEED_EMAIL && process.env.SEED_PASSWORD) {
@@ -101,7 +120,13 @@ if (utenti.totalDocs === 0 && process.env.SEED_EMAIL && process.env.SEED_PASSWOR
 
 // 2. Designer
 const designerId: Record<string, number> = {}
+const altri = await designerAltri(media)
 for (const d of await designerDati(media)) {
+  // Bocchietto e Sansoni: ai dati di base si aggiungono biografia e scheda pubblicata.
+  const extra = GIA_PRESENTI.includes(d.slug) ? altri.find((x) => x.slug === d.slug) : undefined
+  designerId[d.slug as string] = await salva('designer', { ...d, ...extra })
+}
+for (const d of altri.filter((x) => !GIA_PRESENTI.includes(x.slug as string))) {
   designerId[d.slug as string] = await salva('designer', d)
 }
 

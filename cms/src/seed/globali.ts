@@ -250,7 +250,7 @@ export const paginaDesignerDati = async () => ({
   titolo: 'I designer\nSerralunga',
   testo:
     "Architetti e designer italiani e internazionali che dal secondo dopoguerra a oggi hanno dato forma alla nostra materia. Ogni pezzo a catalogo porta il nome di chi lo ha pensato: è la garanzia che dietro a un oggetto d'esterno ci sia un progetto, non un profilo di produzione.",
-  segnaposto: 3,
+  segnaposto: 0,
   cta: {
     kicker: 'Progetti su misura',
     titolo: 'Un pezzo disegnato\nper il vostro luogo',
