@@ -1,5 +1,6 @@
-# Serralunga — Astro + Payload + Postgres. Version: 1.00
+# Serralunga — Astro + Payload + Postgres. Version: 1.01
 # Locale: copia .env.example in .env, poi `docker compose up -d --build`.
+# Sito e pannello rispondono sulla stessa porta (servizio proxy): http://localhost:8080 e /admin.
 # Coolify: crea una risorsa "Docker Compose" da questo repository (vedi DEPLOY.md).
 services:
   db:
@@ -28,8 +29,8 @@ services:
     environment:
       DATABASE_URL: postgres://serralunga:${POSTGRES_PASSWORD}@db:5432/serralunga
       PAYLOAD_SECRET: ${PAYLOAD_SECRET:?imposta PAYLOAD_SECRET}
-      CMS_URL: ${CMS_PUBLIC_URL:-http://localhost:3000}
-      SITO_URL: ${SITO_URL:-http://localhost:4321}
+      CMS_URL: ${SITO_URL:-http://localhost:8080}
+      SITO_URL: ${SITO_URL:-http://localhost:8080}
       SITO_CHIAVE: ${SITO_CHIAVE:?imposta SITO_CHIAVE}
       SEED_EMAIL: ${SEED_EMAIL:-}
       SEED_PASSWORD: ${SEED_PASSWORD:-}
@@ -41,8 +42,8 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
     volumes:
       - media:/app/media
-    ports:
-      - "${CMS_PORT:-3000}:3000"
+    expose:
+      - "3000"
 
   web:
     build:
@@ -52,12 +53,23 @@ services:
       - cms
     environment:
       CMS_INTERNAL_URL: http://cms:3000
-      CMS_PUBLIC_URL: ${CMS_PUBLIC_URL:-http://localhost:3000}
-      SITO_URL: ${SITO_URL:-http://localhost:4321}
+      CMS_PUBLIC_URL: ${SITO_URL:-http://localhost:8080}
+      SITO_URL: ${SITO_URL:-http://localhost:8080}
       SITO_CHIAVE: ${SITO_CHIAVE}
       BLOCCA_INDICIZZAZIONE: ${BLOCCA_INDICIZZAZIONE:-1}
+    expose:
+      - "4321"
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - cms
+      - web
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile:ro
     ports:
-      - "${WEB_PORT:-4321}:4321"
+      - "${PORTA:-8080}:80"
 
 volumes:
   db-dati:
