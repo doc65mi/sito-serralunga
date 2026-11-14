@@ -1,7 +1,6 @@
 # Payload CMS (Next.js) — Version: 1.00
 # Contesto di build: la radice del repository (serve template/assets per il seed).
 FROM node:22-alpine AS base
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 

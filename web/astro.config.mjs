@@ -10,6 +10,7 @@ export default defineConfig({
   adapter: node({ mode: 'standalone' }),
   trailingSlash: 'ignore',
   server: { host: true, port: 4321 },
-  security: { checkOrigin: true },
+  // Controllo dell'origine fatto in src/pages/api/richiesta.ts (indirizzo pubblico noto solo a runtime).
+  security: { checkOrigin: false },
   devToolbar: { enabled: false },
 })
