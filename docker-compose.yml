@@ -1,7 +1,7 @@
-# Serralunga — Astro + Payload + Postgres. Version: 1.01
+# Serralunga — Astro + Payload + Postgres. Version: 1.02
 # Locale: copia .env.example in .env, poi `docker compose up -d --build`.
 # Sito e pannello rispondono sulla stessa porta (servizio proxy): http://localhost:8080 e /admin.
-# Coolify: crea una risorsa "Docker Compose" da questo repository (vedi DEPLOY.md).
+# Coolify: usa docker-compose.coolify.yml (vedi DEPLOY.md).
 services:
   db:
     image: postgres:16-alpine
@@ -61,13 +61,12 @@ services:
       - "4321"
 
   proxy:
-    image: caddy:2-alpine
+    build:
+      context: ./proxy
     restart: unless-stopped
     depends_on:
       - cms
       - web
-    volumes:
-      - ./proxy/Caddyfile:/etc/caddy/Caddyfile:ro
     ports:
       - "${PORTA:-8080}:80"
 
