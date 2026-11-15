@@ -1,6 +1,6 @@
 # Sito Serralunga
 
-Version: 1.01
+Version: 1.02
 
 Sito istituzionale Serralunga (1825 S.R.L.) costruito dai template in `template/`.
 
@@ -31,4 +31,10 @@ Italiano senza prefisso (`/designer/`), inglese con `/en/` (`/en/designer/`). I 
 
 ## Modifica dalla pagina
 
-Chi ha fatto l'accesso al pannello vede sul sito la barra **Modifica pagina**: clic su un testo per correggerlo, clic su una foto per sostituirla. Il salvataggio pubblica subito, nella lingua della pagina. Funziona perché sito e pannello stanno sullo stesso indirizzo (servizio `proxy`).
+In fondo a ogni pagina c'è il link **Accesso redazione**: dopo l'accesso si torna sulla stessa pagina con la modifica già attiva (stesso funzionamento dell'editor delle pagine TWS).
+
+- I testi modificabili hanno un bordo tratteggiato: clic, si scrive sul posto, poi **Salva** o **Annulla** nella barra in basso. Nulla si salva da solo.
+- Ogni foto ha il pulsante **Cambia foto** (o **Carica foto** se manca).
+- **Anteprima** nasconde gli strumenti, **Pannello** apre il documento in Payload, **Esci** chiude la sessione.
+
+Il salvataggio pubblica subito, nella lingua della pagina. Funziona perché sito e pannello stanno sullo stesso indirizzo (servizio `proxy`).

@@ -15,6 +15,7 @@ const EN: Record<string, string> = {
   // struttura
   'Vai al contenuto': 'Skip to content',
   Percorso: 'Breadcrumb',
+  'Accesso redazione': 'Editor login',
   Menu: 'Menu',
   'Menu principale': 'Main menu',
   'Cambia lingua': 'Change language',

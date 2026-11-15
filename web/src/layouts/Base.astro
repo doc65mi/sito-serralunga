@@ -121,6 +121,11 @@ const accento = imp.accento || '#A08A5F'
         <slot />
       </main>
       {nudo ? <slot name="piede" /> : <Footer imp={imp} breve={footerBreve} />}
+      {!redazione && (
+        <div class="accesso-redazione">
+          <a href={`/admin/login?redirect=${encodeURIComponent(u(base))}`} rel="nofollow">{t('Accesso redazione')}</a>
+        </div>
+      )}
     </div>
     <script src="../scripts/site.ts"></script>
   </body>

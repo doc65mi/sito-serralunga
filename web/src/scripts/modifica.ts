@@ -1,11 +1,15 @@
 /**
- * Modifica dalla pagina (Version: 1.00).
+ * Modifica dalla pagina (Version: 2.00).
  * Si carica solo se il browser ha il cookie del pannello (vedi Base.astro) e
  * verifica l'utente con /api/users/me. Sito e pannello stanno sullo stesso
  * indirizzo, quindi le chiamate usano il cookie di accesso di Payload.
  *
- * - [data-campo]: testo. Clic → si modifica il testo grezzo (a capo, _corsivo_), uscendo si salva.
- * - [data-campo-img]: immagine. Clic → si sceglie un file, si carica in Media e si collega al campo.
+ * Per chi ha fatto l'accesso la modifica è sempre attiva (come nell'editor delle pagine TWS):
+ * - [data-campo]: testo. Clic → si scrive sul posto; in basso compaiono Salva e Annulla.
+ *   Nulla si salva da solo: il testo resta aperto finché non si sceglie.
+ * - [data-campo-img]: immagine. Ogni foto ha il pulsante «Cambia foto»: si sceglie un file,
+ *   si carica in Media e si collega al campo.
+ * - Barra in basso: stato, Anteprima (nasconde gli strumenti), Pannello, Esci.
  * Ogni salvataggio pubblica subito nella lingua della pagina.
  */
 
@@ -104,13 +108,20 @@ async function salva(percorso: string, valore: unknown, riserva = false): Promis
   }
 }
 
+const MATITA = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm17.7-10.2a1 1 0 0 0 0-1.42l-2.33-2.33a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>'
+
 function avvia(utente: Json) {
+  const radice = document.documentElement
   const barra = document.createElement('div')
   barra.className = 'redazione'
   barra.innerHTML = `
-    <button type="button" class="redazione__attiva" aria-pressed="false">Modifica pagina</button>
+    <span class="redazione__titolo">${MATITA} Modifica della pagina</span>
     <span class="redazione__stato" role="status" aria-live="polite"></span>
-    <a class="redazione__link" href="${pannello}" target="_blank" rel="noopener">Apri nel pannello</a>`
+    <span class="redazione__azioni">
+      <button type="button" class="redazione__attiva" aria-pressed="true"></button>
+      <a class="redazione__link" href="${pannello}" target="_blank" rel="noopener">Pannello</a>
+      <button type="button" class="redazione__esci">Esci</button>
+    </span>`
   document.body.append(barra)
   const bottone = barra.querySelector<HTMLButtonElement>('.redazione__attiva')!
   const stato = barra.querySelector<HTMLElement>('.redazione__stato')!
@@ -118,29 +129,156 @@ function avvia(utente: Json) {
     stato.textContent = t
     stato.dataset.tipo = tipoStato
   }
-  dici(`${utente.email} · ${lingua.toUpperCase()}`)
 
-  let attiva = false
+  // Barra degli strumenti del testo: compare mentre si scrive, con Salva e Annulla espliciti.
+  const strumenti = document.createElement('div')
+  strumenti.className = 'redazione-testo'
+  strumenti.hidden = true
+  strumenti.innerHTML = `
+    <span class="redazione-testo__aiuto"></span>
+    <button type="button" class="redazione-testo__corsivo" title="Mette o toglie il corsivo d'accento sulla selezione"><em>Corsivo</em></button>
+    <button type="button" class="redazione-testo__annulla">Annulla</button>
+    <button type="button" class="redazione-testo__salva">Salva</button>`
+  document.body.append(strumenti)
+  const aiuto = strumenti.querySelector<HTMLElement>('.redazione-testo__aiuto')!
+  const corsivo = strumenti.querySelector<HTMLButtonElement>('.redazione-testo__corsivo')!
+
+  // Livello dei pulsanti "Cambia foto": stanno sopra a tutto, così si raggiungono anche le foto coperte da testi.
+  const livello = document.createElement('div')
+  livello.className = 'redazione-foto'
+  document.body.append(livello)
+  const pulsantiFoto = new Map<HTMLElement, HTMLButtonElement>()
+
+  /** Antenati che possono tagliare l'elemento (caroselli, slide): fuori da lì il pulsante si nasconde. */
+  const ritagli = new WeakMap<HTMLElement, HTMLElement[]>()
+  function contenitori(el: HTMLElement): HTMLElement[] {
+    let lista = ritagli.get(el)
+    if (!lista) {
+      lista = []
+      for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+        const o = getComputedStyle(p)
+        if (o.overflowX !== 'visible' || o.overflowY !== 'visible') lista.push(p)
+      }
+      ritagli.set(el, lista)
+    }
+    return lista
+  }
+
+  function disponiFoto() {
+    document.querySelectorAll<HTMLElement>('[data-campo-img]').forEach((el) => {
+      if (pulsantiFoto.has(el)) return
+      const b = document.createElement('button')
+      b.type = 'button'
+      b.className = 'redazione-foto__pulsante'
+      b.innerHTML = `${MATITA}<span>${el.hasAttribute('data-segnaposto') ? 'Carica foto' : 'Cambia foto'}</span>`
+      b.addEventListener('click', () => cambiaImmagine(el))
+      livello.append(b)
+      pulsantiFoto.set(el, b)
+    })
+    pulsantiFoto.forEach((b, el) => {
+      if (!el.isConnected) {
+        b.remove()
+        pulsantiFoto.delete(el)
+        return
+      }
+      const r = el.getBoundingClientRect()
+      const x = r.right - 10
+      const y = r.top + 10
+      const visibile =
+        r.width > 60 &&
+        r.height > 40 &&
+        (el.checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) ?? true) &&
+        contenitori(el).every((c) => {
+          const cr = c.getBoundingClientRect()
+          return x > cr.left + 20 && x <= cr.right + 1 && y >= cr.top - 1 && y < cr.bottom - 20
+        })
+      b.hidden = !visibile
+      if (visibile) b.style.transform = `translate(${Math.round(x + window.scrollX)}px, ${Math.round(y + window.scrollY)}px) translateX(-100%)`
+    })
+  }
+  let inAttesa = false
+  const ridisponi = () => {
+    if (inAttesa || !attiva) return
+    inAttesa = true
+    requestAnimationFrame(() => {
+      inAttesa = false
+      disponiFoto()
+    })
+  }
+  window.addEventListener('resize', ridisponi)
+  window.addEventListener('load', ridisponi)
+  document.addEventListener('scroll', ridisponi, true)
+  document.addEventListener('transitionend', ridisponi, true)
+  new ResizeObserver(ridisponi).observe(document.body)
+  window.setInterval(ridisponi, 1500)
+
+  const riposo = () => dici(attiva ? 'Clic su un testo per scriverlo, «Cambia foto» per sostituire un\'immagine.' : `Anteprima: la pagina come la vede il visitatore.`)
+
+  let attiva = true
+  try {
+    attiva = localStorage.getItem('redazione') !== 'off'
+  } catch {}
+  function imposta(v: boolean) {
+    attiva = v
+    radice.classList.toggle('in-modifica', v)
+    radice.classList.add('con-redazione')
+    bottone.setAttribute('aria-pressed', String(v))
+    bottone.textContent = v ? 'Anteprima' : 'Torna a modificare'
+    livello.hidden = !v
+    try {
+      localStorage.setItem('redazione', v ? 'on' : 'off')
+    } catch {}
+    riposo()
+    if (v) disponiFoto()
+  }
   bottone.addEventListener('click', () => {
-    attiva = !attiva
-    document.documentElement.classList.toggle('in-modifica', attiva)
-    bottone.setAttribute('aria-pressed', String(attiva))
-    bottone.textContent = attiva ? 'Fine modifiche' : 'Modifica pagina'
-    dici(attiva ? 'Clic su un testo o su una foto per cambiarli' : `${utente.email} · ${lingua.toUpperCase()}`)
+    if (inCorso) return
+    imposta(!attiva)
+  })
+  barra.querySelector('.redazione__esci')!.addEventListener('click', async () => {
+    if (inCorso && !confirm('Ci sono modifiche non salvate. Uscire lo stesso?')) return
+    inCorso = null
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {})
+    location.reload()
+  })
+  barra.title = `${utente.email} · ${lingua.toUpperCase()}`
+
+  /** Testo in corso di scrittura: finché non si preme Salva o Annulla resta aperto. */
+  let inCorso: { el: HTMLElement; chiudi: (salva: boolean) => Promise<void>; cambiato: () => boolean } | null = null
+  window.addEventListener('beforeunload', (e) => {
+    if (inCorso?.cambiato()) e.preventDefault()
   })
 
-  // In modifica i link non portano altrove e il carosello non scorre da solo.
+  // In modifica i link non portano altrove: il clic su un testo lo apre in scrittura.
   document.addEventListener(
     'click',
     (e) => {
       if (!attiva) return
       const el = e.target as HTMLElement
-      if (el.closest('.redazione')) return
-      const img = el.closest<HTMLElement>('[data-campo-img]')
+      if (el.closest('.redazione, .redazione-testo, .redazione-foto')) return
       const testo = el.closest<HTMLElement>('[data-campo]')
-      if (el.closest('a') || img || testo) e.preventDefault()
-      if (testo) return modificaTesto(testo)
-      if (img) return cambiaImmagine(img)
+      if (inCorso) {
+        // Mentre si scrive, un clic fuori non fa perdere nulla: si resta sul testo aperto.
+        if (testo !== inCorso.el) {
+          if (el.closest('a, button')) e.preventDefault()
+          if (inCorso.cambiato()) {
+            dici('Premi Salva o Annulla per chiudere il testo che stai scrivendo.', 'errore')
+            strumenti.classList.add('redazione-testo--richiamo')
+            window.setTimeout(() => strumenti.classList.remove('redazione-testo--richiamo'), 900)
+            return
+          }
+          void inCorso.chiudi(false)
+        } else if (el.closest('a')) e.preventDefault()
+        if (testo === inCorso?.el) return
+      }
+      if (testo) {
+        e.preventDefault()
+        e.stopPropagation()
+        modificaTesto(testo)
+      } else if (el.closest('a') && el.closest('main')) {
+        // I link dentro la pagina restano fermi solo se contengono un testo modificabile.
+        if (el.closest('a')!.querySelector('[data-campo]')) e.preventDefault()
+      }
     },
     true,
   )
@@ -149,6 +287,7 @@ function avvia(utente: Json) {
     if (el.isContentEditable) return
     const conMarcatura = el.hasAttribute('data-testo')
     const prima = conMarcatura ? grezzo(el).trim() : (el.textContent || '').trim()
+    const leggi = () => scritto(el).replace(/ /g, ' ').replace(/\n{3,}/g, '\n\n').trim()
     el.textContent = prima
     el.classList.add('in-scrittura')
     try {
@@ -157,49 +296,76 @@ function avvia(utente: Json) {
       el.contentEditable = 'true'
     }
     el.focus()
-    const fine = async (annulla: boolean) => {
-      el.removeEventListener('blur', suBlur)
+    // Il testo aperto va al centro, così la barra in basso non lo copre.
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    corsivo.hidden = !conMarcatura
+    aiuto.textContent = conMarcatura
+      ? 'Invio va a capo · _parola_ = corsivo d\'accento · Ctrl+Invio salva · Esc annulla'
+      : 'Invio o Ctrl+Invio salva · Esc annulla'
+    strumenti.hidden = false
+    dici('Stai scrivendo: premi Salva per pubblicare.')
+
+    const chiudi = async (salvare: boolean) => {
       el.removeEventListener('keydown', suTasto)
       el.contentEditable = 'false'
       el.classList.remove('in-scrittura')
-      const dopo = annulla ? prima : scritto(el).replace(/ /g, ' ').replace(/\n{3,}/g, '\n\n').trim()
+      strumenti.hidden = true
+      inCorso = null
+      const dopo = salvare ? leggi() : prima
       if (conMarcatura) el.innerHTML = fmt(dopo)
       else el.textContent = dopo
-      if (annulla || dopo === prima) return
+      ridisponi()
+      if (!salvare || dopo === prima) return riposo()
       dici('Salvataggio…')
       try {
         await salva(el.dataset.campo!, dopo)
-        dici('Salvato e pubblicato', 'ok')
+        dici('Salvato e pubblicato.', 'ok')
       } catch (err) {
         if (conMarcatura) el.innerHTML = fmt(prima)
         else el.textContent = prima
         dici(`Non salvato: ${(err as Error).message}`, 'errore')
       }
     }
-    const suBlur = () => void fine(false)
     const suTasto = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
-        void fine(true)
+        void chiudi(false)
       }
-      // I campi di una riga si chiudono con Invio; nei testi lunghi Invio va a capo.
-      if (e.key === 'Enter' && !conMarcatura) {
+      // I campi di una riga si salvano con Invio; nei testi lunghi Invio va a capo e si salva con Ctrl+Invio.
+      if (e.key === 'Enter' && (!conMarcatura || e.ctrlKey || e.metaKey)) {
         e.preventDefault()
-        el.blur()
+        void chiudi(true)
       }
     }
-    el.addEventListener('blur', suBlur)
     el.addEventListener('keydown', suTasto)
+    inCorso = { el, chiudi, cambiato: () => leggi() !== prima }
   }
 
+  strumenti.addEventListener('mousedown', (e) => e.preventDefault()) // non togliere il cursore dal testo
+  strumenti.querySelector('.redazione-testo__salva')!.addEventListener('click', () => void inCorso?.chiudi(true))
+  strumenti.querySelector('.redazione-testo__annulla')!.addEventListener('click', () => void inCorso?.chiudi(false))
+  corsivo.addEventListener('click', () => {
+    const sel = window.getSelection()
+    if (!inCorso || !sel || sel.rangeCount === 0 || !inCorso.el.contains(sel.anchorNode)) return
+    const scelta = sel.toString()
+    if (!scelta.trim()) return dici('Seleziona prima le parole da mettere in corsivo.', 'errore')
+    const dentro = /^_[^_]+_$/.test(scelta.trim())
+    const nuovo = dentro ? scelta.replace(/_/g, '') : `_${scelta.trim().replace(/_/g, '')}_${/\s$/.test(scelta) ? ' ' : ''}`
+    const r = sel.getRangeAt(0)
+    r.deleteContents()
+    r.insertNode(document.createTextNode(nuovo))
+    sel.collapseToEnd()
+  })
+
   function cambiaImmagine(el: HTMLElement) {
+    if (inCorso?.cambiato()) return dici('Premi Salva o Annulla per chiudere il testo che stai scrivendo.', 'errore')
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = 'image/*,video/mp4'
+    input.accept = 'image/*'
     input.addEventListener('change', async () => {
       const file = input.files?.[0]
       if (!file) return
-      dici('Caricamento immagine…')
+      dici('Caricamento della foto…')
       try {
         const alt = (el.getAttribute('alt') || el.getAttribute('aria-label') || file.name.replace(/\.[^.]+$/, '')).trim()
         const dati = new FormData()
@@ -220,13 +386,16 @@ function avvia(utente: Json) {
           nuova.dataset.campoImg = el.dataset.campoImg
           el.replaceWith(nuova)
         }
-        dici('Immagine salvata e pubblicata', 'ok')
+        dici('Foto salvata e pubblicata.', 'ok')
+        ridisponi()
       } catch (err) {
-        dici(`Immagine non salvata: ${(err as Error).message}`, 'errore')
+        dici(`Foto non salvata: ${(err as Error).message}`, 'errore')
       }
     })
     input.click()
   }
+
+  imposta(attiva)
 }
 
 if (doc) {
