@@ -236,13 +236,44 @@ async function completaPagine() {
     await payload.updateGlobal({ slug: 'impostazioni', data: { menu } as never })
     log('aggiornato il menu: Installazioni e Spunti e idee')
   }
-  // Sezione catalogo della home: quattro box con le famiglie di prodotto già presenti nel footer.
-  // Le foto si caricano dalla pagina: qui non se ne sceglie nessuna al posto della redazione.
-  const home = (await payload.findGlobal({ slug: 'home', depth: 0 })) as unknown as { catalogo?: { box?: unknown[] } }
-  if (!(home.catalogo?.box || []).length) {
-    const box = ['Vasi e fioriere', 'Arredo', 'Illuminazione', 'Accessori'].map((titolo) => ({ titolo, link: '/#collezioni' }))
-    await payload.updateGlobal({ slug: 'home', data: { catalogo: { ...(home.catalogo || {}), box } } as never })
-    log('home: aggiunti i quattro box della sezione catalogo')
+  // Sezione catalogo della home: i quattro cataloghi pubblicati su serralunga.com/pages/serralunga-catalogs
+  // (titolo, copertina e PDF sono quelli della pagina). Si scrivono solo se i box mancano o sono ancora
+  // quelli provvisori senza foto: ciò che la redazione ha già cambiato resta com'è.
+  type Box = { id?: string; titolo?: string; link?: string; immagine?: number | null }
+  const home = (await payload.findGlobal({ slug: 'home', depth: 0 })) as unknown as { catalogo?: { box?: Box[] } }
+  const attuali = home.catalogo?.box || []
+  const PROVVISORI = ['Vasi e fioriere', 'Arredo', 'Illuminazione', 'Accessori']
+  const provvisori = attuali.length > 0 && attuali.every((x, k) => x.titolo === PROVVISORI[k] && !x.immagine && x.link === '/#collezioni')
+  const F = 'https://cdn.shopify.com/s/files/1/0587/3775/4249/files'
+  const I = 'https://serralunga.com/cdn/shop/files'
+  const cataloghi = [
+    { titolo: 'Catalogo Mobili', en: 'Furniture catalogue', link: `${F}/CATALOGUE_FURNITURE.pdf?v=1750319983`, foto: `${I}/KENTIA_lifestyle_1_c1c42453-e8c9-4995-b558-c03223f34f2b.jpg?v=1752219053` },
+    { titolo: 'Catalogo Piscina / Spa e spiaggia', en: 'Pool / Spa and beach catalogue', link: `${F}/CATALOGUE_POOL.pdf?v=1750319914`, foto: `${I}/aqua-2-11-1_1574518a-3458-4b77-b41e-6cb24848c2eb.jpg?v=1771517193` },
+    { titolo: 'Catalogo Fioriere', en: 'Planters catalogue', link: `${F}/CATALOGUE_POTS_83eb6906-b27d-4ed4-b5eb-f3ce24b72d5c.pdf?v=1752221415`, foto: `${I}/June_02.jpg?v=1750324586` },
+    { titolo: 'Catalogo Regali', en: 'Gifts catalogue', link: `${F}/CATALOGUE_GIFTS_fe656b2b-2111-490b-bfe2-048a5239a2aa.pdf?v=1752221319`, foto: `${I}/Doggy_Otto_Gatt-One_05_f8a7633e-0f03-4c5f-bb9d-96064221825d.jpg?v=1750324587` },
+  ]
+  if (!attuali.length || provvisori) {
+    const box: Box[] = []
+    for (const c of cataloghi) box.push({ titolo: c.titolo, link: c.link, immagine: await media(c.foto, `Copertina del ${c.titolo} Serralunga`) })
+    const salvata = (await payload.updateGlobal({ slug: 'home', depth: 0, data: { catalogo: { ...(home.catalogo || {}), box } } as never })) as unknown as { catalogo?: { box?: Box[] } }
+    // Titoli inglesi sulle stesse righe (stesso id), così /en/ non mostra il titolo italiano.
+    const righe = (salvata.catalogo?.box || []).map((x, k) => ({ id: x.id, titolo: cataloghi[k]?.en || x.titolo, link: x.link, immagine: x.immagine }))
+    if (righe.length === cataloghi.length) await payload.updateGlobal({ slug: 'home', locale: 'en', data: { catalogo: { box: righe } } as never })
+    log(`home: nei quattro box i cataloghi di serralunga.com (${box.filter((x) => x.immagine).length} copertine su 4)`)
+  } else if (attuali.some((x) => !x.immagine && cataloghi.some((c) => c.titolo === x.titolo))) {
+    // Copertine non scaricate la volta precedente (sito irraggiungibile): si riprova solo su quelle.
+    let aggiunte = 0
+    const box: Box[] = []
+    for (const x of attuali) {
+      const c = cataloghi.find((v) => v.titolo === x.titolo)
+      const immagine = !x.immagine && c ? await media(c.foto, `Copertina del ${c.titolo} Serralunga`) : x.immagine
+      if (immagine && !x.immagine) aggiunte++
+      box.push({ ...x, immagine })
+    }
+    if (aggiunte) {
+      await payload.updateGlobal({ slug: 'home', depth: 0, data: { catalogo: { ...(home.catalogo || {}), box } } as never })
+      log(`home: aggiunte ${aggiunte} copertine dei cataloghi`)
+    }
   }
   const loge = await payload.find({ collection: 'case-history', where: { slug: { equals: 'la-loge-du-massif' } }, limit: 1, depth: 0, draft: true })
   const caso = loge.docs[0] as unknown as { id: number; categoria?: string } | undefined
