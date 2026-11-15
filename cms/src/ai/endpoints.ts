@@ -11,7 +11,7 @@ import type { Endpoint, PayloadRequest } from 'payload'
 import sharp from 'sharp'
 
 import { formatSlug } from '../fields'
-import { chiediTesto, configAi, ErroreAi, generaImmagine } from './fornitori'
+import { chiediTesto, configAi, elencoModelli, ErroreAi, generaImmagine, type Fornitore } from './fornitori'
 import { uguali } from './segreto'
 
 const json = (dati: unknown, status = 200) => Response.json(dati, { status, headers: { 'cache-control': 'no-store' } })
@@ -330,6 +330,20 @@ const stato: Endpoint = {
   }),
 }
 
+// Elenco dei modelli del fornitore, per la scelta nelle impostazioni ("Scansiona modelli disponibili").
+const modelli: Endpoint = {
+  path: '/ai/modelli',
+  method: 'get',
+  handler: protetto('modelli', 20, async (req) => {
+    const q = (req.query || {}) as Record<string, unknown>
+    const f = String(q.fornitore || '')
+    if (!['openai', 'openrouter', 'gemini'].includes(f)) return errore('Fornitore non riconosciuto.')
+    const uso = q.uso === 'immagini' ? 'immagini' : 'testi'
+    const c = await configAi(req.payload)
+    return json({ modelli: await elencoModelli(c, f as Fornitore, uso) })
+  }),
+}
+
 const verifica: Endpoint = {
   path: '/ai/verifica',
   method: 'post',
@@ -399,4 +413,4 @@ const ricevi: Endpoint = {
   },
 }
 
-export const endpointAi: Endpoint[] = [stato, verifica, testo, alt, immagine, blocco, prodotti, ricevi]
+export const endpointAi: Endpoint[] = [stato, modelli, verifica, testo, alt, immagine, blocco, prodotti, ricevi]

@@ -1,5 +1,5 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * Un solo punto di accesso ai tre fornitori (OpenAI, OpenRouter, Gemini).
  * Le chiavi si leggono dal globale "ai" solo qui, sul server.
  */
@@ -163,4 +163,69 @@ export async function generaImmagine(c: ConfigAi, descrizione: string, orientame
   const p = parti.find((x) => x.inlineData?.data)?.inlineData
   if (!p?.data) throw new ErroreAi('Gemini non ha restituito un\'immagine: il modello scelto potrebbe non generarne.')
   return { dati: Buffer.from(p.data, 'base64'), mime: p.mimeType || 'image/png' }
+}
+
+// --- Elenco dei modelli disponibili presso un fornitore ---------------------------------
+
+export type UsoModello = 'testi' | 'immagini'
+export interface VoceModello {
+  id: string
+  nome: string
+  nota?: string
+}
+
+const NON_TESTO = /(embed|tts|audio|whisper|transcri|realtime|moderation|image|dall-e|sora|veo|imagen|aqa|search|computer-use|robotics|live)/i
+
+/** Prezzo per milione di token, da come lo pubblica OpenRouter (dollari per token). */
+function prezzo(p: unknown): string {
+  const n = Number(p)
+  if (p === undefined || p === null || p === '' || !Number.isFinite(n) || n < 0) return ''
+  if (n === 0) return 'gratis'
+  const m = n * 1_000_000
+  return `$${m < 1 ? m.toFixed(2) : m.toFixed(1).replace(/\.0$/, '')}/M`
+}
+
+/**
+ * Modelli che il fornitore offre per i testi o per le immagini.
+ * OpenRouter pubblica l'elenco anche senza chiave; OpenAI e Gemini la richiedono.
+ */
+export async function elencoModelli(c: ConfigAi, f: Fornitore, uso: UsoModello): Promise<VoceModello[]> {
+  let voci: VoceModello[] = []
+  if (f === 'openrouter') {
+    const intestazioni: Record<string, string> = { accept: 'application/json' }
+    if (c.chiavi.openrouter) intestazioni.authorization = `Bearer ${c.chiavi.openrouter}`
+    const r = await chiama(f, 'https://openrouter.ai/api/v1/models', { headers: intestazioni }, 30_000)
+    const dati = (Array.isArray(r.data) ? r.data : []) as Record<string, unknown>[]
+    voci = dati
+      .filter((m) => {
+        const a = (m.architecture || {}) as { output_modalities?: string[]; modality?: string }
+        const esce = Array.isArray(a.output_modalities) ? a.output_modalities : String(a.modality || '').split('->')[1]?.split('+') || []
+        return uso === 'immagini' ? esce.includes('image') : esce.includes('text') && !esce.includes('image')
+      })
+      .map((m) => {
+        const p = (m.pricing || {}) as Record<string, unknown>
+        const costi = [prezzo(p.prompt) && `ingresso ${prezzo(p.prompt)}`, prezzo(p.completion) && `uscita ${prezzo(p.completion)}`].filter(Boolean).join(', ')
+        return { id: String(m.id || ''), nome: String(m.name || m.id || ''), nota: costi || undefined }
+      })
+  } else if (f === 'openai') {
+    if (!c.chiavi.openai) throw new ErroreAi('Per leggere l’elenco dei modelli OpenAI bisogna prima salvare la chiave API.', 400)
+    const r = await chiama(f, 'https://api.openai.com/v1/models', { headers: { authorization: `Bearer ${c.chiavi.openai}` } }, 30_000)
+    const dati = (Array.isArray(r.data) ? r.data : []) as { id?: string }[]
+    voci = dati
+      .map((m) => String(m.id || ''))
+      .filter((id) => (uso === 'immagini' ? /^(gpt-image|dall-e)/i.test(id) : /^(gpt-|o\d|chatgpt-)/i.test(id) && !NON_TESTO.test(id)))
+      .map((id) => ({ id, nome: id }))
+  } else {
+    if (!c.chiavi.gemini) throw new ErroreAi('Per leggere l’elenco dei modelli Gemini bisogna prima salvare la chiave API.', 400)
+    const r = await chiama(f, 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000', { headers: { 'x-goog-api-key': c.chiavi.gemini } }, 30_000)
+    const dati = (Array.isArray(r.models) ? r.models : []) as { name?: string; displayName?: string; supportedGenerationMethods?: string[] }[]
+    voci = dati
+      .filter((m) => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map((m) => ({ id: String(m.name || '').replace(/^models\//, ''), nome: String(m.displayName || m.name || '') }))
+      .filter((m) => (uso === 'immagini' ? /image/i.test(m.id) : !NON_TESTO.test(m.id)))
+  }
+  return voci
+    .filter((v) => v.id)
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .slice(0, 800)
 }

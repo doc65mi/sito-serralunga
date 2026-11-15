@@ -1,3 +1,4 @@
+import { CampoModello as CampoModello_c0e2f720d59705c569c2c87c2b2ab6f4 } from '../../../componenti/CampoModello'
 import { default as default_a5c62363df18077b83503d139aa5ffbb } from '../../../componenti/Icona'
 import { default as default_d5ab4196404d6ed38b86f187692de6f8 } from '../../../componenti/Logo'
 import { default as default_bb9a30ea06c7e333dd806e5aae7cb6d3 } from '../../../componenti/AzioneFrontend'
@@ -7,6 +8,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/componenti/CampoModello#CampoModello": CampoModello_c0e2f720d59705c569c2c87c2b2ab6f4,
   "/componenti/Icona#default": default_a5c62363df18077b83503d139aa5ffbb,
   "/componenti/Logo#default": default_d5ab4196404d6ed38b86f187692de6f8,
   "/componenti/AzioneFrontend#default": default_bb9a30ea06c7e333dd806e5aae7cb6d3,

@@ -4,7 +4,7 @@ import { soloRedazione } from '../access'
 import { cifra, decifra, MASCHERA, mascherata } from '../ai/segreto'
 
 /**
- * Version: 1.00
+ * Version: 1.01
  * Intelligenza artificiale: fornitore, chiavi API, modelli e direttive.
  * Le chiavi sono cifrate nel database e non escono mai intere dalle API: il pannello
  * mostra solo le ultime quattro lettere. Per sostituirne una basta scriverla sopra,
@@ -35,12 +35,17 @@ const chiave = (name: string, label: string, description: string): Field => ({
   hooks: { beforeChange: [salvaChiave], afterRead: [leggiChiave] },
 })
 
-const modello = (name: string, label: string, defaultValue: string): Field => ({
+/** Nome del modello: si sceglie dall'elenco letto dal fornitore oppure si scrive a mano. */
+const modello = (name: string, label: string, defaultValue: string, fornitore: string, uso: 'testi' | 'immagini'): Field => ({
   name,
   type: 'text',
   label,
   defaultValue,
-  admin: { description: 'Identificativo esatto del modello, come compare nell’elenco del fornitore. Se un modello viene ritirato basta cambiarlo qui.' },
+  admin: {
+    description:
+      '«Scansiona modelli disponibili» legge l’elenco dal fornitore; in alternativa si scrive a mano l’identificativo esatto. Se un modello viene ritirato basta cambiarlo qui.',
+    components: { Field: { path: '/componenti/CampoModello#CampoModello', clientProps: { fornitore, uso } } },
+  },
 })
 
 export const FORNITORI = [
@@ -92,21 +97,24 @@ export const Ai: GlobalConfig = {
           label: 'OpenAI',
           fields: [
             chiave('chiaveOpenai', 'Chiave API OpenAI', 'Si crea su platform.openai.com, sezione API keys.'),
-            { type: 'row', fields: [modello('modelloOpenai', 'Modello per i testi', 'gpt-4o-mini'), modello('modelloImmaginiOpenai', 'Modello per le immagini', 'gpt-image-1')] },
+            modello('modelloOpenai', 'Modello per i testi', 'gpt-4o-mini', 'openai', 'testi'),
+            modello('modelloImmaginiOpenai', 'Modello per le immagini', 'gpt-image-1', 'openai', 'immagini'),
           ],
         },
         {
           label: 'OpenRouter',
           fields: [
             chiave('chiaveOpenrouter', 'Chiave API OpenRouter', 'Si crea su openrouter.ai, sezione Keys.'),
-            { type: 'row', fields: [modello('modelloOpenrouter', 'Modello per i testi', 'openai/gpt-4o-mini'), modello('modelloImmaginiOpenrouter', 'Modello per le immagini', 'google/gemini-2.5-flash-image')] },
+            modello('modelloOpenrouter', 'Modello per i testi', 'openai/gpt-4o-mini', 'openrouter', 'testi'),
+            modello('modelloImmaginiOpenrouter', 'Modello per le immagini', 'google/gemini-2.5-flash-image', 'openrouter', 'immagini'),
           ],
         },
         {
           label: 'Gemini',
           fields: [
             chiave('chiaveGemini', 'Chiave API Google Gemini', 'Si crea su aistudio.google.com, sezione API keys.'),
-            { type: 'row', fields: [modello('modelloGemini', 'Modello per i testi', 'gemini-2.5-flash'), modello('modelloImmaginiGemini', 'Modello per le immagini', 'gemini-2.5-flash-image')] },
+            modello('modelloGemini', 'Modello per i testi', 'gemini-2.5-flash', 'gemini', 'testi'),
+            modello('modelloImmaginiGemini', 'Modello per le immagini', 'gemini-2.5-flash-image', 'gemini', 'immagini'),
           ],
         },
         {

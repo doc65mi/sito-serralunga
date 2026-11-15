@@ -1,5 +1,5 @@
 /**
- * Modifica dalla pagina (Version: 3.01).
+ * Modifica dalla pagina (Version: 3.02).
  * Si carica solo se il browser ha il cookie del pannello (vedi Base.astro) e
  * verifica l'utente con /api/users/me. Sito e pannello stanno sullo stesso
  * indirizzo, quindi le chiamate usano il cookie di accesso di Payload.
@@ -205,8 +205,8 @@ function avvia(utente: Json) {
   const NOTA_AI = `<p class="redazione-ai__nota">L'AI non è ancora attiva: manca la chiave API. <a href="${IMPOSTAZIONI_AI}" target="_blank" rel="noopener">Apri le impostazioni dell'AI</a>.</p>`
   function aiDaAttivare(cosa: 'testi' | 'immagini') {
     finestra(cosa === 'testi' ? 'AI sui testi' : 'AI sulle immagini', `
-      <p>Per usare l'AI ${cosa === 'testi' ? 'sui testi' : 'sulle immagini'} servono due cose nel pannello, in Impostazioni &gt; Intelligenza artificiale:</p>
-      <ol class="redazione-ai__passi"><li>accendere l'interruttore «AI attiva»;</li><li>inserire la chiave API del fornitore scelto per ${cosa === 'testi' ? 'i testi' : 'le immagini'} (OpenAI, OpenRouter o Gemini).</li></ol>
+      <p>Per usare l'AI ${cosa === 'testi' ? 'sui testi' : 'sulle immagini'} servono tre cose nel pannello, in Impostazioni &gt; Intelligenza artificiale:</p>
+      <ol class="redazione-ai__passi"><li>accendere l'interruttore che abilita i pulsanti AI;</li><li>scegliere il fornitore per ${cosa === 'testi' ? 'i testi' : 'le immagini'} (OpenAI, OpenRouter o Gemini);</li><li>inserire la chiave API di quel fornitore e scegliere il modello.</li></ol>
       <p class="redazione-ai__nota">Dopo il salvataggio ricarica questa pagina.</p>
       <div class="redazione-ai__riga"><a class="redazione-ai__vai" href="${IMPOSTAZIONI_AI}" target="_blank" rel="noopener">Apri le impostazioni dell'AI</a></div>`)
   }
