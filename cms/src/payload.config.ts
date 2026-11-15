@@ -32,6 +32,9 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const sitoPubblico = process.env.SITO_URL || 'http://localhost:4321'
+// Sito e pannello sullo stesso indirizzo (CMS_URL vuoto): i link verso il sito sono relativi,
+// così valgono da qualunque nome si apra il pannello (localhost, 127.0.0.1, dominio).
+const versoSito = process.env.CMS_URL ? sitoPubblico : ''
 
 // In locale lo stesso sito si apre sia come localhost sia come 127.0.0.1: valgono entrambi.
 const origini = [...new Set([sitoPubblico, process.env.CMS_URL || ''].filter(Boolean).flatMap((u) => [u, u.replace('//localhost', '//127.0.0.1'), u.replace('//127.0.0.1', '//localhost')]))]
@@ -53,7 +56,7 @@ const email = process.env.SMTP_HOST
   : undefined
 
 export default buildConfig({
-  serverURL: process.env.CMS_URL || 'http://localhost:3000',
+  serverURL: process.env.CMS_URL || '',
   admin: {
     user: Users.slug,
     meta: { titleSuffix: ' · Serralunga Redazione', icons: [{ rel: 'icon', type: 'image/svg+xml', url: '/favicon.svg' }] },
@@ -66,17 +69,17 @@ export default buildConfig({
     importMap: { baseDir: path.resolve(dirname) },
     livePreview: {
       url: ({ data, collectionConfig, globalConfig }) => {
-        if (globalConfig?.slug === 'home') return `${sitoPubblico}/`
-        if (globalConfig?.slug === 'pagina-designer') return `${sitoPubblico}/designer/`
-        if (globalConfig?.slug === 'pagina-installazioni') return `${sitoPubblico}/installazioni/`
-        if (globalConfig?.slug === 'pagina-spunti') return `${sitoPubblico}/spunti-e-idee/`
-        if (globalConfig?.slug === 'pagina-journal') return `${sitoPubblico}/journal/`
-        if (collectionConfig?.slug === 'articoli') return `${sitoPubblico}/journal/${data?.slug}/`
-        if (collectionConfig?.slug === 'spunti') return `${sitoPubblico}/spunti-e-idee/${data?.slug}/`
-        if (collectionConfig?.slug === 'prodotti') return `${sitoPubblico}/prodotti/${data?.slug}/`
-        if (collectionConfig?.slug === 'designer') return `${sitoPubblico}/designer/${data?.slug}/`
-        if (collectionConfig?.slug === 'case-history') return `${sitoPubblico}/case-history/${data?.slug}/`
-        return sitoPubblico
+        if (globalConfig?.slug === 'home') return `${versoSito}/`
+        if (globalConfig?.slug === 'pagina-designer') return `${versoSito}/designer/`
+        if (globalConfig?.slug === 'pagina-installazioni') return `${versoSito}/installazioni/`
+        if (globalConfig?.slug === 'pagina-spunti') return `${versoSito}/spunti-e-idee/`
+        if (globalConfig?.slug === 'pagina-journal') return `${versoSito}/journal/`
+        if (collectionConfig?.slug === 'articoli') return `${versoSito}/journal/${data?.slug}/`
+        if (collectionConfig?.slug === 'spunti') return `${versoSito}/spunti-e-idee/${data?.slug}/`
+        if (collectionConfig?.slug === 'prodotti') return `${versoSito}/prodotti/${data?.slug}/`
+        if (collectionConfig?.slug === 'designer') return `${versoSito}/designer/${data?.slug}/`
+        if (collectionConfig?.slug === 'case-history') return `${versoSito}/case-history/${data?.slug}/`
+        return `${versoSito}/`
       },
       collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli'],
       globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal'],

@@ -54,7 +54,8 @@ const base = senzaLingua(Astro.url.pathname)
 const alternative = LINGUE.map((l) => ({ l, href: `${sito}${inLingua(l, base)}` }))
 const canonico = `${sito}${u(base)}`
 // Per la condivisione si usa il file caricato: le reti sociali non leggono ancora l'AVIF.
-const og = isMedia(immagine) ? originale(immagine) : undefined
+const assoluto = (u: string) => (u.startsWith('/') ? `${sito}${u}` : u)
+const og = isMedia(immagine) ? assoluto(originale(immagine)) : undefined
 
 const organizzazione = {
   '@type': 'Organization',
@@ -113,6 +114,8 @@ const faq = domande.length
   : []
 const grafo = JSON.stringify({ '@context': 'https://schema.org', '@graph': [organizzazione, sitoWeb, paginaWeb, ...briciole, ...faq, ...jsonld.map((j) => ({ inLanguage: INFO[L].html, ...j }))] })
   .replace(/</g, '\\u003c')
+  // Nei dati strutturati gli indirizzi delle foto devono essere completi.
+  .replace(/"\/api\/media\//g, `"${sito}/api/media/`)
 const accento = imp.accento || '#A08A5F'
 ---
 <!doctype html>

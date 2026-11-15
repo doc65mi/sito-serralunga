@@ -225,6 +225,14 @@ async function completaPagine() {
     await payload.updateGlobal({ slug: 'impostazioni', data: { menu } as never })
     log('aggiornato il menu: Installazioni e Spunti e idee')
   }
+  // Sezione catalogo della home: quattro box con le famiglie di prodotto già presenti nel footer.
+  // Le foto si caricano dalla pagina: qui non se ne sceglie nessuna al posto della redazione.
+  const home = (await payload.findGlobal({ slug: 'home', depth: 0 })) as unknown as { catalogo?: { box?: unknown[] } }
+  if (!(home.catalogo?.box || []).length) {
+    const box = ['Vasi e fioriere', 'Arredo', 'Illuminazione', 'Accessori'].map((titolo) => ({ titolo, link: '/#collezioni' }))
+    await payload.updateGlobal({ slug: 'home', data: { catalogo: { ...(home.catalogo || {}), box } } as never })
+    log('home: aggiunti i quattro box della sezione catalogo')
+  }
   const loge = await payload.find({ collection: 'case-history', where: { slug: { equals: 'la-loge-du-massif' } }, limit: 1, depth: 0, draft: true })
   const caso = loge.docs[0] as unknown as { id: number; categoria?: string } | undefined
   if (caso && !caso.categoria) await payload.update({ collection: 'case-history', id: caso.id, data: { categoria: 'risto' } as never })

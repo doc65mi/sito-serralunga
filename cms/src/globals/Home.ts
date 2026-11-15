@@ -186,6 +186,14 @@ export const Home: GlobalConfig = {
               type: 'group',
               label: 'Richiesta catalogo e listino',
               fields: [
+                {
+                  name: 'box',
+                  type: 'array',
+                  label: 'Quattro box (immagine, titolo, link)',
+                  maxRows: 4,
+                  labels: { singular: 'Box', plural: 'Box' },
+                  fields: [immagine('immagine', 'Immagine'), testo('titolo', 'Titolo', { required: true }), link('link', 'Link')],
+                },
                 immagine('immagine', 'Immagine del catalogo'),
                 testo('kicker', 'Kicker'),
                 area('titolo', 'Titolo'),

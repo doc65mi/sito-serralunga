@@ -17,7 +17,7 @@ export const GET: APIRoute = async () => {
     LINGUE.map((l) => `<xhtml:link rel="alternate" hreflang="${INFO[l].html}" href="${base}${percorso(l, path)}"/>`).join('')
   const xml = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   // Foto principale della pagina: aiuta la ricerca per immagini.
-  const foto = (m?: unknown) => (isMedia(m) ? `<image:image><image:loc>${xml(originale(m))}</image:loc></image:image>` : '')
+  const foto = (m?: unknown) => (isMedia(m) ? `<image:image><image:loc>${xml(originale(m).replace(/^\//, `${base}/`))}</image:loc></image:image>` : '')
   const url = (path: string, data?: string, immagine?: unknown) =>
     LINGUE.map(
       (l) =>

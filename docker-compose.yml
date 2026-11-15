@@ -1,4 +1,4 @@
-# Serralunga — Astro + Payload + Postgres. Version: 1.02
+# Serralunga — Astro + Payload + Postgres. Version: 1.03
 # Locale: copia .env.example in .env, poi `docker compose up -d --build`.
 # Sito e pannello rispondono sulla stessa porta (servizio proxy): http://localhost:8080 e /admin.
 # Coolify: usa docker-compose.coolify.yml (vedi DEPLOY.md).
@@ -29,7 +29,8 @@ services:
     environment:
       DATABASE_URL: postgres://serralunga:${POSTGRES_PASSWORD}@db:5432/serralunga
       PAYLOAD_SECRET: ${PAYLOAD_SECRET:?imposta PAYLOAD_SECRET}
-      CMS_URL: ${SITO_URL:-http://localhost:8080}
+      # Vuoto: il pannello usa indirizzi relativi e funziona da qualunque nome (localhost, 127.0.0.1, dominio).
+      CMS_URL: ""
       SITO_URL: ${SITO_URL:-http://localhost:8080}
       SITO_CHIAVE: ${SITO_CHIAVE:?imposta SITO_CHIAVE}
       SEED_EMAIL: ${SEED_EMAIL:-}
@@ -53,7 +54,8 @@ services:
       - cms
     environment:
       CMS_INTERNAL_URL: http://cms:3000
-      CMS_PUBLIC_URL: ${SITO_URL:-http://localhost:8080}
+      # Vuoto: le foto hanno indirizzi relativi, sempre sullo stesso indirizzo da cui si apre il sito.
+      CMS_PUBLIC_URL: ""
       SITO_URL: ${SITO_URL:-http://localhost:8080}
       SITO_CHIAVE: ${SITO_CHIAVE}
       BLOCCA_INDICIZZAZIONE: ${BLOCCA_INDICIZZAZIONE:-1}

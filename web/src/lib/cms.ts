@@ -6,7 +6,8 @@
 export const env = (k: string, d = '') => process.env[k] || (import.meta.env as Record<string, string>)[k] || d
 
 export const CMS_INTERNAL = env('CMS_INTERNAL_URL', 'http://localhost:3000').replace(/\/$/, '')
-export const CMS_PUBLIC = env('CMS_PUBLIC_URL', 'http://localhost:3000').replace(/\/$/, '')
+// Vuoto (come in Docker, dove sito e pannello condividono l'indirizzo): le foto usano percorsi relativi.
+export const CMS_PUBLIC = (process.env.CMS_PUBLIC_URL ?? 'http://localhost:3000').replace(/\/$/, '')
 import type { Lingua } from './lingua'
 
 export type Doc = Record<string, any>

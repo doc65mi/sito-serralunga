@@ -1,10 +1,11 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * Testata del cruscotto: le azioni di tutti i giorni prima dell'elenco delle collezioni.
  */
 import React from 'react'
 
-const sito = (process.env.SITO_URL || '').replace(/\/$/, '')
+// Stesso indirizzo del pannello (CMS_URL vuoto): link relativo, valido da qualunque nome host.
+const sito = process.env.CMS_URL ? (process.env.SITO_URL || '').replace(/\/$/, '') : ''
 
 const AZIONI = [
   { titolo: 'Modifica frontend', testo: 'Apri il sito e cambia testi, pulsanti e foto nella pagina.', href: `${sito}/`, primaria: true },

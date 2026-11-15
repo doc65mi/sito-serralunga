@@ -1,11 +1,12 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * Pulsante in testa alla barra laterale del pannello: porta al sito, dove chi ha fatto
  * l'accesso modifica testi, pulsanti e foto direttamente nella pagina.
  */
 import React from 'react'
 
-const sito = (process.env.SITO_URL || '').replace(/\/$/, '')
+// Stesso indirizzo del pannello (CMS_URL vuoto): link relativo, valido da qualunque nome host.
+const sito = process.env.CMS_URL ? (process.env.SITO_URL || '').replace(/\/$/, '') : ''
 
 export default function ModificaFrontend() {
   return (

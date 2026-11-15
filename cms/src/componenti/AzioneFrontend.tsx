@@ -1,11 +1,12 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * Pulsante "Modifica frontend" nella testata del pannello: resta visibile anche quando
  * la barra laterale è chiusa (schermi fino a 1440 px).
  */
 import React from 'react'
 
-const sito = (process.env.SITO_URL || '').replace(/\/$/, '')
+// Stesso indirizzo del pannello (CMS_URL vuoto): link relativo, valido da qualunque nome host.
+const sito = process.env.CMS_URL ? (process.env.SITO_URL || '').replace(/\/$/, '') : ''
 
 export default function AzioneFrontend() {
   return (

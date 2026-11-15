@@ -1,6 +1,6 @@
 # Avvio e pubblicazione
 
-Version: 1.06
+Version: 1.07
 
 Quattro servizi Docker: `db` (PostgreSQL 16), `cms` (Payload), `web` (Astro) e `proxy` (Caddy). Solo il proxy è aperto verso l'esterno: **sito e pannello stanno sulla stessa porta**, il pannello su `/admin`.
 Il database e le foto caricate stanno in due volumi: `db-dati` e `media`. **Sono gli unici da salvare nei backup.**
@@ -117,3 +117,7 @@ Con l'estensione **Docker** di Plesk si può usare `docker-compose.yml` (quello 
 2. Lanciare una volta `npm run seed:aggiorna` dal terminale del servizio `cms`: porta le foto in AVIF e crea ciò che manca, senza toccare i testi.
 3. Entrare nel pannello, Impostazioni > Intelligenza artificiale, inserire la chiave API del fornitore scelto e spuntare «Abilita i pulsanti AI».
 4. Quando il sito va in linea, impostare `BLOCCA_INDICIZZAZIONE=0`: finché vale 1 il file robots.txt chiude il sito a motori di ricerca e assistenti.
+
+## Indirizzi relativi
+
+Sito e pannello condividono l'indirizzo: foto, pannello e pulsante «Modifica frontend» usano percorsi relativi e funzionano da qualunque nome si apra il sito (localhost, 127.0.0.1, dominio). `SITO_URL` serve solo per canonical, sitemap, dati strutturati e immagini di condivisione: in produzione va impostato sul dominio definitivo. Per l'accesso al pannello valgono `SITO_URL` e, in locale, il suo equivalente tra localhost e 127.0.0.1.

@@ -1,4 +1,4 @@
-# Serralunga su Coolify — Astro + Payload + Postgres. Version: 1.00
+# Serralunga su Coolify — Astro + Payload + Postgres. Version: 1.01
 # In Coolify: New Resource → repository GitHub → Build Pack "Docker Compose",
 # Docker Compose Location: /docker-compose.coolify.yml (passi completi in DEPLOY.md).
 #
@@ -33,7 +33,8 @@ services:
       DATABASE_URL: postgres://serralunga:${SERVICE_PASSWORD_POSTGRES}@db:5432/serralunga
       PAYLOAD_SECRET: ${SERVICE_PASSWORD_64_PAYLOAD}
       SITO_CHIAVE: ${SERVICE_PASSWORD_64_SITOCHIAVE}
-      CMS_URL: ${SITO_URL:?indirizzo pubblico, per esempio https://www.serralunga.com}
+      # Vuoto: il pannello usa indirizzi relativi e funziona da qualunque nome (localhost, 127.0.0.1, dominio).
+      CMS_URL: ""
       SITO_URL: ${SITO_URL}
       SEED_EMAIL: ${SEED_EMAIL:?email del primo utente del pannello}
       SEED_PASSWORD: ${SEED_PASSWORD:?password del primo utente del pannello}
@@ -63,7 +64,8 @@ services:
         condition: service_healthy
     environment:
       CMS_INTERNAL_URL: http://cms:3000
-      CMS_PUBLIC_URL: ${SITO_URL}
+      # Vuoto: le foto hanno indirizzi relativi, sempre sullo stesso indirizzo da cui si apre il sito.
+      CMS_PUBLIC_URL: ""
       SITO_URL: ${SITO_URL}
       SITO_CHIAVE: ${SERVICE_PASSWORD_64_SITOCHIAVE}
       BLOCCA_INDICIZZAZIONE: ${BLOCCA_INDICIZZAZIONE:-1}

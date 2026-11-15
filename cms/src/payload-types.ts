@@ -2787,6 +2787,17 @@ export interface Home {
       | null;
   };
   catalogo?: {
+    box?:
+      | {
+          immagine?: (number | null) | Media;
+          titolo: string;
+          /**
+           * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+           */
+          link?: string | null;
+          id?: string | null;
+        }[]
+      | null;
     immagine?: (number | null) | Media;
     kicker?: string | null;
     /**
@@ -3944,6 +3955,14 @@ export interface HomeSelect<T extends boolean = true> {
   catalogo?:
     | T
     | {
+        box?:
+          | T
+          | {
+              immagine?: T;
+              titolo?: T;
+              link?: T;
+              id?: T;
+            };
         immagine?: T;
         kicker?: T;
         titolo?: T;
