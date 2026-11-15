@@ -326,6 +326,8 @@ const stato: Endpoint = {
       immagini: c.attiva && !!c.chiavi[c.fornitoreImmagini],
       fornitoreTesti: c.fornitoreTesti,
       fornitoreImmagini: c.fornitoreImmagini,
+      // Solo presenza, mai il valore: serve a dire alla redazione che cosa manca.
+      chiavi: { openai: !!c.chiavi.openai, openrouter: !!c.chiavi.openrouter, gemini: !!c.chiavi.gemini },
     })
   }),
 }

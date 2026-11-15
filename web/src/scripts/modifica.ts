@@ -1,5 +1,5 @@
 /**
- * Modifica dalla pagina (Version: 3.02).
+ * Modifica dalla pagina (Version: 3.04).
  * Si carica solo se il browser ha il cookie del pannello (vedi Base.astro) e
  * verifica l'utente con /api/users/me. Sito e pannello stanno sullo stesso
  * indirizzo, quindi le chiamate usano il cookie di accesso di Payload.
@@ -192,23 +192,54 @@ function avvia(utente: Json) {
   const bottoneAi = strumenti.querySelector<HTMLButtonElement>('.redazione-testo__ai')!
 
   // Che cosa può fare l'AI dipende dalle impostazioni del pannello (chiavi e interruttore).
+  type StatoAi = { attiva?: boolean; testi?: boolean; immagini?: boolean; fornitoreTesti?: string; fornitoreImmagini?: string; chiavi?: Record<string, boolean> }
   let ai: { testi: boolean; immagini: boolean } = { testi: false, immagini: false }
-  fetch('/api/ai/stato', { credentials: 'same-origin' })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((d) => {
-      if (d) ai = { testi: !!d.testi, immagini: !!d.immagini }
-    })
-    .catch(() => {})
+  let statoAi: StatoAi | null = null
+  let erroreStato = ''
+  /** Rilegge le impostazioni: così un cambio fatto nel pannello vale subito, senza ricaricare la pagina. */
+  async function leggiStatoAi() {
+    try {
+      const r = await fetch('/api/ai/stato', { credentials: 'same-origin', cache: 'no-store' })
+      if (!r.ok) {
+        erroreStato = r.status === 401 ? 'la sessione è scaduta: rifare l\'accesso al pannello' : `il sito non riesce a leggere le impostazioni (errore ${r.status})`
+        return
+      }
+      statoAi = (await r.json()) as StatoAi
+      erroreStato = ''
+      ai = { testi: !!statoAi.testi, immagini: !!statoAi.immagini }
+    } catch {
+      erroreStato = 'il sito non riesce a leggere le impostazioni (nessuna risposta dal server)'
+    }
+  }
+  void leggiStatoAi()
+  // Tornando dalla scheda del pannello le impostazioni si rileggono da sole.
+  window.addEventListener('focus', () => void leggiStatoAi())
+  /** Esegue un comando AI; se risulta spenta rilegge prima le impostazioni, poi spiega che cosa manca. */
+  async function conAi(cosa: 'testi' | 'immagini', fai: () => void) {
+    if (!ai[cosa]) await leggiStatoAi()
+    if (ai[cosa]) fai()
+    else aiDaAttivare(cosa)
+  }
 
   // Senza chiave i comandi dell'AI restano visibili e spiegano dove si attiva.
   const IMPOSTAZIONI_AI = '/admin/globals/ai'
-  const NOTA_AI = `<p class="redazione-ai__nota">L'AI non è ancora attiva: manca la chiave API. <a href="${IMPOSTAZIONI_AI}" target="_blank" rel="noopener">Apri le impostazioni dell'AI</a>.</p>`
+  const NOMI_AI: Record<string, string> = { openai: 'OpenAI', openrouter: 'OpenRouter', gemini: 'Gemini' }
+  const NOTA_AI = `<p class="redazione-ai__nota">L'AI non è ancora attiva. <a href="${IMPOSTAZIONI_AI}" target="_blank" rel="noopener">Apri le impostazioni dell'AI</a>.</p>`
   function aiDaAttivare(cosa: 'testi' | 'immagini') {
+    const per = cosa === 'testi' ? 'i testi' : 'le immagini'
+    const scelto = (cosa === 'testi' ? statoAi?.fornitoreTesti : statoAi?.fornitoreImmagini) || ''
+    const conChiave = Object.entries(statoAi?.chiavi || {}).filter(([, c]) => c).map(([f]) => NOMI_AI[f] || f)
+    let motivo: string
+    if (erroreStato || !statoAi) motivo = `<p>Non posso usare l'AI: ${esc(erroreStato || 'impostazioni non lette')}.</p>`
+    else if (!statoAi.attiva)
+      motivo = `<p>L'interruttore «Abilita i pulsanti AI nella modifica dalla pagina» è spento.</p><p class="redazione-ai__nota">Si accende nel pannello, Impostazioni &gt; Intelligenza artificiale, scheda «Uso». Poi premi «Salva».</p>`
+    else
+      motivo = `<p>Per ${per} è scelto il fornitore <strong>${esc(NOMI_AI[scelto] || scelto)}</strong>, ma la sua chiave API non è salvata.</p>
+      <p class="redazione-ai__nota">${conChiave.length ? `Risulta salvata la chiave di ${esc(conChiave.join(', '))}: ` : ''}nella scheda «Uso» scegli come fornitore per ${per} quello di cui hai inserito la chiave, oppure inserisci la chiave di ${esc(NOMI_AI[scelto] || scelto)} nella sua scheda. Poi premi «Salva».</p>`
     finestra(cosa === 'testi' ? 'AI sui testi' : 'AI sulle immagini', `
-      <p>Per usare l'AI ${cosa === 'testi' ? 'sui testi' : 'sulle immagini'} servono tre cose nel pannello, in Impostazioni &gt; Intelligenza artificiale:</p>
-      <ol class="redazione-ai__passi"><li>accendere l'interruttore che abilita i pulsanti AI;</li><li>scegliere il fornitore per ${cosa === 'testi' ? 'i testi' : 'le immagini'} (OpenAI, OpenRouter o Gemini);</li><li>inserire la chiave API di quel fornitore e scegliere il modello.</li></ol>
-      <p class="redazione-ai__nota">Dopo il salvataggio ricarica questa pagina.</p>
-      <div class="redazione-ai__riga"><a class="redazione-ai__vai" href="${IMPOSTAZIONI_AI}" target="_blank" rel="noopener">Apri le impostazioni dell'AI</a></div>`)
+      ${motivo}
+      <div class="redazione-ai__riga"><a class="redazione-ai__vai" href="${IMPOSTAZIONI_AI}" target="_blank" rel="noopener">Apri le impostazioni dell'AI</a></div>
+      <p class="redazione-ai__nota">Dopo il salvataggio basta cliccare di nuovo il comando: non serve ricaricare la pagina.</p>`)
   }
 
   /** Finestra di lavoro (AI, testo alternativo, blocchi): un <dialog> con titolo e pulsante di chiusura. */
@@ -219,7 +250,55 @@ function avvia(utente: Json) {
     document.body.append(d)
     d.addEventListener('close', () => d.remove())
     d.showModal()
+    spostabile(d, d.querySelector<HTMLElement>('.redazione-ai__testa')!)
     return d
+  }
+
+  /**
+   * Rende una finestra trascinabile dalla sua intestazione (mouse, dito o frecce della tastiera),
+   * per scoprire la parte di pagina che copre. Resta sempre dentro lo schermo.
+   */
+  function spostabile(d: HTMLElement, maniglia: HTMLElement) {
+    let x = 0
+    let y = 0
+    let da: { px: number; py: number; x: number; y: number; r: DOMRect } | null = null
+    maniglia.classList.add('redazione-ai__testa--sposta')
+    maniglia.title = 'Trascina per spostare la finestra'
+    const metti = (nx: number, ny: number, r: DOMRect, x0: number, y0: number) => {
+      // r è il rettangolo alla posizione (x0, y0): in orizzontale la finestra resta tutta nello schermo (il pulsante di chiusura è a destra), in verticale resta visibile l'intestazione.
+      const minX = x0 - r.left
+      const maxX = Math.max(minX, x0 + innerWidth - r.right)
+      const minY = y0 - r.top
+      const maxY = y0 + innerHeight - r.top - maniglia.offsetHeight
+      x = Math.min(maxX, Math.max(minX, nx))
+      y = Math.min(maxY, Math.max(minY, ny))
+      d.style.translate = `${x}px ${y}px`
+    }
+    maniglia.addEventListener('pointerdown', (e) => {
+      if ((e.target as HTMLElement).closest('button, a, input, textarea, select')) return
+      da = { px: e.clientX, py: e.clientY, x, y, r: d.getBoundingClientRect() }
+      maniglia.setPointerCapture(e.pointerId)
+      e.preventDefault()
+    })
+    maniglia.addEventListener('pointermove', (e) => {
+      if (da) metti(da.x + e.clientX - da.px, da.y + e.clientY - da.py, da.r, da.x, da.y)
+    })
+    const fine = () => (da = null)
+    maniglia.addEventListener('pointerup', fine)
+    maniglia.addEventListener('pointercancel', fine)
+    // Tastiera: con il titolo a fuoco le frecce spostano la finestra di 24 px.
+    const titolo = maniglia.querySelector<HTMLElement>('strong')
+    if (titolo) {
+      titolo.tabIndex = 0
+      titolo.setAttribute('aria-description', 'Con le frecce si sposta la finestra')
+      titolo.addEventListener('keydown', (e) => {
+        const passo: Record<string, [number, number]> = { ArrowLeft: [-24, 0], ArrowRight: [24, 0], ArrowUp: [0, -24], ArrowDown: [0, 24] }
+        const p = passo[e.key]
+        if (!p) return
+        e.preventDefault()
+        metti(x + p[0], y + p[1], d.getBoundingClientRect(), x, y)
+      })
+    }
   }
   const statoDi = (d: HTMLDialogElement) => (t: string, errore = false) => {
     const el = d.querySelector<HTMLElement>('.redazione-ai__stato')!
@@ -466,7 +545,10 @@ function avvia(utente: Json) {
   strumenti.addEventListener('mousedown', (e) => {
     if (!(e.target as HTMLElement).closest('input')) e.preventDefault() // non togliere il cursore dal testo
   })
-  bottoneAi.addEventListener('click', () => inCorso && (ai.testi ? aiTesto(inCorso.el) : aiDaAttivare('testi')))
+  bottoneAi.addEventListener('click', () => {
+    const el = inCorso?.el
+    if (el) void conAi('testi', () => aiTesto(el))
+  })
   strumenti.querySelector('.redazione-testo__salva')!.addEventListener('click', () => void inCorso?.chiudi(true))
   strumenti.querySelector('.redazione-testo__annulla')!.addEventListener('click', () => void inCorso?.chiudi(false))
   corsivo.addEventListener('click', () => {
@@ -608,7 +690,7 @@ function avvia(utente: Json) {
       }
     }
     if (img?.dataset.media) voci.push(['Testo alternativo (SEO)', () => testoAlternativo(img)])
-    if (!lista) voci.push(['Genera un\'immagine con l\'AI', () => (ai.immagini ? aiImmagine(el, cornice) : aiDaAttivare('immagini'))])
+    if (!lista) voci.push(['Genera un\'immagine con l\'AI', () => void conAi('immagini', () => aiImmagine(el, cornice))])
     const menu = document.createElement('div')
     menu.className = 'redazione-menu'
     menu.setAttribute('role', 'menu')
