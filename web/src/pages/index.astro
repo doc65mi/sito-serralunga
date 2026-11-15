@@ -238,20 +238,21 @@ const tel = (a.telefono || '').replace(/[^+\d]/g, '')
   )}
 
   <section id="listino" class="hf-listino">
-    {(cat.box || []).length > 0 && (
-      <ul class="hf-listino__box">
-        {cat.box.map((b: Doc, k: number) => (
-          <li>
-            <a href={qui(b.link)} class="hf-box" target={esterno(b.link) ? '_blank' : undefined} rel={esterno(b.link) ? 'noopener' : undefined}>
-              <div class="hf-box__foto"><Img campo={`catalogo.box.${k}.immagine`} media={b.immagine} alt={b.immagine?.alt || b.titolo} sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={1000} nota={t('foto da fornire')} /></div>
-              <span class="hf-box__piede"><span class="hf-box__titolo" data-campo={`catalogo.box.${k}.titolo`} data-campo-link={`catalogo.box.${k}.link`} data-link={b.link || ''}>{b.titolo}</span><span class="hf-box__freccia" aria-hidden="true">→</span></span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    )}
     <div class="hf-listino__griglia">
-      <div class="hf-listino__foto"><Img campo="catalogo.immagine" media={cat.immagine} sizes="(max-width: 900px) 100vw, 45vw" larghezza={1800} /></div>
+      {(cat.box || []).length > 0 ? (
+          <ul class="hf-listino__box">
+            {cat.box.map((b: Doc, k: number) => (
+              <li>
+                <a href={qui(b.link)} class="hf-box" target={esterno(b.link) ? '_blank' : undefined} rel={esterno(b.link) ? 'noopener' : undefined}>
+                  <div class="hf-box__foto"><Img campo={`catalogo.box.${k}.immagine`} media={b.immagine} alt={b.immagine?.alt || b.titolo} sizes="(max-width: 520px) 100vw, (max-width: 900px) 50vw, 23vw" larghezza={900} nota={t('foto da fornire')} /></div>
+                  <span class="hf-box__piede"><span class="hf-box__titolo" data-campo={`catalogo.box.${k}.titolo`} data-campo-link={`catalogo.box.${k}.link`} data-link={b.link || ''}>{b.titolo}</span><span class="hf-box__freccia" aria-hidden="true">→</span></span>
+                </a>
+              </li>
+            ))}
+          </ul>
+      ) : (
+        <div class="hf-listino__foto"><Img campo="catalogo.immagine" media={cat.immagine} sizes="(max-width: 900px) 100vw, 45vw" larghezza={1800} /></div>
+      )}
       <div class="hf-listino__testi">
         {cat.kicker && <span class="hf-kicker" data-campo="catalogo.kicker">{cat.kicker}</span>}
         <Testo as="h2" campo="catalogo.titolo" t={cat.titolo} />

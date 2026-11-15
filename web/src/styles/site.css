@@ -1,6 +1,6 @@
 /*
  * site.css — stile unico del sito Serralunga
- * Version: 1.04
+ * Version: 1.05
  * Fonte: template/*.dc.html (Claude Design), regole in file-md/design.md.
  * Nessuno stile nelle pagine: ogni valore passa da un token qui sotto.
  */
@@ -1195,14 +1195,13 @@ article.card-spunto > .card-spunto { height: 100%; }
 }
 
 /* ---------- Home, sezione catalogo: quattro box immagine + titolo + link ---------- */
-.hf-listino__box { list-style: none; max-width: 1560px; margin: 0 auto 100px; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 2vw, 32px); }
+.hf-listino__box { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(16px, 2vw, 32px); }
 .hf-box { display: flex; flex-direction: column; gap: 16px; color: var(--ink); text-decoration: none; }
-.hf-box__foto { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--hf-sand); }
+.hf-box__foto { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--hf-sand); }
 .hf-box__foto img, .hf-box__foto .segnaposto { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1200ms var(--ease); }
 .hf-box:hover .hf-box__foto img { transform: scale(1.05); }
 .hf-box__piede { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
 .hf-box__titolo { font-family: var(--serif); font-size: clamp(22px, 1.9vw, 28px); font-weight: 300; line-height: 1.15; }
 .hf-box__freccia { color: var(--accent); transition: transform 300ms var(--ease); }
 .hf-box:hover .hf-box__freccia { transform: translateX(6px); }
-@media (max-width: 1100px) { .hf-listino__box { grid-template-columns: repeat(2, 1fr); margin-bottom: 64px; } }
-@media (max-width: 520px) { .hf-listino__box { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .hf-box__titolo { font-size: 19px; } .hf-box { gap: 10px; } }
