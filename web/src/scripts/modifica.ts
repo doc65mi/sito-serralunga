@@ -1,5 +1,5 @@
 /**
- * Modifica dalla pagina (Version: 3.00).
+ * Modifica dalla pagina (Version: 3.01).
  * Si carica solo se il browser ha il cookie del pannello (vedi Base.astro) e
  * verifica l'utente con /api/users/me. Sito e pannello stanno sullo stesso
  * indirizzo, quindi le chiamate usano il cookie di accesso di Payload.
@@ -180,7 +180,7 @@ function avvia(utente: Json) {
   strumenti.innerHTML = `
     <span class="redazione-testo__aiuto"></span>
     <label class="redazione-testo__url" hidden>Indirizzo del pulsante <input type="text" spellcheck="false" autocomplete="off" placeholder="/designer/ oppure https://…" /></label>
-    <button type="button" class="redazione-testo__ai" hidden title="Riscrive il testo con l'intelligenza artificiale: la proposta si rivede prima di salvare">AI</button>
+    <button type="button" class="redazione-testo__ai" title="Riscrive il testo con l'intelligenza artificiale: la proposta si rivede prima di salvare">✦ AI</button>
     <button type="button" class="redazione-testo__corsivo" title="Mette o toglie il corsivo d'accento sulla selezione"><em>Corsivo</em></button>
     <button type="button" class="redazione-testo__annulla">Annulla</button>
     <button type="button" class="redazione-testo__salva">Salva</button>`
@@ -199,6 +199,17 @@ function avvia(utente: Json) {
       if (d) ai = { testi: !!d.testi, immagini: !!d.immagini }
     })
     .catch(() => {})
+
+  // Senza chiave i comandi dell'AI restano visibili e spiegano dove si attiva.
+  const IMPOSTAZIONI_AI = '/admin/globals/ai'
+  const NOTA_AI = `<p class="redazione-ai__nota">L'AI non è ancora attiva: manca la chiave API. <a href="${IMPOSTAZIONI_AI}" target="_blank" rel="noopener">Apri le impostazioni dell'AI</a>.</p>`
+  function aiDaAttivare(cosa: 'testi' | 'immagini') {
+    finestra(cosa === 'testi' ? 'AI sui testi' : 'AI sulle immagini', `
+      <p>Per usare l'AI ${cosa === 'testi' ? 'sui testi' : 'sulle immagini'} servono due cose nel pannello, in Impostazioni &gt; Intelligenza artificiale:</p>
+      <ol class="redazione-ai__passi"><li>accendere l'interruttore «AI attiva»;</li><li>inserire la chiave API del fornitore scelto per ${cosa === 'testi' ? 'i testi' : 'le immagini'} (OpenAI, OpenRouter o Gemini).</li></ol>
+      <p class="redazione-ai__nota">Dopo il salvataggio ricarica questa pagina.</p>
+      <div class="redazione-ai__riga"><a class="redazione-ai__vai" href="${IMPOSTAZIONI_AI}" target="_blank" rel="noopener">Apri le impostazioni dell'AI</a></div>`)
+  }
 
   /** Finestra di lavoro (AI, testo alternativo, blocchi): un <dialog> con titolo e pulsante di chiusura. */
   function finestra(titolo: string, corpo: string): HTMLDialogElement {
@@ -375,7 +386,6 @@ function avvia(utente: Json) {
     const urlPrima = link?.dataset.link || ''
     campoUrl.hidden = !link
     inputUrl.value = urlPrima
-    bottoneAi.hidden = !ai.testi
     el.textContent = prima
     el.classList.add('in-scrittura')
     try {
@@ -456,7 +466,7 @@ function avvia(utente: Json) {
   strumenti.addEventListener('mousedown', (e) => {
     if (!(e.target as HTMLElement).closest('input')) e.preventDefault() // non togliere il cursore dal testo
   })
-  bottoneAi.addEventListener('click', () => inCorso && aiTesto(inCorso.el))
+  bottoneAi.addEventListener('click', () => inCorso && (ai.testi ? aiTesto(inCorso.el) : aiDaAttivare('testi')))
   strumenti.querySelector('.redazione-testo__salva')!.addEventListener('click', () => void inCorso?.chiudi(true))
   strumenti.querySelector('.redazione-testo__annulla')!.addEventListener('click', () => void inCorso?.chiudi(false))
   corsivo.addEventListener('click', () => {
@@ -598,7 +608,7 @@ function avvia(utente: Json) {
       }
     }
     if (img?.dataset.media) voci.push(['Testo alternativo (SEO)', () => testoAlternativo(img)])
-    if (ai.immagini && !lista) voci.push(['Genera un\'immagine con l\'AI', () => aiImmagine(el, cornice)])
+    if (!lista) voci.push(['Genera un\'immagine con l\'AI', () => (ai.immagini ? aiImmagine(el, cornice) : aiDaAttivare('immagini'))])
     const menu = document.createElement('div')
     menu.className = 'redazione-menu'
     menu.setAttribute('role', 'menu')
@@ -698,6 +708,7 @@ function avvia(utente: Json) {
       <label>Testo alternativo<textarea class="redazione-ai__proposta" rows="3" maxlength="125"></textarea></label>
       <div class="redazione-ai__riga">
         ${ai.testi ? '<button type="button" class="redazione-ai__vai">Proponi con l\'AI</button>' : ''}
+        ${ai.testi ? '' : NOTA_AI}
         <button type="button" class="redazione-ai__usa">Salva</button>
       </div>`)
     const dico = statoDi(d)
@@ -823,7 +834,7 @@ function avvia(utente: Json) {
     const d = finestra('Aggiungi un blocco', `
       <p class="redazione-ai__nota">Il blocco viene aggiunto in fondo alla pagina; poi si sposta con le frecce e i testi si scrivono con un clic.</p>
       <label>${ai.testi ? 'Descrivi il blocco all\'AI, oppure incolla qui gli indirizzi dei prodotti' : 'Indirizzi dei prodotti (per l\'elenco di prodotti), uno per riga'}<textarea class="redazione-ai__istruzione" rows="5" placeholder="${ai.testi ? 'Es. Inserisci un elenco di prodotti con questi indirizzi: https://serralunga.com/products/… oppure: uno slider di foto della terrazza, con titolo…' : 'https://serralunga.com/products/…'}"></textarea></label>
-      ${ai.testi ? '<button type="button" class="redazione-ai__vai">Crea con l\'AI</button>' : '<p class="redazione-ai__nota">L\'AI non è attiva: si accende nel pannello, Impostazioni &gt; Intelligenza artificiale.</p>'}
+      ${ai.testi ? '<button type="button" class="redazione-ai__vai">Crea con l\'AI</button>' : NOTA_AI}
       <p class="redazione-ai__nota">Oppure scegli il tipo:</p>
       <div class="redazione-ai__rapide">${TIPI_BLOCCO.map(([tipo, nome]) => `<button type="button" data-tipo="${tipo}">${nome}</button>`).join('')}</div>`)
     const dico = statoDi(d)
