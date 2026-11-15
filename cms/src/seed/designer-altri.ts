@@ -1,11 +1,14 @@
 /**
- * Schede di tutti i designer con pezzi nel catalogo attuale (Version: 1.00).
+ * Schede di tutti i designer con pezzi nel catalogo attuale (Version: 1.01).
  * Fonte: le schede prodotto di serralunga.com (nome, ritratto, nota biografica, collezioni firmate).
  * Le biografie sono riassunti redazionali dei dati pubblicati lì, in italiano e in inglese:
  * vanno riviste dal cliente. Dove serralunga.com non riporta una biografia, la scheda
  * elenca solo i pezzi firmati. I ritratti si scaricano da serralunga.com durante il seed.
  */
-type Media = (sorgente: string, alt: string) => Promise<number | null>
+type Media = (sorgente: string, alt: string, opz?: { min?: number }) => Promise<number | null>
+
+/** Larghezza minima dei ritratti: quelli più piccoli vengono ingranditi dal seed. */
+export const RITRATTO_MIN = 1400
 type Due = [it: string, en: string]
 
 interface Voce {
@@ -16,6 +19,8 @@ interface Voce {
   /** Nome del file del ritratto in serralunga.com/cdn/shop/files, con la versione. */
   foto?: string
   pezzi: string[]
+  /** Altri nomi con cui il designer compare tra le etichette dei prodotti di serralunga.com. */
+  etichette?: string[]
   /** Nota sui pezzi firmati con altri, aggiunta dopo l'elenco. */
   nota?: Due
   bio?: Due
@@ -254,6 +259,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Zaha Hadid',
     slug: 'zaha-hadid',
+    etichette: ['Zaha Hadid Architects', 'ZHA'],
     ruolo: A,
     foto: 'Zaha_Hadid.webp?v=1666096606',
     pezzi: ['Flow', 'The Ripple'],
@@ -331,6 +337,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Raffaella Mangiarotti',
     slug: 'raffaella-mangiarotti',
+    etichette: ['Matteo Bazzicalupo and Raffaella Mangiarotti', 'Raffaella Mangiarotti and Marco Ravina', 'Bazzicalupo Mangiarotti', 'deepdesign'],
     ruolo: AD,
     prov: ['Architetto e designer · Milano', 'Architect and designer · Milan'],
     foto: 'Raffaella_Mangiarotti.webp?v=1666096606',
@@ -441,6 +448,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Paolo Rizzatto',
     slug: 'paolo-rizzatto',
+    etichette: ['Paolo Rizzato'],
     ruolo: AD,
     prov: ['Architetto e designer · Milano', 'Architect and designer · Milan'],
     foto: 'Paolo_Rizzatto.webp?v=1666096606',
@@ -568,7 +576,7 @@ export const designerAltri = async (m: Media) => {
         ? {}
         : {
             ordine,
-            ritratto: v.foto ? await m(`${S}/${v.foto}&width=1000`, t.alt[0]) : null,
+            ritratto: v.foto ? await m(`${S}/${v.foto}`, t.alt[0], { min: RITRATTO_MIN }) : null,
             ritrattoProvvisorio: true,
             estratto: t.estratto[0],
             pezziSegnaposto: 0,
@@ -590,4 +598,32 @@ export const designerInglese = (): Record<string, string> => {
     v.premi?.forEach((p) => metti(p.titolo))
   }
   return en
+}
+
+/** Ritratti dei tre designer del seed di base, per rifarli a risoluzione piena. */
+const RITRATTI_BASE: Record<string, string> = {
+  'marc-sadler': 'Marc_Sadler.webp?v=1666092471',
+  'luisa-bocchietto': 'Luisa_Bocchiettto_8d7d7247-c9af-44ac-89e7-ec26bf157f3f.webp?v=1676378763',
+  'marta-sansoni': 'ritrattomarta.jpg?v=1683278005',
+}
+
+/** Per ogni designer: come trovarne i pezzi nel catalogo di serralunga.com e dove sta il ritratto. */
+export const designerFonti = () => {
+  const separa = (nome: string) => nome.split(/\s+(?:&|e|and)\s+/).map((x) => x.trim())
+  return [
+    {
+      slug: 'marc-sadler',
+      nome: 'Marc Sadler',
+      etichette: ['Marc Sadler'],
+      pezzi: ['Aqua', 'Lady Jane', 'Aunt Jane', 'Grand Jane', 'Kubrick'],
+      ritratto: `${S}/${RITRATTI_BASE['marc-sadler']}`,
+    },
+    ...VOCI.map((v) => ({
+      slug: v.slug,
+      nome: v.nome,
+      etichette: [v.nome, ...separa(v.nome), ...(v.etichette || [])].filter((x, i, a) => a.indexOf(x) === i),
+      pezzi: v.pezzi,
+      ritratto: RITRATTI_BASE[v.slug] ? `${S}/${RITRATTI_BASE[v.slug]}` : v.foto ? `${S}/${v.foto}` : null,
+    })),
+  ]
 }

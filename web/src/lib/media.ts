@@ -28,8 +28,8 @@ export function srcset(m: Media) {
     .filter((s) => s?.url && s.width)
     .sort((a, b) => (a.width || 0) - (b.width || 0))
     .map((s) => `${pubblico(s.url)} ${s.width}w`)
-  if (m.width && m.mimeType !== 'image/webp') voci.push(`${pubblico(m.url)} ${m.width}w`)
-  return voci.join(', ')
+  // Una foto più stretta della taglia richiesta non viene ingrandita: le taglie uguali si contano una volta.
+  return [...new Set(voci)].join(', ')
 }
 
 /** URL della versione più adatta alla larghezza richiesta. */
@@ -37,6 +37,16 @@ export function src(m: Media, larghezza = 1800): string {
   const sizes = Object.values(m.sizes || {}).filter((s) => s?.url && s.width) as { url: string; width: number }[]
   const adatta = sizes.sort((a, b) => a.width - b.width).find((s) => s.width >= larghezza)
   return pubblico(adatta?.url || m.url)
+}
+
+/** File caricato (WebP, JPEG o PNG): riserva per i browser senza AVIF e immagine per la condivisione. */
+export const originale = (m: Media) => pubblico(m.url)
+
+/** Tipo delle versioni ridotte: 'image/avif' dopo la rigenerazione, altrimenti quello vecchio. */
+export function tipoRidotte(m: Media): string | undefined {
+  const prima = Object.values(m.sizes || {}).find((s) => s?.url)
+  const est = prima?.url?.split('?')[0].split('.').pop()?.toLowerCase()
+  return est === 'avif' ? 'image/avif' : est === 'webp' ? 'image/webp' : undefined
 }
 
 export const urlFile = (m?: Media | null) => (m?.url ? pubblico(m.url) : '')

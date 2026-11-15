@@ -13,11 +13,14 @@ import { CaseHistory } from './collections/CaseHistory'
 import { Designer } from './collections/Designer'
 import { Media } from './collections/Media'
 import { Prodotti } from './collections/Prodotti'
+import { Spunti } from './collections/Spunti'
 import { Richieste } from './collections/Richieste'
 import { Users } from './collections/Users'
 import { Home } from './globals/Home'
 import { Impostazioni } from './globals/Impostazioni'
 import { PaginaDesigner } from './globals/PaginaDesigner'
+import { PaginaInstallazioni } from './globals/PaginaInstallazioni'
+import { PaginaSpunti } from './globals/PaginaSpunti'
 import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -51,13 +54,16 @@ export default buildConfig({
       url: ({ data, collectionConfig, globalConfig }) => {
         if (globalConfig?.slug === 'home') return `${sitoPubblico}/`
         if (globalConfig?.slug === 'pagina-designer') return `${sitoPubblico}/designer/`
+        if (globalConfig?.slug === 'pagina-installazioni') return `${sitoPubblico}/installazioni/`
+        if (globalConfig?.slug === 'pagina-spunti') return `${sitoPubblico}/spunti-e-idee/`
+        if (collectionConfig?.slug === 'spunti') return `${sitoPubblico}/spunti-e-idee/${data?.slug}/`
         if (collectionConfig?.slug === 'prodotti') return `${sitoPubblico}/prodotti/${data?.slug}/`
         if (collectionConfig?.slug === 'designer') return `${sitoPubblico}/designer/${data?.slug}/`
         if (collectionConfig?.slug === 'case-history') return `${sitoPubblico}/case-history/${data?.slug}/`
         return sitoPubblico
       },
-      collections: ['prodotti', 'designer', 'case-history'],
-      globals: ['home', 'pagina-designer'],
+      collections: ['prodotti', 'designer', 'case-history', 'spunti'],
+      globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti'],
       breakpoints: [
         { label: 'Telefono', name: 'telefono', width: 390, height: 844 },
         { label: 'Tablet', name: 'tablet', width: 1000, height: 1200 },
@@ -75,8 +81,8 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, CaseHistory, Designer, Media, Richieste, Users],
-  globals: [Home, PaginaDesigner, Impostazioni],
+  collections: [Prodotti, CaseHistory, Spunti, Designer, Media, Richieste, Users],
+  globals: [Home, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, Impostazioni],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },

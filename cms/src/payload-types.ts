@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     prodotti: Prodotti;
     'case-history': CaseHistory;
+    spunti: Spunti;
     designer: Designer;
     media: Media;
     richieste: Richieste;
@@ -82,6 +83,7 @@ export interface Config {
   collectionsSelect: {
     prodotti: ProdottiSelect<false> | ProdottiSelect<true>;
     'case-history': CaseHistorySelect<false> | CaseHistorySelect<true>;
+    spunti: SpuntiSelect<false> | SpuntiSelect<true>;
     designer: DesignerSelect<false> | DesignerSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     richieste: RichiesteSelect<false> | RichiesteSelect<true>;
@@ -98,11 +100,15 @@ export interface Config {
   globals: {
     home: Home;
     'pagina-designer': PaginaDesigner;
+    'pagina-installazioni': PaginaInstallazioni;
+    'pagina-spunti': PaginaSpunti;
     impostazioni: Impostazioni;
   };
   globalsSelect: {
     home: HomeSelect<false> | HomeSelect<true>;
     'pagina-designer': PaginaDesignerSelect<false> | PaginaDesignerSelect<true>;
+    'pagina-installazioni': PaginaInstallazioniSelect<false> | PaginaInstallazioniSelect<true>;
+    'pagina-spunti': PaginaSpuntiSelect<false> | PaginaSpuntiSelect<true>;
     impostazioni: ImpostazioniSelect<false> | ImpostazioniSelect<true>;
   };
   locale: 'it' | 'en';
@@ -376,6 +382,19 @@ export interface Designer {
     frase?: string | null;
   };
   titoloPezzi?: string | null;
+  /**
+   * Foto dei pezzi firmati dal designer, di prodotto e ambientate. Il seed le prende da serralunga.com.
+   */
+  creazioni?:
+    | {
+        immagine: number | Media;
+        nome: string;
+        tipo?: string | null;
+        ambientata?: boolean | null;
+        fonte?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   pezziSegnaposto?: number | null;
   cta?: {
     kicker?: string | null;
@@ -468,6 +487,7 @@ export interface CaseHistory {
    * Numeri più bassi compaiono prima.
    */
   ordine?: number | null;
+  categoria?: ('hotel' | 'risto' | 'spa' | 'resid' | 'urbano') | null;
   /**
    * Es. Case history — Courmayeur, Valle d’Aosta
    */
@@ -629,6 +649,60 @@ export interface CaseHistory {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "spunti".
+ */
+export interface Spunti {
+  id: number;
+  titolo: string;
+  /**
+   * Parte finale dell’indirizzo, in minuscolo senza accenti. Se vuoto si genera dal nome. Non cambiarlo dopo la pubblicazione: i link esistenti smetterebbero di funzionare.
+   */
+  slug: string;
+  /**
+   * Numeri più bassi compaiono prima.
+   */
+  ordine?: number | null;
+  /**
+   * Es. Terrazza di un hotel, Bordo piscina, Dehors.
+   */
+  ambito?: string | null;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  estratto?: string | null;
+  immagine?: (number | null) | Media;
+  paragrafi?:
+    | {
+        /**
+         * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+         */
+        testo: string;
+        id?: string | null;
+      }[]
+    | null;
+  galleria?:
+    | {
+        immagine: number | Media;
+        didascalia?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  prodotti?: (number | Prodotti)[] | null;
+  designer?: (number | Designer)[] | null;
+  /**
+   * Regole in file-md/seo.md: title fino a 60 caratteri, description 140–160.
+   */
+  seo?: {
+    titolo?: string | null;
+    descrizione?: string | null;
+    immagine?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "richieste".
  */
 export interface Richieste {
@@ -701,6 +775,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'case-history';
         value: number | CaseHistory;
+      } | null)
+    | ({
+        relationTo: 'spunti';
+        value: number | Spunti;
       } | null)
     | ({
         relationTo: 'designer';
@@ -885,6 +963,7 @@ export interface CaseHistorySelect<T extends boolean = true> {
   nome?: T;
   slug?: T;
   ordine?: T;
+  categoria?: T;
   kicker?: T;
   titolo?: T;
   introduzione?: T;
@@ -1002,6 +1081,43 @@ export interface CaseHistorySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "spunti_select".
+ */
+export interface SpuntiSelect<T extends boolean = true> {
+  titolo?: T;
+  slug?: T;
+  ordine?: T;
+  ambito?: T;
+  estratto?: T;
+  immagine?: T;
+  paragrafi?:
+    | T
+    | {
+        testo?: T;
+        id?: T;
+      };
+  galleria?:
+    | T
+    | {
+        immagine?: T;
+        didascalia?: T;
+        id?: T;
+      };
+  prodotti?: T;
+  designer?: T;
+  seo?:
+    | T
+    | {
+        titolo?: T;
+        descrizione?: T;
+        immagine?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "designer_select".
  */
 export interface DesignerSelect<T extends boolean = true> {
@@ -1043,6 +1159,16 @@ export interface DesignerSelect<T extends boolean = true> {
         frase?: T;
       };
   titoloPezzi?: T;
+  creazioni?:
+    | T
+    | {
+        immagine?: T;
+        nome?: T;
+        tipo?: T;
+        ambientata?: T;
+        fonte?: T;
+        id?: T;
+      };
   pezziSegnaposto?: T;
   cta?:
     | T
@@ -1425,6 +1551,115 @@ export interface PaginaDesigner {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagina-installazioni".
+ */
+export interface PaginaInstallazioni {
+  id: number;
+  kicker?: string | null;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  titolo: string;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  testo?: string | null;
+  immagine?: (number | null) | Media;
+  /**
+   * Ogni sezione racconta un ambito e mostra da sola le case history e le installazioni della home con la stessa categoria.
+   */
+  sezioni?:
+    | {
+        categoria: 'hotel' | 'risto' | 'spa' | 'resid' | 'urbano';
+        kicker?: string | null;
+        /**
+         * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+         */
+        titolo: string;
+        /**
+         * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+         */
+        testo?: string | null;
+        immagine?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  notaVuota?: string | null;
+  cta?: {
+    kicker?: string | null;
+    /**
+     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     */
+    titolo?: string | null;
+    /**
+     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     */
+    testo?: string | null;
+    pulsante?: string | null;
+    /**
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+     */
+    link?: string | null;
+  };
+  /**
+   * Regole in file-md/seo.md: title fino a 60 caratteri, description 140–160.
+   */
+  seo?: {
+    titolo?: string | null;
+    descrizione?: string | null;
+    immagine?: (number | null) | Media;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagina-spunti".
+ */
+export interface PaginaSpunti {
+  id: number;
+  kicker?: string | null;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  titolo: string;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  testo?: string | null;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  notaVuota?: string | null;
+  cta?: {
+    kicker?: string | null;
+    /**
+     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     */
+    titolo?: string | null;
+    /**
+     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     */
+    testo?: string | null;
+    pulsante?: string | null;
+    /**
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+     */
+    link?: string | null;
+  };
+  /**
+   * Regole in file-md/seo.md: title fino a 60 caratteri, description 140–160.
+   */
+  seo?: {
+    titolo?: string | null;
+    descrizione?: string | null;
+    immagine?: (number | null) | Media;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "impostazioni".
  */
 export interface Impostazioni {
@@ -1639,6 +1874,75 @@ export interface PaginaDesignerSelect<T extends boolean = true> {
   titolo?: T;
   testo?: T;
   segnaposto?: T;
+  cta?:
+    | T
+    | {
+        kicker?: T;
+        titolo?: T;
+        testo?: T;
+        pulsante?: T;
+        link?: T;
+      };
+  seo?:
+    | T
+    | {
+        titolo?: T;
+        descrizione?: T;
+        immagine?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagina-installazioni_select".
+ */
+export interface PaginaInstallazioniSelect<T extends boolean = true> {
+  kicker?: T;
+  titolo?: T;
+  testo?: T;
+  immagine?: T;
+  sezioni?:
+    | T
+    | {
+        categoria?: T;
+        kicker?: T;
+        titolo?: T;
+        testo?: T;
+        immagine?: T;
+        id?: T;
+      };
+  notaVuota?: T;
+  cta?:
+    | T
+    | {
+        kicker?: T;
+        titolo?: T;
+        testo?: T;
+        pulsante?: T;
+        link?: T;
+      };
+  seo?:
+    | T
+    | {
+        titolo?: T;
+        descrizione?: T;
+        immagine?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagina-spunti_select".
+ */
+export interface PaginaSpuntiSelect<T extends boolean = true> {
+  kicker?: T;
+  titolo?: T;
+  testo?: T;
+  notaVuota?: T;
   cta?:
     | T
     | {

@@ -1,0 +1,96 @@
+---
+/** Scheda di uno spunto (Version: 1.00): racconto, galleria e prodotti usati. */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import CardProdotto from '../../components/CardProdotto.astro'
+import { perSlug, SITO, type Doc } from '../../lib/cms'
+import { isMedia, src } from '../../lib/media'
+import { piatto } from '../../lib/testo'
+import { percorso, traduttore } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const s = await perSlug('spunti', Astro.params.slug || '', 2, L)
+if (!s) return Astro.rewrite('/404')
+const prodotti: Doc[] = (s.prodotti || []).filter((p: unknown) => p && typeof p === 'object')
+const designer: Doc[] = (s.designer || []).filter((d: unknown) => d && typeof d === 'object')
+const jsonld = [{
+  '@type': 'Article',
+  headline: piatto(s.titolo),
+  description: piatto(s.seo?.descrizione || s.estratto),
+  image: isMedia(s.immagine) ? [src(s.immagine, 1800)] : undefined,
+  publisher: { '@id': `${SITO}/#organizzazione` },
+  dateModified: s.updatedAt,
+}]
+---
+<Base
+  titolo={s.seo?.titolo || `${piatto(s.titolo)} | Serralunga`}
+  descrizione={s.seo?.descrizione || s.estratto}
+  immagine={s.seo?.immagine || s.immagine}
+  percorso={[{ nome: t('Spunti e idee'), url: '/spunti-e-idee/' }, { nome: piatto(s.titolo), url: `/spunti-e-idee/${s.slug}/` }]}
+  jsonld={jsonld}
+  pagina={`spunto-${s.slug}`}
+  doc={`collections/spunti/${s.id}`}
+>
+  <article>
+    <header class="intro-pagina" id="spunto-intro">
+      <div class="wrap intro-pagina__griglia">
+        <div>
+          {s.ambito && <span class="kicker" data-campo="ambito">{s.ambito}</span>}
+          <h1 class="titolo titolo--display" data-campo="titolo">{s.titolo}</h1>
+        </div>
+        <Testo class="testo" campo="estratto" t={s.estratto} />
+      </div>
+    </header>
+
+    <div class="pad"><div class="wrap"><div class="foto r-219 spunto__apertura"><Img campo="immagine" media={s.immagine} priorita larghezza={2600} nota={t('foto da fornire')} /></div></div></div>
+
+    {(s.paragrafi || []).length > 0 && (
+      <section class="sez-int pad" id="spunto-racconto">
+        <div class="spunto__racconto">
+          {s.paragrafi.map((p: Doc, k: number) => <Testo class="testo testo--forte" campo={`paragrafi.${k}.testo`} t={p.testo} />)}
+          {designer.length > 0 && (
+            <p class="testo spunto__designer">
+              {t('Design')}: {designer.map((d, k) => <>{k > 0 && ', '}{d.schedaPubblicata ? <a href={u(`/designer/${d.slug}/`)}>{d.nome}</a> : d.nome}</>)}
+            </p>
+          )}
+        </div>
+      </section>
+    )}
+
+    {(s.galleria || []).length > 0 && (
+      <section class="pad ambiente-sez" id="spunto-galleria" aria-label={t('Galleria')}>
+        <div class="wrap creazioni">
+          {s.galleria.map((g: Doc, k: number) => (
+            <figure class="creazione creazione--ambientata">
+              <div class="foto r-43"><Img campo={`galleria.${k}.immagine`} media={g.immagine} sizes="(max-width: 700px) 100vw, 50vw" larghezza={1800} /></div>
+              {g.didascalia && <figcaption><span class="creazione__nome" data-campo={`galleria.${k}.didascalia`}>{g.didascalia}</span></figcaption>}
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {prodotti.length > 0 && (
+      <section class="sez-pezzi" id="spunto-prodotti">
+        <div class="wrap pad intesta"><h2 class="titolo titolo--l">{t('I pezzi di questo spunto')}</h2></div>
+        <div class="rail" tabindex="0" aria-label={t('I pezzi di questo spunto')}>
+          {prodotti.map((p) => <CardProdotto p={p} sotto={p.categoria?.split('—')[0]?.trim() || p.etichettaCard} />)}
+        </div>
+      </section>
+    )}
+  </article>
+
+  <section class="sez-int pad scuro" id="spunto-cta">
+    <div class="centro centro--s">
+      <span class="kicker kicker--largo">{t('Progetti su misura')}</span>
+      <h2 class="titolo titolo--cta">{t('Avete in mente uno spazio preciso?')}</h2>
+      <div class="btn-riga btn-riga--centro">
+        <a href={u('/#listino')} class="btn btn--chiaro">{t('Parliamo del progetto')}</a>
+        <a href={u('/spunti-e-idee/')} class="btn btn--bordo-chiaro">{t('Tutti gli spunti')}</a>
+      </div>
+    </div>
+  </section>
+</Base>

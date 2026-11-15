@@ -18,6 +18,7 @@ if (!d || !d.schedaPubblicata) return Astro.rewrite('/404')
 
 const pezzi = await elenco('prodotti', { 'where[designer][equals]': d.id, depth: 1 }, L)
 const segnaposto = Array.from({ length: d.pezziSegnaposto || 0 })
+const creazioni: Doc[] = (d.creazioni || []).filter((c: Doc) => isMedia(c.immagine))
 
 const jsonld = [{
   '@type': 'Person',
@@ -71,6 +72,30 @@ const jsonld = [{
       <Img campo="banner.immagine" media={d.banner.immagine} larghezza={2600} />
       <div class="velo velo--banner"></div>
       <Testo campo="banner.frase" t={d.banner.frase} />
+    </section>
+  )}
+
+  {creazioni.length > 0 && (
+    <section class="sez-creazioni pad" id="designer-creazioni" aria-labelledby="designer-creazioni-titolo">
+      <div class="wrap">
+        <div class="intesta">
+          <h2 class="titolo titolo--l" id="designer-creazioni-titolo">{t('Le creazioni per Serralunga')}</h2>
+          <p class="testo">{t('Foto di prodotto e ambientate dal catalogo Serralunga.')}</p>
+        </div>
+        <div class="creazioni">
+          {creazioni.map((c, k) => (
+            <figure class:list={['creazione', c.ambientata && 'creazione--ambientata']}>
+              <div class:list={['foto', c.ambientata ? 'r-43' : 'r-11 foto--prodotto']}>
+                <Img campo={`creazioni.${k}.immagine`} media={c.immagine} sizes={c.ambientata ? '(max-width: 700px) 100vw, 50vw' : '(max-width: 700px) 50vw, 25vw'} larghezza={c.ambientata ? 1800 : 1000} />
+              </div>
+              <figcaption>
+                <span class="creazione__nome" data-campo={`creazioni.${k}.nome`}>{c.nome}</span>
+                {c.tipo && <span class="creazione__tipo" data-campo={`creazioni.${k}.tipo`}>{c.tipo}</span>}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
     </section>
   )}
 

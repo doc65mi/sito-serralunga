@@ -5,20 +5,24 @@
  * - Crea l'utente amministratore da SEED_EMAIL / SEED_PASSWORD se non ci sono utenti.
  * - Carica le foto: quelle in template/ dal disco, quelle di serralunga.com scaricandole.
  *   Se una foto non si scarica, il campo resta vuoto e il sito mostra il segnaposto.
- * - `npm run seed:designer` aggiunge solo le schede dei designer che mancano, senza toccare
- *   gli altri contenuti (home, prodotti, testi già modificati).
+ * - `npm run seed:aggiorna` aggiunge solo ciò che manca (schede designer, ritratti a risoluzione
+ *   piena, creazioni, pagine nuove, voci di menu) senza toccare i testi già modificati.
  * - Si può rilanciare: i documenti esistenti con lo stesso slug vengono aggiornati, non duplicati.
  */
 import fs from 'fs'
 import path from 'path'
 
 import { getPayload } from 'payload'
+import sharp from 'sharp'
 import config from '@payload-config'
 
 import { aquaLounger, caseLoge, designerDati, prodottiCard } from './dati'
-import { designerAltri, GIA_PRESENTI } from './designer-altri'
-import { homeDati, impostazioniDati, paginaDesignerDati } from './globali'
+import { creazioniDi, type Creazione } from './creazioni'
+import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
+import { homeDati, impostazioniDati, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
+import { rigeneraFormati } from './immagini'
 import { applicaInglese } from './inglese'
+import { nomeFile } from '../collections/Media'
 
 const payload = await getPayload({ config })
 const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
@@ -35,17 +39,30 @@ const tipo = (nome: string) => {
   )
 }
 
-/** Restituisce l'id del media; sorgente = percorso in template/ oppure URL https. */
-export async function media(sorgente: string, alt: string): Promise<number | null> {
-  if (mediaCache.has(sorgente)) return mediaCache.get(sorgente) ?? null
+export interface OpzioniMedia {
+  /** Larghezza minima: sotto questa soglia la foto viene ingrandita (interpolazione, nessun ritocco). */
+  min?: number
+}
+
+/**
+ * Restituisce l'id del media; sorgente = percorso in template/ oppure URL https.
+ * Le foto si salvano in WebP alla risoluzione originale. Se la foto è più stretta di `min`
+ * viene ingrandita con interpolazione Lanczos e una leggera nitidezza: non si aggiunge nulla
+ * che nell'originale non ci sia.
+ */
+export async function media(sorgente: string, alt: string, opz: OpzioniMedia = {}): Promise<number | null> {
+  const chiave = `${sorgente}|${opz.min || 0}`
+  if (mediaCache.has(chiave)) return mediaCache.get(chiave) ?? null
   let id: number | null = null
   try {
     let data: Buffer
     let nome: string
     if (/^https?:\/\//.test(sorgente)) {
       const url = new URL(sorgente)
-      nome = path.basename(url.pathname)
-      const res = await fetch(sorgente, { signal: AbortSignal.timeout(30_000) })
+      nome = decodeURIComponent(path.basename(url.pathname))
+      // Dalle foto di serralunga.com si chiede sempre l'originale: il parametro width le rimpicciolisce.
+      if (opz.min) url.searchParams.delete('width')
+      const res = await fetch(url, { signal: AbortSignal.timeout(60_000) })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       data = Buffer.from(await res.arrayBuffer())
     } else {
@@ -53,9 +70,20 @@ export async function media(sorgente: string, alt: string): Promise<number | nul
       nome = path.basename(file)
       data = fs.readFileSync(file)
     }
+    if (/\.(jpe?g|png|webp|avif|tiff?)$/i.test(nome)) {
+      const info = await sharp(data).metadata()
+      const larga = info.width || 0
+      const ingrandire = !!opz.min && larga > 0 && larga < opz.min
+      let img = sharp(data).rotate()
+      if (ingrandire) img = img.resize({ width: opz.min, kernel: 'lanczos3' }).sharpen({ sigma: 0.6 })
+      data = await img.webp({ quality: 90, effort: 5 }).toBuffer()
+      // Le foto chieste a risoluzione piena hanno un nome proprio, per non confondersi con le copie ridotte già caricate.
+      nome = `${nome.replace(/\.[^.]+$/, '')}${opz.min ? '-hd' : ''}.webp`
+    }
+    nome = nome.replace(/[^A-Za-z0-9._-]+/g, '-')
     const esistente = await payload.find({
       collection: 'media',
-      where: { filename: { equals: nome } },
+      where: { filename: { in: [nome, nomeFile(nome)] } },
       limit: 1,
       depth: 0,
     })
@@ -72,7 +100,7 @@ export async function media(sorgente: string, alt: string): Promise<number | nul
   } catch (err) {
     payload.logger.warn(`[seed] foto non caricata (${sorgente}): ${(err as Error).message}`)
   }
-  mediaCache.set(sorgente, id)
+  mediaCache.set(chiave, id)
   return id
 }
 
@@ -92,19 +120,136 @@ async function salva(collection: Slugged, data: Record<string, unknown>): Promis
   return doc.id as number
 }
 
-// Solo designer: aggiunge le schede mancanti e completa quelle non ancora pubblicate.
-// Non tocca le schede già pubblicate né gli altri contenuti.
-if (process.env.SEED_SOLO === 'designer') {
+const radice = (nomeFile?: string | null) =>
+  (nomeFile || '')
+    .replace(/\.[^.]+$/, '')
+    .replace(/-hd$/, '')
+    .replace(/-\d+$/, '')
+    .toLowerCase()
+
+/**
+ * Per ogni designer: ritratto a risoluzione piena e foto delle creazioni da serralunga.com.
+ * Non sovrascrive un ritratto caricato a mano né creazioni già presenti.
+ */
+async function completaDesigner() {
+  for (const f of designerFonti()) {
+    const trovato = await payload.find({ collection: 'designer', where: { slug: { equals: f.slug } }, limit: 1, depth: 1, draft: true })
+    const doc = trovato.docs[0] as unknown as
+      | { id: number; ritratto?: { id: number; filename?: string } | null; creazioni?: unknown[] | null }
+      | undefined
+    if (!doc) continue
+    const dati: Record<string, unknown> = {}
+
+    if (f.ritratto) {
+      const attesa = radice(decodeURIComponent(path.basename(new URL(f.ritratto).pathname)).replace(/[^A-Za-z0-9._-]+/g, '-'))
+      const attuale = doc.ritratto?.filename
+      // Si sostituisce solo il ritratto messo dal seed (stesso file di origine), mai uno caricato a mano.
+      if (!attuale || (radice(attuale) === attesa && !/-hd\.webp$/.test(attuale))) {
+        const hd = await media(f.ritratto, `Ritratto di ${f.nome}`, { min: RITRATTO_MIN })
+        if (hd && hd !== doc.ritratto?.id) dati.ritratto = hd
+      }
+    }
+
+    let lista: Creazione[] = []
+    if (!doc.creazioni?.length) {
+      try {
+        lista = await creazioniDi(f.etichette, f.pezzi)
+      } catch (err) {
+        payload.logger.warn(`[seed] creazioni di ${f.nome} non lette da serralunga.com: ${(err as Error).message}`)
+      }
+      const righe: Record<string, unknown>[] = []
+      for (const c of lista) {
+        const id = await media(c.url, `${c.nome}, design ${f.nome}${c.ambientata ? ', foto ambientata' : ''}`.slice(0, 125))
+        if (id) righe.push({ immagine: id, nome: c.nome, tipo: c.tipo, ambientata: c.ambientata, fonte: c.fonte })
+      }
+      if (righe.length) dati.creazioni = righe
+      else if (!lista.length) log(`designer/${f.slug}: nessun prodotto trovato su serralunga.com`)
+    }
+
+    if (!Object.keys(dati).length) continue
+    const salvato = (await payload.update({ collection: 'designer', id: doc.id, data: dati as never, depth: 0 })) as unknown as {
+      creazioni?: { id: string; immagine: number; ambientata?: boolean; fonte?: string }[]
+    }
+    // Nomi e tipologie in inglese, sulle stesse righe.
+    if (dati.creazioni && salvato.creazioni?.length) {
+      const perFonte = new Map(lista.map((c) => [c.fonte, c]))
+      await payload.update({
+        collection: 'designer',
+        id: doc.id,
+        locale: 'en',
+        data: {
+          creazioni: salvato.creazioni.map((r) => ({
+            id: r.id,
+            immagine: r.immagine,
+            ambientata: r.ambientata,
+            fonte: r.fonte,
+            nome: perFonte.get(r.fonte || '')?.nomeEn,
+            tipo: perFonte.get(r.fonte || '')?.tipoEn,
+          })),
+        } as never,
+      })
+    }
+    log(`designer/${f.slug}: ${dati.ritratto ? 'ritratto aggiornato' : ''}${dati.ritratto && dati.creazioni ? ', ' : ''}${dati.creazioni ? `${(dati.creazioni as unknown[]).length} creazioni` : ''}`)
+  }
+}
+
+/** Pagine nuove e voci di menu: si aggiungono solo se mancano. */
+async function completaPagine() {
+  const inst = (await payload.findGlobal({ slug: 'pagina-installazioni', depth: 0 })) as { titolo?: string }
+  if (!inst.titolo) {
+    await payload.updateGlobal({ slug: 'pagina-installazioni', data: (await paginaInstallazioniDati()) as never })
+    log('creata la pagina Installazioni')
+  }
+  const spunti = (await payload.findGlobal({ slug: 'pagina-spunti', depth: 0 })) as { titolo?: string }
+  if (!spunti.titolo) {
+    await payload.updateGlobal({ slug: 'pagina-spunti', data: (await paginaSpuntiDati()) as never })
+    log('creata la pagina Spunti e idee')
+  }
+  const imp = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as {
+    menu?: { etichetta?: string; link?: string; evidenza?: boolean }[]
+  }
+  const menu = [...(imp.menu || [])]
+  let cambiato = false
+  for (const v of menu) {
+    if (v.link === '/#collezioni' && /installazioni/i.test(v.etichetta || '')) {
+      v.link = '/installazioni/'
+      cambiato = true
+    }
+  }
+  if (!menu.some((v) => v.link === '/spunti-e-idee/')) {
+    const dopo = menu.findIndex((v) => v.link === '/designer/')
+    menu.splice(dopo >= 0 ? dopo + 1 : menu.filter((v) => !v.evidenza).length, 0, { etichetta: 'Spunti e idee', link: '/spunti-e-idee/' })
+    cambiato = true
+  }
+  if (cambiato) {
+    await payload.updateGlobal({ slug: 'impostazioni', data: { menu } as never })
+    log('aggiornato il menu: Installazioni e Spunti e idee')
+  }
+  const loge = await payload.find({ collection: 'case-history', where: { slug: { equals: 'la-loge-du-massif' } }, limit: 1, depth: 0, draft: true })
+  const caso = loge.docs[0] as unknown as { id: number; categoria?: string } | undefined
+  if (caso && !caso.categoria) await payload.update({ collection: 'case-history', id: caso.id, data: { categoria: 'risto' } as never })
+}
+
+// Aggiornamento di un sito già avviato (npm run seed:aggiorna): aggiunge ciò che manca
+// senza toccare i testi e le foto già modificati dal pannello o dalla pagina.
+if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer') {
   for (const d of await designerAltri(media)) {
     const trovato = await payload.find({ collection: 'designer', where: { slug: { equals: d.slug } }, limit: 1, depth: 0, draft: true })
     const doc = trovato.docs[0] as { id: number; schedaPubblicata?: boolean } | undefined
-    if (doc?.schedaPubblicata) log(`designer/${d.slug} già pubblicata: lasciata com'è`)
-    else await salva('designer', d)
+    if (!doc?.schedaPubblicata) await salva('designer', d)
   }
+  await completaDesigner()
+  await completaPagine()
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
   await payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never })
-  await applicaInglese(payload, log, true)
-  log('fatto (solo designer)')
+  await applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer'] })
+  await rigeneraFormati(payload, log)
+  const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
+  if (saltate.length) {
+    log(`${saltate.length} foto non caricate:`)
+    saltate.forEach((m) => log(`  - ${m.split('|')[0]}`))
+  }
+  log('fatto (aggiornamento)')
   process.exit(0)
 }
 
@@ -150,14 +295,19 @@ await payload.updateGlobal({
 log('aggiornata la home')
 await payload.updateGlobal({ slug: 'pagina-designer', data: (await paginaDesignerDati()) as never })
 log('aggiornata la pagina designer')
+await completaPagine()
+
+// 5b. Ritratti a risoluzione piena e creazioni dei designer da serralunga.com
+await completaDesigner()
 
 // 6. Inglese: riempie i campi ancora vuoti con le traduzioni di partenza
 await applicaInglese(payload, log)
+await rigeneraFormati(payload, log)
 
 const mancanti = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
 if (mancanti.length) {
   log(`${mancanti.length} foto non caricate: si possono aggiungere dal pannello Media.`)
-  mancanti.forEach((m) => log(`  - ${m}`))
+  mancanti.forEach((m) => log(`  - ${m.split('|')[0]}`))
 }
 log('fatto')
 process.exit(0)

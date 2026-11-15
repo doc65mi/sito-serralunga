@@ -16,10 +16,11 @@ export const impostazioniDati = async (m: Media) => ({
   },
   menu: [
     { etichetta: 'Progetti', link: '/#progetti' },
-    { etichetta: 'Installazioni', link: '/#collezioni' },
+    { etichetta: 'Installazioni', link: '/installazioni/' },
     { etichetta: 'Contract', link: '/#contract' },
     { etichetta: 'Materiali', link: '/#materiali' },
     { etichetta: 'Designer', link: '/designer/' },
+    { etichetta: 'Spunti e idee', link: '/spunti-e-idee/' },
     { etichetta: 'Listino B2B', link: '/#listino' },
     { etichetta: 'Richiedi il catalogo', link: '/#listino', evidenza: true },
   ],
@@ -262,5 +263,77 @@ export const paginaDesignerDati = async () => ({
     titolo: 'I designer Serralunga',
     descrizione:
       "Marc Sadler, Luisa Bocchietto, Marta Sansoni: i designer e gli architetti che firmano vasi, arredi e luci Serralunga per l'ospitalità e il contract.",
+  },
+})
+
+/** Pagina Installazioni: i testi presentano gli ambiti, le case history arrivano dalla collezione. */
+export const paginaInstallazioniDati = async () => ({
+  kicker: 'Installazioni',
+  titolo: 'Dove i nostri pezzi\nsono già di casa',
+  testo:
+    'Hotel, ristoranti, spa e residenze: gli ambiti in cui lavoriamo con architetti e committenti. Ogni sezione raccoglie le installazioni e le case history che la raccontano.',
+  sezioni: [
+    {
+      categoria: 'hotel',
+      kicker: 'Hôtellerie',
+      titolo: 'Hotel e resort',
+      testo:
+        "Ingressi, corti, terrazze e bordi piscina: fioriere di grande formato, sedute e luci che restano all'aperto tutto l'anno, coordinate nei colori e nelle finiture del progetto.",
+    },
+    {
+      categoria: 'risto',
+      kicker: 'Ristorazione',
+      titolo: 'Ristoranti e dehors',
+      testo:
+        'Sedute, tavoli e illuminazione per sale e dehors: arredi in polietilene tinto in massa, pensati per un uso quotidiano e intenso.',
+    },
+    {
+      categoria: 'spa',
+      kicker: 'Spa & Piscine',
+      titolo: 'Spa, piscine e wellness',
+      testo:
+        "Lettini, sedute e oggetti luminosi per l'acqua e il bordo vasca, in materiali che non temono umidità, sole e sbalzi di temperatura.",
+    },
+    {
+      categoria: 'resid',
+      kicker: 'Residenze',
+      titolo: 'Residenze e giardini privati',
+      testo:
+        'Vasi della tradizione italiana e pezzi di design per giardini, terrazze e interni, scelti insieme a paesaggisti e interior designer.',
+    },
+  ],
+  notaVuota: 'Case history in preparazione.',
+  cta: {
+    kicker: 'Progetti su misura',
+    titolo: 'Raccontateci\nil vostro progetto',
+    testo: 'Dimensioni, colori e finiture dedicate, con il supporto del nostro ufficio contract.',
+    pulsante: 'Parliamo del progetto',
+    link: '/#listino',
+  },
+  seo: {
+    titolo: 'Installazioni e case history | Serralunga Contract',
+    descrizione:
+      'Le installazioni Serralunga per hotel, ristoranti, spa e residenze: gli ambiti di lavoro e le case history dei progetti realizzati.',
+  },
+})
+
+/** Pagina Spunti e idee: gli spunti si pubblicano dal pannello (collezione "Spunti e idee"). */
+export const paginaSpuntiDati = async () => ({
+  kicker: 'Spunti e idee',
+  titolo: 'Idee per usare\ni nostri pezzi',
+  testo:
+    'Esempi di cosa si può fare con i prodotti Serralunga: accostamenti, ambienti e soluzioni da cui partire per il vostro progetto.',
+  notaVuota: 'I primi spunti sono in preparazione.',
+  cta: {
+    kicker: 'Progetti su misura',
+    titolo: 'Avete in mente\nuno spazio preciso?',
+    testo: 'Partiamo dal luogo e costruiamo insieme la selezione di pezzi, colori e finiture.',
+    pulsante: 'Parliamo del progetto',
+    link: '/#listino',
+  },
+  seo: {
+    titolo: 'Spunti e idee | Serralunga',
+    descrizione:
+      'Spunti e idee per arredare terrazze, giardini, dehors e bordi piscina con vasi, sedute e luci Serralunga.',
   },
 })

@@ -16,7 +16,7 @@ import '../styles/site.css'
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
 import { impostazioni, SITO, type Doc } from '../lib/cms'
-import { isMedia, src } from '../lib/media'
+import { isMedia, originale } from '../lib/media'
 import { piatto } from '../lib/testo'
 import { INFO, LINGUE, percorso as inLingua, senzaLingua, traduttore } from '../lib/lingua'
 
@@ -46,7 +46,8 @@ const sito = SITO
 const base = senzaLingua(Astro.url.pathname)
 const alternative = LINGUE.map((l) => ({ l, href: `${sito}${inLingua(l, base)}` }))
 const canonico = `${sito}${u(base)}`
-const og = isMedia(immagine) ? src(immagine, 1800) : undefined
+// Per la condivisione si usa il file caricato: le reti sociali non leggono ancora l'AVIF.
+const og = isMedia(immagine) ? originale(immagine) : undefined
 
 const organizzazione = {
   '@type': 'Organization',

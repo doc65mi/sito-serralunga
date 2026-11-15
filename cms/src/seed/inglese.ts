@@ -283,6 +283,48 @@ export const EN: Record<string, string> = {
 // Schede di tutti i designer (designer-altri.ts)
 Object.assign(EN, designerInglese())
 
+// Pagine Installazioni e Spunti e idee
+Object.assign(EN, {
+  Installazioni: 'Installations',
+  'Spunti e idee': 'Ideas',
+  'Dove i nostri pezzi\nsono già di casa': 'Where our pieces\nalready feel at home',
+  'Hotel, ristoranti, spa e residenze: gli ambiti in cui lavoriamo con architetti e committenti. Ogni sezione raccoglie le installazioni e le case history che la raccontano.':
+    'Hotels, restaurants, spas and residences: the settings where we work with architects and clients. Each section gathers the installations and case histories that tell its story.',
+  'Hôtellerie': 'Hospitality',
+  'Hotel e resort': 'Hotels and resorts',
+  "Ingressi, corti, terrazze e bordi piscina: fioriere di grande formato, sedute e luci che restano all'aperto tutto l'anno, coordinate nei colori e nelle finiture del progetto.":
+    'Entrances, courtyards, terraces and poolsides: large-format planters, seating and lighting that stay outdoors all year round, coordinated with the colours and finishes of the project.',
+  Ristorazione: 'Restaurants',
+  'Ristoranti e dehors': 'Restaurants and outdoor dining',
+  'Sedute, tavoli e illuminazione per sale e dehors: arredi in polietilene tinto in massa, pensati per un uso quotidiano e intenso.':
+    'Seating, tables and lighting for dining rooms and terraces: furniture in mass-coloured polyethylene, designed for intensive daily use.',
+  'Spa & Piscine': 'Spas & Pools',
+  'Spa, piscine e wellness': 'Spas, pools and wellness',
+  "Lettini, sedute e oggetti luminosi per l'acqua e il bordo vasca, in materiali che non temono umidità, sole e sbalzi di temperatura.":
+    'Sun loungers, seating and luminous objects for the water and the poolside, in materials unaffected by humidity, sun and temperature swings.',
+  Residenze: 'Residences',
+  'Residenze e giardini privati': 'Residences and private gardens',
+  'Vasi della tradizione italiana e pezzi di design per giardini, terrazze e interni, scelti insieme a paesaggisti e interior designer.':
+    'Traditional Italian pots and design pieces for gardens, terraces and interiors, chosen together with landscape and interior designers.',
+  'Case history in preparazione.': 'Case histories coming soon.',
+  'Raccontateci\nil vostro progetto': 'Tell us about\nyour project',
+  'Dimensioni, colori e finiture dedicate, con il supporto del nostro ufficio contract.':
+    'Dedicated sizes, colours and finishes, with the support of our contract office.',
+  'Installazioni e case history | Serralunga Contract': 'Installations and case histories | Serralunga Contract',
+  'Le installazioni Serralunga per hotel, ristoranti, spa e residenze: gli ambiti di lavoro e le case history dei progetti realizzati.':
+    'Serralunga installations for hotels, restaurants, spas and residences: the settings we work in and the case histories of completed projects.',
+  'Idee per usare\ni nostri pezzi': 'Ideas for using\nour pieces',
+  'Esempi di cosa si può fare con i prodotti Serralunga: accostamenti, ambienti e soluzioni da cui partire per il vostro progetto.':
+    'Examples of what can be done with Serralunga products: combinations, settings and solutions to start your project from.',
+  'I primi spunti sono in preparazione.': 'The first ideas are on their way.',
+  'Avete in mente\nuno spazio preciso?': 'Do you have a specific\nspace in mind?',
+  'Partiamo dal luogo e costruiamo insieme la selezione di pezzi, colori e finiture.':
+    'We start from the place and build the selection of pieces, colours and finishes together.',
+  'Spunti e idee | Serralunga': 'Ideas | Serralunga',
+  'Spunti e idee per arredare terrazze, giardini, dehors e bordi piscina con vasi, sedute e luci Serralunga.':
+    'Ideas for furnishing terraces, gardens, outdoor dining areas and poolsides with Serralunga pots, seating and lighting.',
+})
+
 const SALTA = new Set(['id', 'slug', 'createdAt', 'updatedAt', '_status', 'link', 'link1', 'link2', 'hex', 'email', 'url'])
 
 /** Unisce italiano e inglese: resta l'inglese già scritto, altrimenti la traduzione, altrimenti l'italiano. */
@@ -308,13 +350,24 @@ const pulisci = (d: Record<string, unknown>) => {
   return resto
 }
 
-export async function applicaInglese(payload: Payload, log: (m: string) => void, soloDesigner = false) {
-  for (const slug of soloDesigner ? [] : (['impostazioni', 'home', 'pagina-designer'] as const)) {
+const GLOBALI = ['impostazioni', 'home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti'] as const
+const COLLEZIONI = ['designer', 'case-history', 'prodotti', 'spunti'] as const
+
+/**
+ * Riempie i campi inglesi ancora vuoti. `solo` limita il lavoro ad alcuni documenti
+ * (aggiornamento di un sito già avviato): il resto non viene toccato.
+ */
+export async function applicaInglese(
+  payload: Payload,
+  log: (m: string) => void,
+  solo?: { globali: (typeof GLOBALI)[number][]; collezioni: (typeof COLLEZIONI)[number][] },
+) {
+  for (const slug of solo ? solo.globali : GLOBALI) {
     const it = (await payload.findGlobal({ slug, locale: 'it', depth: 0 })) as unknown as Record<string, unknown>
     const en = (await payload.findGlobal({ slug, locale: 'en', fallbackLocale: false, depth: 0 })) as unknown as Record<string, unknown>
     await payload.updateGlobal({ slug, locale: 'en', data: pulisci(unisci(it, en) as Record<string, unknown>) as never })
   }
-  for (const collection of soloDesigner ? (['designer'] as const) : (['designer', 'case-history', 'prodotti'] as const)) {
+  for (const collection of solo ? solo.collezioni : COLLEZIONI) {
     const it = await payload.find({ collection, locale: 'it', depth: 0, limit: 500, draft: false })
     for (const doc of it.docs as unknown as Record<string, unknown>[]) {
       const en = (await payload.findByID({ collection, id: doc.id as number, locale: 'en', fallbackLocale: false, depth: 0 })) as unknown as Record<string, unknown>

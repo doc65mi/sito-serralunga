@@ -91,6 +91,33 @@ export const Designer: CollectionConfig = {
               defaultValue: 'I pezzi\nper Serralunga',
             }),
             {
+              name: 'creazioni',
+              type: 'array',
+              label: 'Creazioni per Serralunga (foto)',
+              labels: { singular: 'Creazione', plural: 'Creazioni' },
+              admin: {
+                description:
+                  'Foto dei pezzi firmati dal designer, di prodotto e ambientate. Il seed le prende da serralunga.com.',
+              },
+              fields: [
+                immagine('immagine', 'Immagine', { required: true }),
+                {
+                  type: 'row',
+                  fields: [
+                    testo('nome', 'Nome del pezzo', { required: true }),
+                    testo('tipo', 'Tipologia'),
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'ambientata', type: 'checkbox', label: 'Foto ambientata', defaultValue: false },
+                    { name: 'fonte', type: 'text', label: 'Pagina di origine', admin: { readOnly: true } },
+                  ],
+                },
+              ],
+            },
+            {
               name: 'pezziSegnaposto',
               type: 'number',
               label: 'Card segnaposto "altri pezzi da confermare"',

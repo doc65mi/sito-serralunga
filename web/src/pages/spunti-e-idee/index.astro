@@ -1,0 +1,63 @@
+---
+/** Spunti e idee (Version: 1.00): elenco degli esempi d'uso dei prodotti, pubblicati dal pannello. */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import { elenco, globale } from '../../lib/cms'
+import { piatto } from '../../lib/testo'
+import { percorso, traduttore } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const [pagina, spunti] = await Promise.all([globale('pagina-spunti', 1, L), elenco('spunti', { depth: 1 }, L)])
+---
+<Base
+  titolo={pagina.seo?.titolo || `${piatto(pagina.titolo || t('Spunti e idee'))} | Serralunga`}
+  descrizione={pagina.seo?.descrizione || pagina.testo}
+  immagine={pagina.seo?.immagine}
+  percorso={[{ nome: t('Spunti e idee'), url: '/spunti-e-idee/' }]}
+  pagina="spunti"
+  doc="globals/pagina-spunti"
+>
+  <section class="intro-pagina" id="spunti-intro">
+    <div class="wrap intro-pagina__griglia">
+      <div>
+        {pagina.kicker && <span class="kicker" data-campo="kicker">{pagina.kicker}</span>}
+        <Testo as="h1" class="titolo titolo--display" campo="titolo" t={pagina.titolo || t('Spunti e idee')} />
+      </div>
+      <Testo class="testo" campo="testo" t={pagina.testo} />
+    </div>
+  </section>
+
+  <section class="pad ambiente-sez" id="spunti-elenco" aria-label={t('Elenco degli spunti')}>
+    <div class="wrap">
+      {spunti.length > 0 ? (
+        <div class="elenco-spunti">
+          {spunti.map((s, k) => (
+            <a href={u(`/spunti-e-idee/${s.slug}/`)} class:list={['card-spunto', k % 5 === 0 && 'card-spunto--larga']}>
+              <div class:list={['foto zoom', k % 5 === 0 ? 'r-169' : 'r-43']}><Img media={s.immagine} sizes="(max-width: 700px) 100vw, 50vw" larghezza={1800} nota={t('foto da fornire')} /></div>
+              <div class="card-spunto__testi">
+                {s.ambito && <span class="card-case__etichetta">{s.ambito}</span>}
+                <div class="card-case__titolo">{s.titolo}</div>
+                {s.estratto && <Testo class="testo testo--card" t={s.estratto} />}
+                <span class="card__azione">{t('Leggi lo spunto →')}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <Testo class="nota-vuota" campo="notaVuota" t={pagina.notaVuota || t('I primi spunti sono in preparazione.')} />
+      )}
+    </div>
+  </section>
+
+  <section id="richiesta" class="sez-int pad scuro">
+    <div class="centro centro--s">
+      {pagina.cta?.kicker && <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta.kicker}</span>}
+      <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo} />
+      <Testo class="testo" campo="cta.testo" t={pagina.cta?.testo} />
+      {pagina.cta?.pulsante && <a href={u(pagina.cta.link || '/#listino')} class="btn btn--chiaro" data-campo="cta.pulsante">{pagina.cta.pulsante}</a>}
+    </div>
+  </section>
+</Base>

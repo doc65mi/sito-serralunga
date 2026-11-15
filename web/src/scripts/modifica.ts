@@ -374,8 +374,9 @@ function avvia(utente: Json) {
         const caricato = await richiesta(`/api/media?${q}`, { method: 'POST', body: dati })
         const media = caricato.doc
         await salva(el.dataset.campoImg!, media.id)
-        const url = media.sizes?.grande?.url || media.url
+        const url = media.url
         if (el instanceof HTMLImageElement) {
+          el.parentElement?.querySelectorAll('source').forEach((f) => f.remove())
           el.removeAttribute('srcset')
           el.src = url
         } else {
@@ -384,7 +385,10 @@ function avvia(utente: Json) {
           nuova.alt = media.alt || ''
           nuova.className = el.className.replace('segnaposto', '').trim()
           nuova.dataset.campoImg = el.dataset.campoImg
-          el.replaceWith(nuova)
+          const cornice = document.createElement('picture')
+          cornice.className = 'im'
+          el.replaceWith(cornice)
+          cornice.append(nuova)
         }
         dici('Foto salvata e pubblicata.', 'ok')
         ridisponi()

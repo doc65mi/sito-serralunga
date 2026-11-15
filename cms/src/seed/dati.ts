@@ -1,5 +1,5 @@
 /** Contenuti di prodotti, designer e case history copiati dai template. */
-type Media = (sorgente: string, alt: string) => Promise<number | null>
+type Media = (sorgente: string, alt: string, opz?: { min?: number }) => Promise<number | null>
 
 const S = 'https://serralunga.com/cdn/shop'
 
@@ -11,7 +11,7 @@ export const designerDati = async (m: Media) => [
     schedaPubblicata: true,
     ruolo: 'Designer',
     provenienza: 'Designer · Francia / Italia',
-    ritratto: await m(`${S}/files/Marc_Sadler.webp?v=1666092471&width=600`, 'Ritratto di Marc Sadler'),
+    ritratto: await m(`${S}/files/Marc_Sadler.webp?v=1666092471`, 'Ritratto di Marc Sadler', { min: 1400 }),
     ritrattoProvvisorio: true,
     estratto: "Quattro volte Compasso d'Oro. Per Serralunga firma l'Aqua Lounger e la famiglia Aqua.",
     citazione: '«Il materiale non è un vincolo: è il primo interlocutore del progetto.»',
@@ -41,7 +41,7 @@ export const designerDati = async (m: Media) => [
       frase: 'Un guscio unico, nessun assemblaggio.',
     },
     titoloPezzi: 'I pezzi\nper Serralunga',
-    pezziSegnaposto: 1,
+    pezziSegnaposto: 0,
     cta: { kicker: 'Progetti su misura', titolo: 'Lavoriamo con i designer,\nper il vostro luogo' },
     seo: {
       titolo: 'Marc Sadler, designer | Serralunga',
@@ -56,8 +56,9 @@ export const designerDati = async (m: Media) => [
     schedaPubblicata: false,
     ruolo: 'Architetto',
     ritratto: await m(
-      `${S}/files/Luisa_Bocchiettto_8d7d7247-c9af-44ac-89e7-ec26bf157f3f.webp?v=1676378763&width=600`,
+      `${S}/files/Luisa_Bocchiettto_8d7d7247-c9af-44ac-89e7-ec26bf157f3f.webp?v=1676378763`,
       'Ritratto di Luisa Bocchietto',
+      { min: 1400 },
     ),
     ritrattoProvvisorio: true,
     estratto: 'Vas-One Family e Big-Bo: i volumi monumentali che segnano gli ingressi e le corti.',
@@ -70,7 +71,7 @@ export const designerDati = async (m: Media) => [
     ordine: 3,
     schedaPubblicata: false,
     ruolo: 'Designer',
-    ritratto: await m(`${S}/files/ritrattomarta.jpg?v=1683278005&width=1080`, 'Ritratto di Marta Sansoni'),
+    ritratto: await m(`${S}/files/ritrattomarta.jpg?v=1683278005`, 'Ritratto di Marta Sansoni', { min: 1400 }),
     ritrattoProvvisorio: false,
     estratto: 'Fiore di Loto: geometria, monocromia e un rapporto armonioso fra luce, oggetto e acqua.',
     estrattoHome:

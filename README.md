@@ -1,6 +1,6 @@
 # Sito Serralunga
 
-Version: 1.02
+Version: 1.03
 
 Sito istituzionale Serralunga (1825 S.R.L.) costruito dai template in `template/`.
 
@@ -38,3 +38,13 @@ In fondo a ogni pagina c'è il link **Accesso redazione**: dopo l'accesso si tor
 - **Anteprima** nasconde gli strumenti, **Pannello** apre il documento in Payload, **Esci** chiude la sessione.
 
 Il salvataggio pubblica subito, nella lingua della pagina. Funziona perché sito e pannello stanno sullo stesso indirizzo (servizio `proxy`).
+
+## Foto
+
+Ogni foto caricata (dal pannello, dalla pagina o dall'importazione) viene servita in AVIF in quattro larghezze dentro `<picture>`; il file caricato resta come riserva per i browser senza AVIF e come immagine per la condivisione. Il nome del file viene reso leggibile (minuscolo, trattini) e, se arriva un nome da fotocamera, si usa il testo alternativo, che è obbligatorio. Le foto prese da serralunga.com si scaricano all'originale; un ritratto più stretto di 1400 px viene ingrandito per interpolazione, senza aggiungere dettagli che nell'originale non ci sono.
+
+## Pagine nuove
+
+- `/installazioni/`: macro sezioni per ambito (hotel, ristorazione, spa e piscine, residenze, spazi urbani) con le case history della stessa categoria. Testi in Pagine > Installazioni; la categoria si sceglie in ogni case history.
+- `/spunti-e-idee/`: elenco e scheda degli spunti (collezione Spunti e idee), con galleria e prodotti collegati.
+- Scheda designer: sezione "Le creazioni per Serralunga" con foto di prodotto e ambientate dal catalogo Serralunga.

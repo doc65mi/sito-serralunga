@@ -1,0 +1,123 @@
+---
+/**
+ * Installazioni (Version: 1.00): macro sezioni per ambito. Ogni sezione racconta l'ambito
+ * e mostra le case history e le installazioni della home con la stessa categoria.
+ */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import CardCase from '../../components/CardCase.astro'
+import { elenco, globale, type Doc } from '../../lib/cms'
+import { piatto } from '../../lib/testo'
+import { percorso, traduttore } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const [pagina, home, casi] = await Promise.all([
+  globale('pagina-installazioni', 1, L),
+  globale('home', 1, L),
+  elenco('case-history', { depth: 1 }, L),
+])
+const voci: Doc[] = home.installazioni?.voci || []
+const sezioni: Doc[] = (pagina.sezioni || []).map((s: Doc) => ({
+  ...s,
+  casi: casi.filter((c) => c.categoria === s.categoria),
+  voci: voci.filter((v) => v.categoria === s.categoria),
+}))
+const senzaCategoria = casi.filter((c) => !sezioni.some((s) => s.categoria === c.categoria))
+---
+<Base
+  titolo={pagina.seo?.titolo || `${piatto(pagina.titolo || t('Installazioni'))} | Serralunga`}
+  descrizione={pagina.seo?.descrizione || pagina.testo}
+  immagine={pagina.seo?.immagine || pagina.immagine}
+  percorso={[{ nome: t('Installazioni'), url: '/installazioni/' }]}
+  pagina="installazioni"
+  doc="globals/pagina-installazioni"
+>
+  <section class="intro-pagina" id="installazioni-intro">
+    <div class="wrap intro-pagina__griglia">
+      <div>
+        {pagina.kicker && <span class="kicker" data-campo="kicker">{pagina.kicker}</span>}
+        <Testo as="h1" class="titolo titolo--display" campo="titolo" t={pagina.titolo || t('Installazioni')} />
+      </div>
+      <div>
+        <Testo class="testo" campo="testo" t={pagina.testo} />
+        {sezioni.length > 1 && (
+          <nav class="ambiti" aria-label={t('Ambiti')}>
+            {sezioni.map((s) => <a href={`#ambito-${s.categoria}`}>{piatto(s.titolo)}</a>)}
+          </nav>
+        )}
+      </div>
+    </div>
+  </section>
+
+  {sezioni.map((s, k) => (
+    <section class:list={['ambito pad', k % 2 === 1 && 'ambito--chiaro']} id={`ambito-${s.categoria}`} aria-labelledby={`ambito-${s.categoria}-titolo`}>
+      <div class="wrap">
+        <div class="ambito__testa" data-reveal>
+          <div class="ambito__testi">
+            {s.kicker && <span class="kicker" data-campo={`sezioni.${k}.kicker`}>{s.kicker}</span>}
+            <Testo as="h2" class="titolo titolo--xl" id={`ambito-${s.categoria}-titolo`} campo={`sezioni.${k}.titolo`} t={s.titolo} />
+            <Testo class="testo testo--forte" campo={`sezioni.${k}.testo`} t={s.testo} />
+          </div>
+          {(s.immagine || s.voci[0]?.immagine) && (
+            <div class="foto r-169 ambito__foto">
+              {s.immagine
+                ? <Img campo={`sezioni.${k}.immagine`} media={s.immagine} sizes="(max-width: 900px) 100vw, 55vw" larghezza={1800} />
+                : <Img media={s.voci[0].immagine} sizes="(max-width: 900px) 100vw, 55vw" larghezza={1800} />}
+            </div>
+          )}
+        </div>
+
+        {s.casi.length > 0 && (
+          <div class="ambito__gruppo">
+            <h3 class="etichetta-gruppo">{t('Case history')}</h3>
+            <div class="griglia-3 ambito__casi">
+              {s.casi.map((c: Doc) => <CardCase c={c} />)}
+            </div>
+          </div>
+        )}
+
+        {s.voci.length > 0 && (
+          <div class="ambito__gruppo">
+            <h3 class="etichetta-gruppo">{t('Installazioni')}</h3>
+            <div class="griglia-3 ambito__voci">
+              {s.voci.map((v: Doc) => (
+                <figure class="voce-inst">
+                  <div class="foto r-43"><Img media={v.immagine} sizes="(max-width: 560px) 100vw, 30vw" larghezza={1000} nota={t('foto da fornire')} /></div>
+                  <figcaption>
+                    <span class="voce-inst__titolo">{v.titolo}</span>
+                    {v.sottotitolo && <span class="voce-inst__sotto">{v.sottotitolo}</span>}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {s.casi.length === 0 && s.voci.length === 0 && pagina.notaVuota && (
+          <p class="nota-vuota" data-campo="notaVuota">{pagina.notaVuota}</p>
+        )}
+      </div>
+    </section>
+  ))}
+
+  {senzaCategoria.length > 0 && (
+    <section class="ambito pad" id="altre-case-history">
+      <div class="wrap">
+        <h2 class="titolo titolo--l">{t('Altre case history')}</h2>
+        <div class="griglia-3 ambito__casi">{senzaCategoria.map((c) => <CardCase c={c} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <section id="richiesta" class="sez-int pad scuro">
+    <div class="centro centro--s">
+      {pagina.cta?.kicker && <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta.kicker}</span>}
+      <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo} />
+      <Testo class="testo" campo="cta.testo" t={pagina.cta?.testo} />
+      {pagina.cta?.pulsante && <a href={u(pagina.cta.link || '/#listino')} class="btn btn--chiaro" data-campo="cta.pulsante">{pagina.cta.pulsante}</a>}
+    </div>
+  </section>
+</Base>

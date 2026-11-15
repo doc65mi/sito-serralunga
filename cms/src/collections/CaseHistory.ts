@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { pubblicatiOppureRedazione, soloRedazione } from '../access'
+import { CATEGORIE_INSTALLAZIONI } from '../globals/PaginaInstallazioni'
 import { area, coppie, immagine, ordine, paragrafi, seoField, slugField, testo } from '../fields'
 
 /** Template: template/Case History - La Loge du Massif.dc.html */
@@ -24,6 +25,13 @@ export const CaseHistory: CollectionConfig = {
     testo('nome', 'Nome del progetto', { required: true }),
     slugField('nome'),
     ordine,
+    {
+      name: 'categoria',
+      type: 'select',
+      label: 'Categoria (pagina Installazioni)',
+      options: CATEGORIE_INSTALLAZIONI,
+      admin: { position: 'sidebar' },
+    },
     {
       type: 'tabs',
       tabs: [

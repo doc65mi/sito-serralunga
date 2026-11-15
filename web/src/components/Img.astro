@@ -1,10 +1,11 @@
 ---
 /**
  * Immagine dal CMS con srcset. Se manca la foto mostra il segnaposto a strisce
- * (come nei template: "da fornire"). Il punto focale scelto nel CMS passa
+ * (come nei template: "da fornire"). Le versioni ridotte sono in AVIF dentro <picture>;
+ * il file caricato fa da riserva per i browser che non lo leggono. Il punto focale scelto nel CMS passa
  * da una variabile CSS, non da uno stile scritto a mano.
  */
-import { fuoco, isMedia, src, srcset, type Media } from '../lib/media'
+import { fuoco, isMedia, originale, src, srcset, tipoRidotte, type Media } from '../lib/media'
 import { traduttore } from '../lib/lingua'
 
 interface Props {
@@ -22,12 +23,15 @@ interface Props {
 const { media, alt, sizes = '100vw', larghezza = 1800, priorita = false, class: cls, nota, campo, ...rest } = Astro.props
 const m = isMedia(media) ? media : null
 const posizione = m ? fuoco(m) : undefined
+const ridotte = m ? srcset(m) : ''
+const tipo = m ? tipoRidotte(m) : undefined
+const vettoriale = m?.mimeType === 'image/svg+xml'
 ---
 {m ? (
+  <picture class="im">
+  {ridotte && tipo && !vettoriale && <source type={tipo} srcset={ridotte} sizes={sizes} />}
   <img
-    src={src(m, larghezza)}
-    srcset={srcset(m) || undefined}
-    sizes={sizes}
+    src={ridotte && tipo && !vettoriale ? originale(m) : src(m, larghezza)}
     alt={alt ?? m.alt ?? ''}
     width={m.width}
     height={m.height}
@@ -39,6 +43,7 @@ const posizione = m ? fuoco(m) : undefined
     {...rest}
     style={posizione ? `--fuoco:${posizione};object-position:var(--fuoco)` : undefined}
   />
+  </picture>
 ) : (
   <span class:list={['segnaposto', cls]} role="img" aria-label={alt || traduttore(Astro.locals.lingua)('Immagine da fornire')} data-segnaposto data-campo-img={campo} {...rest}>
     {nota && <span class="nota-mono">{nota}</span>}
