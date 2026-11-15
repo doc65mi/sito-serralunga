@@ -1,6 +1,6 @@
 # Avvio e pubblicazione
 
-Version: 1.07
+Version: 1.08
 
 Quattro servizi Docker: `db` (PostgreSQL 16), `cms` (Payload), `web` (Astro) e `proxy` (Caddy). Solo il proxy è aperto verso l'esterno: **sito e pannello stanno sulla stessa porta**, il pannello su `/admin`.
 Il database e le foto caricate stanno in due volumi: `db-dati` e `media`. **Sono gli unici da salvare nei backup.**
@@ -55,39 +55,71 @@ In sviluppo lo schema del database si aggiorna da solo; in produzione si usano l
 
 ## 2. Pubblicazione su Coolify
 
-Su Coolify si usa il file **`docker-compose.coolify.yml`**: è uguale a quello locale, ma non apre porte sul server (il dominio lo collega Coolify), controlla lo stato di ogni servizio e si fa generare le password da Coolify.
+Il sito si installa con due risorse nello stesso progetto di Coolify:
 
-Requisiti del server: almeno 2 GB di RAM liberi durante la compilazione (meglio 4 GB in tutto) e circa 5 GB di disco. Il dominio deve già puntare all'indirizzo IP del server (record DNS A).
+1. un **database PostgreSQL creato da Coolify** (risorsa a sé, con i backup programmati dal suo pannello);
+2. l'**applicazione** dal repository GitHub, con il file **`docker-compose.coolify.yml`** (sito Astro, pannello Payload e proxy).
 
-### Passi
+Perché il database separato: un nuovo deploy del sito non lo tocca mai, i backup e il ripristino si fanno dal pannello di Coolify, e si può spostare o aggiornare senza ricompilare il sito. Chi preferisce un solo blocco può usare `docker-compose.coolify-tutto.yml`, che contiene anche il database (vedi in fondo a questa sezione).
 
-1. **Sorgente.** In Coolify: progetto → **+ New** → repository GitHub `doc65mi/sito-serralunga`. Il repository è privato, quindi va scelto con la **GitHub App** di Coolify (o con una deploy key). Ramo: `claude/project-thread-cs7x7p` (oppure `main` dopo l'unione).
-2. **Compilazione.** Build Pack (Build strategy): **Docker Compose**. Base Directory: `/`. Docker Compose Location: `/docker-compose.coolify.yml`. Salvare: Coolify legge il file e mostra i quattro servizi.
-3. **Dominio.** In **Domains** aggiungere il dominio **solo al servizio `proxy`**, porta 80: per esempio `https://www.serralunga.com` (durante le prove va bene un sottodominio, per esempio `https://serralunga.oltremedia.it`). Gli altri servizi restano senza dominio. Il certificato HTTPS lo crea Coolify.
-4. **Variabili.** In **Environment Variables** compilare:
+Requisiti del server: almeno 2 GB di RAM liberi durante la compilazione (meglio 4 GB in tutto) e circa 6 GB di disco. Il dominio deve già puntare all'indirizzo IP del server (record DNS A).
 
-   | Variabile | Valore |
-   |---|---|
-   | `SITO_URL` | lo stesso indirizzo del punto 3, con `https://` e senza barra finale |
-   | `SEED_EMAIL` | email del primo utente del pannello |
-   | `SEED_PASSWORD` | password del primo utente (lunga, da cambiare poi dal pannello) |
-   | `BLOCCA_INDICIZZAZIONE` | `1` finché il sito è in prova, `0` al lancio |
-   | `NOTIFICHE_EMAIL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | facoltative: servono per ricevere un'email a ogni richiesta del modulo |
+Le variabili sono già pronte nel file **`coolify.env.example`**: si copia il contenuto nella vista Developer delle variabili e si compilano i valori.
 
-   `SERVICE_PASSWORD_POSTGRES`, `SERVICE_PASSWORD_64_PAYLOAD` e `SERVICE_PASSWORD_64_SITOCHIAVE` le genera Coolify: **non vanno toccate** (cambiare la prima dopo il primo avvio blocca l'accesso al database).
-5. **Deploy.** Premere **Deploy**. La prima compilazione richiede 5–10 minuti. Al primo avvio il CMS crea da solo le tabelle del database; quando i quattro servizi sono "healthy" il sito risponde.
-6. **Contenuti di partenza.** In **Terminal** scegliere il servizio `cms` e lanciare una sola volta:
+### A. Creare il database PostgreSQL
 
-   ```sh
-   npm run seed
-   ```
+1. In Coolify aprire il progetto e l'ambiente (per esempio `production`) → **+ New** → **Database** → **PostgreSQL** (versione 16).
+2. Compilare: nome della risorsa `serralunga-db`, **Initial Database** `serralunga`, **Username** `serralunga`. La password la propone Coolify: lasciarla.
+3. **Non** attivare "Make it publicly available": il database deve restare raggiungibile solo dall'interno.
+4. Premere **Start** e attendere lo stato "Running".
+5. Copiare il valore del campo **Postgres URL (internal)**: ha la forma `postgres://serralunga:PASSWORD@NOME:5432/serralunga`. Serve al punto C.
+6. Scheda **Backups** → **+ Add**: frequenza `daily`, tenere per esempio 14 copie. Se è configurato uno spazio S3 conviene attivarlo, così le copie stanno fuori dal server.
 
-   Crea l'utente del pannello e carica testi (italiano e inglese) e foto. Poi: sito su `SITO_URL`, pannello su `SITO_URL/admin`.
-7. **Backup.** I dati stanno in due volumi (in **Persistent Storage**): `db-dati` (database) e `media` (foto e video caricati). Vanno inclusi nei backup del server; in più conviene un salvataggio periodico del database, dal terminale del server:
+### B. Creare l'applicazione
 
-   ```sh
-   docker exec $(docker ps -qf name=db-) pg_dump -U serralunga serralunga | gzip > serralunga-$(date +%F).sql.gz
-   ```
+1. Nello stesso progetto e ambiente, sullo **stesso server** del database: **+ New** → repository GitHub `doc65mi/sito-serralunga`. Il repository è privato: va scelto con la **GitHub App** di Coolify (o con una deploy key). Ramo: `claude/project-thread-cs7x7p` (oppure `main` dopo l'unione).
+2. Build Pack: **Docker Compose**. Base Directory: `/`. Docker Compose Location: `/docker-compose.coolify.yml`. Salvare: Coolify legge il file e mostra i tre servizi `cms`, `web` e `proxy`.
+3. **Advanced** → sezione Docker Compose → spuntare **Connect To Predefined Network**. Senza questa spunta il sito non vede il database.
+4. **Domains**: aggiungere il dominio **solo al servizio `proxy`**, porta 80, per esempio `https://www.serralunga.com` (per le prove va bene un sottodominio). Gli altri servizi restano senza dominio. Il certificato HTTPS lo crea Coolify.
+
+### C. Variabili
+
+In **Environment Variables** → **Developer view** incollare il contenuto di `coolify.env.example` e compilare:
+
+| Variabile | Valore |
+|---|---|
+| `DATABASE_URL` | il **Postgres URL (internal)** copiato al punto A5 |
+| `SITO_URL` | lo stesso indirizzo messo in Domains, con `https://` e senza barra finale |
+| `SEED_EMAIL` | email del primo utente del pannello |
+| `SEED_PASSWORD` | password del primo utente (lunga, da cambiare poi dal pannello) |
+| `SEED_AUTOMATICO` | `1`: al primo avvio, con il database vuoto, carica da solo utente, testi e foto |
+| `BLOCCA_INDICIZZAZIONE` | `1` finché il sito è in prova, `0` al lancio |
+| `NOTIFICHE_EMAIL`, `SMTP_*` | facoltative: email di avviso a ogni richiesta dei moduli |
+
+`SERVICE_PASSWORD_64_PAYLOAD` e `SERVICE_PASSWORD_64_SITOCHIAVE` le genera Coolify: **non vanno toccate**. La prima cifra anche le chiavi API dell'AI salvate nel pannello: se cambia, le chiavi vanno reinserite.
+
+### D. Deploy e primo avvio
+
+1. Premere **Deploy**. La prima compilazione richiede 5–10 minuti.
+2. All'avvio il CMS crea da solo le tabelle del database (migrazioni). Quando `cms`, `web` e `proxy` sono "healthy" il sito risponde.
+3. Con `SEED_AUTOMATICO=1` e il database vuoto partono da soli i contenuti di partenza: utente del pannello, testi in italiano e inglese, foto scaricate da serralunga.com e convertite in AVIF. Servono 10–20 minuti; il sito è già raggiungibile e si riempie man mano. L'avanzamento si legge nei log del servizio `cms` (righe `[seed]`, fino a `[seed] fatto`). Agli avvii successivi non succede nulla: se esiste già un utente i contenuti non si toccano.
+4. Entrare in `SITO_URL/admin` con `SEED_EMAIL` e `SEED_PASSWORD` e cambiare la password. Per l'AI: Impostazioni > Intelligenza artificiale, inserire la chiave del fornitore e spuntare «Abilita i pulsanti AI».
+
+Se il caricamento automatico si interrompe (per esempio il server non raggiunge serralunga.com), si rilancia da **Terminal**, servizio `cms`: `npm run seed:primo` se l'utente non è stato creato, altrimenti `npm run seed:aggiorna`.
+
+### E. Dati e backup
+
+- **Database**: backup programmati della risorsa PostgreSQL (punto A6). Il ripristino si fa dalla stessa scheda.
+- **Foto e video caricati**: volume `media` dell'applicazione (in **Persistent Storage**). Contiene i file caricati e le versioni AVIF. Va incluso nei backup del server: non sta nel database.
+- Le due cose vanno salvate insieme: un database senza i file mostra le foto mancanti.
+
+### Variante con il database nello stesso file
+
+Docker Compose Location: `/docker-compose.coolify-tutto.yml`. Non serve il punto A, non serve "Connect To Predefined Network" e non c'è `DATABASE_URL`: la password la genera Coolify (`SERVICE_PASSWORD_POSTGRES`, da non cambiare dopo il primo avvio). Il database sta nel volume `db-dati`; per il salvataggio periodico, dal terminale del server:
+
+```sh
+docker exec $(docker ps -qf name=db-) pg_dump -U serralunga serralunga | gzip > serralunga-$(date +%F).sql.gz
+```
 
 ### Aggiornamenti
 
@@ -101,6 +133,7 @@ Cambiare il dominio del servizio `proxy`, mettere lo stesso indirizzo in `SITO_U
 
 ### Se qualcosa non va
 
+- **Il servizio `cms` si riavvia di continuo e nei log c'è un errore di connessione al database**: manca la spunta "Connect To Predefined Network", oppure `DATABASE_URL` non è l'indirizzo *internal*, oppure database e applicazione sono su server diversi.
 - **"No Available Server" o 502**: un servizio non è ancora "healthy". Guardare i log di `cms` (di solito sta ancora applicando le migrazioni o manca una variabile).
 - **Il modulo risponde "Invio non consentito"** o **non si riesce a entrare nel pannello**: `SITO_URL` non coincide con il dominio usato nel browser.
 - **La compilazione si ferma senza errore**: memoria del server insufficiente; aggiungere swap o RAM.

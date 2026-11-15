@@ -1,6 +1,6 @@
 # Sito Serralunga
 
-Version: 1.04
+Version: 1.05
 
 Sito istituzionale Serralunga (1825 S.R.L.) costruito dai template in `template/`.
 

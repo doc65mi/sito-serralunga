@@ -1,36 +1,26 @@
-# Serralunga su Coolify — Astro + Payload + Postgres. Version: 1.01
-# In Coolify: New Resource → repository GitHub → Build Pack "Docker Compose",
-# Docker Compose Location: /docker-compose.coolify.yml (passi completi in DEPLOY.md).
+# Serralunga su Coolify — Astro + Payload, database PostgreSQL di Coolify. Version: 1.03
+# In Coolify: prima si crea il database (New Resource → Database → PostgreSQL), poi questa
+# applicazione: New Resource → repository GitHub → Build Pack "Docker Compose",
+# Docker Compose Location: /docker-compose.coolify.yml. Passi completi in DEPLOY.md,
+# variabili pronte da incollare in coolify.env.example.
 #
+# - Il database è una risorsa separata di Coolify: backup programmati dal suo pannello,
+#   e un nuovo deploy del sito non lo tocca mai. Qui arriva solo il suo indirizzo (DATABASE_URL).
+#   Perché il sito lo raggiunga va spuntato "Connect to Predefined Network"
+#   (Advanced → Docker Compose) e i due devono stare sullo stesso server e destinazione.
 # - Nessuna porta pubblicata sul server: il dominio va assegnato al servizio `proxy` (porta 80).
-# - Le password (SERVICE_PASSWORD_…) le genera Coolify al primo caricamento e le conserva.
-# - Dati da salvare nei backup: volumi `db-dati` (database) e `media` (foto e video caricati).
+# - PAYLOAD_SECRET e SITO_CHIAVE (SERVICE_PASSWORD_64_…) le genera Coolify e le conserva.
+#   PAYLOAD_SECRET cifra anche le chiavi API dell'AI: se cambia, le chiavi vanno reinserite.
+# - Dati da salvare: il database (backup di Coolify) e il volume `media` (foto e video caricati).
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: serralunga
-      POSTGRES_USER: serralunga
-      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES}
-    volumes:
-      - db-dati:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U serralunga -d serralunga"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
   cms:
     build:
       context: .
       dockerfile: cms/Dockerfile
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
-      DATABASE_URL: postgres://serralunga:${SERVICE_PASSWORD_POSTGRES}@db:5432/serralunga
+      # Indirizzo interno del database PostgreSQL creato in Coolify (campo "Postgres URL (internal)").
+      DATABASE_URL: ${DATABASE_URL:?indirizzo interno del database PostgreSQL di Coolify, postgres://utente:password@host:5432/nome}
       PAYLOAD_SECRET: ${SERVICE_PASSWORD_64_PAYLOAD}
       SITO_CHIAVE: ${SERVICE_PASSWORD_64_SITOCHIAVE}
       # Vuoto: il pannello usa indirizzi relativi e funziona da qualunque nome (localhost, 127.0.0.1, dominio).
@@ -38,6 +28,8 @@ services:
       SITO_URL: ${SITO_URL}
       SEED_EMAIL: ${SEED_EMAIL:?email del primo utente del pannello}
       SEED_PASSWORD: ${SEED_PASSWORD:?password del primo utente del pannello}
+      # 1 = al primo avvio, con il database vuoto, carica da solo utente, testi e foto di partenza.
+      SEED_AUTOMATICO: ${SEED_AUTOMATICO:-1}
       NOTIFICHE_EMAIL: ${NOTIFICHE_EMAIL:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
@@ -91,5 +83,4 @@ services:
       - "80"
 
 volumes:
-  db-dati:
   media:

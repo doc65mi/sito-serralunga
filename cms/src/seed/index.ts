@@ -27,6 +27,17 @@ import { nomeFile } from '../collections/Media'
 const payload = await getPayload({ config })
 const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
 
+// Primo avvio automatico (npm run seed:primo, lanciato da avvio.sh su Coolify):
+// se esiste già un utente il sito è stato avviato e non si tocca nulla.
+if (process.env.SEED_SOLO === 'primo') {
+  const utenti = await payload.count({ collection: 'users' })
+  if (utenti.totalDocs > 0) {
+    log('primo avvio: contenuti già presenti, nessuna modifica')
+    process.exit(0)
+  }
+  log('primo avvio: database vuoto, carico i contenuti di partenza')
+}
+
 const TEMPLATE_DIR = path.resolve(process.cwd(), process.env.SEED_TEMPLATE_DIR || '../template')
 
 const mediaCache = new Map<string, number | null>()

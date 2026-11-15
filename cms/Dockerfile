@@ -1,4 +1,4 @@
-# Payload CMS (Next.js) — Version: 1.00
+# Payload CMS (Next.js) — Version: 1.01
 # Contesto di build: la radice del repository (serve template/assets per il seed).
 FROM node:22-alpine AS base
 WORKDIR /app
@@ -24,4 +24,5 @@ RUN mkdir -p /app/media && chown -R node:node /app/media /app/.next
 USER node
 EXPOSE 3000
 # All'avvio Payload applica da solo le migrazioni del database (prodMigrations).
-CMD ["npm", "run", "start"]
+# Con SEED_AUTOMATICO=1 avvio.sh carica anche i contenuti di partenza, solo se il database è vuoto.
+CMD ["sh", "./avvio.sh"]

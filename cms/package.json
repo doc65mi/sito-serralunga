@@ -11,6 +11,7 @@
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed/index.ts",
+    "seed:primo": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=primo payload run src/seed/index.ts",
     "seed:aggiorna": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=aggiorna payload run src/seed/index.ts",
     "seed:designer": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=aggiorna payload run src/seed/index.ts"
   },
