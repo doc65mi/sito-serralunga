@@ -1,9 +1,14 @@
 ---
 /**
+ * Version: 1.02
  * Immagine dal CMS con srcset. Se manca la foto mostra il segnaposto a strisce
  * (come nei template: "da fornire"). Le versioni ridotte sono in AVIF dentro <picture>;
- * il file caricato fa da riserva per i browser che non lo leggono. Il punto focale scelto nel CMS passa
- * da una variabile CSS, non da uno stile scritto a mano.
+ * il file caricato fa da riserva per i browser che non lo leggono. Il punto focale
+ * scelto nel CMS passa da una variabile CSS, non da uno stile scritto a mano.
+ *
+ * Spazio fotografico: se allo stesso spazio sono collegate altre foto (prop `altre`, oppure
+ * collezione spazi-foto per il campo indicato) lo spazio diventa uno slider; con `lightbox`
+ * le foto si aprono a tutto schermo. Lo script è in scripts/site.ts.
  */
 import { fuoco, isMedia, originale, src, srcset, tipoRidotte, type Media } from '../lib/media'
 import { traduttore } from '../lib/lingua'
@@ -18,20 +23,32 @@ interface Props {
   nota?: string
   /** Percorso del campo immagine nel documento, per sostituirla dalla pagina. */
   campo?: string
+  /** Altre foto dello stesso spazio (slider). Se manca si leggono dagli spazi del documento. */
+  altre?: unknown[]
+  lightbox?: boolean
+  /** Campo elenco da cui arrivano le foto (blocco slider): la modifica agisce sull'elenco. */
+  lista?: string
   [attr: `data-${string}`]: unknown
 }
-const { media, alt, sizes = '100vw', larghezza = 1800, priorita = false, class: cls, nota, campo, ...rest } = Astro.props
+const { media, alt, sizes = '100vw', larghezza = 1800, priorita = false, class: cls, nota, campo, altre, lightbox, lista, ...rest } = Astro.props
 const m = isMedia(media) ? media : null
-const posizione = m ? fuoco(m) : undefined
-const ridotte = m ? srcset(m) : ''
-const tipo = m ? tipoRidotte(m) : undefined
-const vettoriale = m?.mimeType === 'image/svg+xml'
+const spazio = campo && !lista ? Astro.locals.spazi?.[campo] : undefined
+const inPiu = ((altre ?? spazio?.immagini ?? []) as unknown[]).filter(isMedia) as Media[]
+const conLightbox = lightbox ?? spazio?.lightbox ?? false
+const pezzi = (x: Media) => {
+  const ridotte = srcset(x)
+  const tipo = tipoRidotte(x)
+  const conFonte = !!ridotte && !!tipo && x.mimeType !== 'image/svg+xml'
+  const pos = fuoco(x)
+  return { ridotte, tipo, conFonte, stile: pos ? `--fuoco:${pos};object-position:var(--fuoco)` : undefined }
+}
+const p = m ? pezzi(m) : null
 ---
-{m ? (
-  <picture class="im">
-  {ridotte && tipo && !vettoriale && <source type={tipo} srcset={ridotte} sizes={sizes} />}
+{m && p ? (
+  <picture class="im" data-spazio={inPiu.length > 0 || conLightbox ? '' : undefined} data-lightbox={conLightbox ? '' : undefined}>
+  {p.conFonte && <source type={p.tipo} srcset={p.ridotte} sizes={sizes} />}
   <img
-    src={ridotte && tipo && !vettoriale ? originale(m) : src(m, larghezza)}
+    src={p.conFonte ? originale(m) : src(m, larghezza)}
     alt={alt ?? m.alt ?? ''}
     width={m.width}
     height={m.height}
@@ -40,12 +57,23 @@ const vettoriale = m?.mimeType === 'image/svg+xml'
     decoding="async"
     class={cls}
     data-campo-img={campo}
+    data-campo-lista={lista}
+    data-media={m.id}
     {...rest}
-    style={posizione ? `--fuoco:${posizione};object-position:var(--fuoco)` : undefined}
+    style={p.stile}
   />
   </picture>
 ) : (
-  <span class:list={['segnaposto', cls]} role="img" aria-label={alt || traduttore(Astro.locals.lingua)('Immagine da fornire')} data-segnaposto data-campo-img={campo} {...rest}>
+  <span class:list={['segnaposto', cls]} role="img" aria-label={alt || traduttore(Astro.locals.lingua)('Immagine da fornire')} data-segnaposto data-campo-img={campo} data-campo-lista={lista} {...rest}>
     {nota && <span class="nota-mono">{nota}</span>}
   </span>
 )}
+{m && inPiu.map((x) => {
+  const q = pezzi(x)
+  return (
+    <picture class="im im--altra">
+      {q.conFonte && <source type={q.tipo} srcset={q.ridotte} sizes={sizes} />}
+      <img src={q.conFonte ? originale(x) : src(x, larghezza)} alt={x.alt ?? ''} width={x.width} height={x.height} loading="lazy" decoding="async" class={cls} data-media={x.id} style={q.stile} />
+    </picture>
+  )
+})}

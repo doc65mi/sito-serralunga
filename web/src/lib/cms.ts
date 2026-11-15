@@ -48,3 +48,20 @@ export async function impostazioni(lingua: Lingua = 'it'): Promise<Doc> {
 
 /** Indirizzo pubblico del sito, letto a runtime (Astro.site è fissato alla build e in Docker non coincide). */
 export const SITO = env('SITO_URL', 'http://localhost:4321').replace(/\/$/, '')
+
+export type Spazio = { id: number; immagini: Doc[]; lightbox: boolean }
+
+/** Foto in più e lightbox degli spazi fotografici di un documento (collezione spazi-foto). */
+export async function spaziDi(doc: string, lingua: Lingua = 'it'): Promise<Record<string, Spazio>> {
+  try {
+    const r = await get('spazi-foto', { 'where[documento][equals]': doc, depth: 1, limit: 200 }, lingua)
+    return Object.fromEntries(
+      (r.docs ?? []).map((s: Doc) => [
+        String(s.chiave).split(':').slice(1).join(':'),
+        { id: s.id, immagini: (s.immagini || []).filter((m: unknown) => m && typeof m === 'object'), lightbox: s.lightbox === true },
+      ]),
+    )
+  } catch {
+    return {}
+  }
+}

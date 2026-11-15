@@ -1,0 +1,130 @@
+---
+/**
+ * Version: 1.00
+ * Blocchi aggiuntivi di una pagina (campo "blocchi" del CMS): testo, immagine e testo,
+ * slider di foto, elenco di prodotti, citazione, domande e risposte, invito.
+ * Markup fisso e semantico: una <section> per blocco, titoli h2, elenchi veri.
+ */
+import Img from './Img.astro'
+import Testo from './Testo.astro'
+import type { Doc } from '../lib/cms'
+import { isMedia } from '../lib/media'
+import { percorso, traduttore } from '../lib/lingua'
+import { esterno } from '../lib/testo'
+
+interface Props { blocchi?: Doc[] | null }
+const blocchi = (Astro.props.blocchi || []).filter((b) => b && b.blockType)
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const fondo = (b: Doc) => (b.sfondo === 'scuro' ? 'scuro' : b.sfondo === 'carta' ? 'blocco--carta' : 'blocco--chiaro')
+const RAPPORTI: Record<string, string> = { largo: 'r-169', panoramico: 'r-219', classico: 'r-43' }
+---
+{blocchi.map((b, i) => {
+  const c = (campo: string) => `blocchi.${i}.${campo}`
+  const comuni = { class: `blocco blocco--${b.blockType} sez-int pad ${fondo(b)}`, 'data-blocco': i, 'data-blocco-id': b.id, 'data-blocco-tipo': b.blockType }
+  const testata = (b.kicker || b.titolo) && (
+    <header class="blocco__testata">
+      {b.kicker && <span class="kicker" data-campo={c('kicker')}>{b.kicker}</span>}
+      <Testo as="h2" class="titolo titolo--l" campo={c('titolo')} t={b.titolo} />
+    </header>
+  )
+  if (b.blockType === 'testo') return (
+    <section {...comuni}>
+      <div class="wrap blocco__colonna">
+        {testata}
+        <Testo class="testo testo--forte" campo={c('testo')} t={b.testo} />
+      </div>
+    </section>
+  )
+  if (b.blockType === 'immagineTesto') return (
+    <section {...comuni}>
+      <div class:list={['wrap blocco__due', b.lato === 'destra' && 'blocco__due--destra']}>
+        <div class="foto r-43"><Img campo={c('immagine')} media={b.immagine} sizes="(max-width: 900px) 100vw, 50vw" larghezza={1800} nota={t('foto da fornire')} /></div>
+        <div class="blocco__testi">
+          {testata}
+          <Testo class="testo" campo={c('testo')} t={b.testo} />
+          {b.pulsante && <a href={u(b.link) || '#'} class:list={['btn', b.sfondo === 'scuro' ? 'btn--chiaro' : 'btn--scuro']} target={esterno(b.link) ? '_blank' : undefined} rel={esterno(b.link) ? 'noopener' : undefined} data-campo={c('pulsante')} data-campo-link={c('link')} data-link={b.link || ''}>{b.pulsante}</a>}
+        </div>
+      </div>
+    </section>
+  )
+  if (b.blockType === 'slider') {
+    const foto = (b.immagini || []).filter(isMedia)
+    return (
+      <section {...comuni}>
+        <div class="wrap">
+          {testata}
+          <div class:list={['foto', RAPPORTI[b.formato] || 'r-169', 'blocco__slider']}>
+            <Img media={foto[0]} altre={foto.slice(1)} lightbox={b.lightbox !== false} lista={c('immagini')} data-campo-lightbox={c('lightbox')} sizes="100vw" larghezza={2600} nota={t('foto da fornire')} />
+          </div>
+        </div>
+      </section>
+    )
+  }
+  if (b.blockType === 'prodotti') {
+    const voci = (b.voci || []).map((v: Doc, k: number) => {
+      const p = v.prodotto && typeof v.prodotto === 'object' ? v.prodotto : null
+      const link = p ? (p.schedaPubblicata ? u(`/prodotti/${p.slug}/`) : undefined) : v.url ? u(v.url) : undefined
+      return { k, link, fuori: !p && esterno(v.url), nome: v.nome || p?.nome, tipo: v.tipo || p?.etichettaCard, immagine: v.immagine || p?.immagine, proprio: !p }
+    }).filter((v: Doc) => v.nome)
+    return (
+      <section {...comuni}>
+        <div class="wrap">
+          {testata}
+          <ul class="blocco__prodotti">
+            {voci.map((v: Doc) => {
+              const dentro = (
+                <>
+                  <div class="foto r-45 zoom foto--prodotto"><Img campo={v.proprio ? c(`voci.${v.k}.immagine`) : undefined} media={v.immagine} alt={v.immagine?.alt || v.nome} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={1000} nota={t('foto da fornire')} /></div>
+                  <div class="card__piede">
+                    <div>
+                      <div class="card__nome card__nome--s" data-campo={v.proprio ? c(`voci.${v.k}.nome`) : undefined}>{v.nome}</div>
+                      {v.tipo && <div class="card__sotto">{v.tipo}</div>}
+                    </div>
+                    {v.link && <span class="card__azione card__azione--attiva">{t('Scheda →')}</span>}
+                  </div>
+                </>
+              )
+              return <li>{v.link ? <a href={v.link} class="card" target={v.fuori ? '_blank' : undefined} rel={v.fuori ? 'noopener' : undefined}>{dentro}</a> : <div class="card">{dentro}</div>}</li>
+            })}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+  if (b.blockType === 'citazione') return (
+    <section {...comuni}>
+      <figure class="centro blocco__citazione">
+        <blockquote><Testo class="titolo titolo--m" campo={c('testo')} t={b.testo} /></blockquote>
+        {b.autore && <figcaption class="kicker" data-campo={c('autore')}>{b.autore}</figcaption>}
+      </figure>
+    </section>
+  )
+  if (b.blockType === 'domande') return (
+    <section {...comuni}>
+      <div class="wrap blocco__colonna">
+        {testata}
+        <dl class="domande">
+          {(b.voci || []).map((v: Doc, k: number) => (
+            <div class="domande__voce">
+              <dt data-campo={c(`voci.${k}.domanda`)}>{v.domanda}</dt>
+              <Testo as="dd" class="testo" campo={c(`voci.${k}.risposta`)} t={v.risposta} />
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+  )
+  if (b.blockType === 'invito') return (
+    <section {...comuni}>
+      <div class="centro centro--s">
+        {b.kicker && <span class="kicker kicker--largo" data-campo={c('kicker')}>{b.kicker}</span>}
+        <Testo as="h2" class="titolo titolo--cta" campo={c('titolo')} t={b.titolo} />
+        <Testo class="testo" campo={c('testo')} t={b.testo} />
+        {b.pulsante && <a href={u(b.link) || '#'} class:list={['btn', b.sfondo === 'scuro' ? 'btn--chiaro' : 'btn--scuro']} data-campo={c('pulsante')} data-campo-link={c('link')} data-link={b.link || ''}>{b.pulsante}</a>}
+      </div>
+    </section>
+  )
+  return null
+})}

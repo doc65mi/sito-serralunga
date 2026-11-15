@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
+import { blocchiField } from '../blocchi'
 import { pubblico, soloRedazione } from '../access'
 import { area, immagine, link, numeri, seoField, testo } from '../fields'
 
@@ -199,6 +200,7 @@ export const Home: GlobalConfig = {
         },
       ],
     },
+    blocchiField,
     seoField,
   ],
 }

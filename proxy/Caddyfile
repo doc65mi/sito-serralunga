@@ -1,8 +1,11 @@
-# Proxy unico — Version: 1.01
+# Proxy unico — Version: 1.02
 # Sito e pannello sulla stessa porta: il pannello (Payload) risponde su /admin,
 # /api e /_next; tutto il resto è il sito (Astro). L'unica API del sito è /api/richiesta.
 # Davanti può esserci un altro proxy (Coolify/Traefik): ci si fida delle sue intestazioni
 # X-Forwarded-* solo se arriva da una rete privata.
+# Intestazioni di sicurezza: niente incorporamento da altri siti, niente MIME indovinato,
+# permessi del browser spenti, CSP sulle pagine del sito, pannello e API fuori dai motori
+# di ricerca (le foto in /api/media/file restano indicizzabili).
 {
 	admin off
 	auto_https off
@@ -13,6 +16,38 @@
 
 :80 {
 	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		-Server
+		-X-Powered-By
+	}
+
+	# HSTS solo quando il sito è servito in HTTPS dal proxy che sta davanti.
+	@https header X-Forwarded-Proto https
+	header @https Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	@pannello {
+		path /admin* /api/* /_next/*
+		not path /api/media/file/*
+	}
+	header @pannello X-Robots-Tag "noindex, nofollow"
+	header @pannello Content-Security-Policy "frame-ancestors 'self'"
+
+	# Le foto cambiano di rado: una settimana di cache nel browser.
+	@foto path /api/media/file/*
+	header @foto Cache-Control "public, max-age=604800"
+	# Un SVG caricato non può eseguire script né caricare risorse.
+	@svg path_regexp ^/api/media/file/.+\.svg$
+	header @svg Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+
+	@sito not path /admin* /api/* /_next/*
+	header @sito Content-Security-Policy "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+
 	route {
 		respond /_salute "ok" 200
 		reverse_proxy /api/richiesta web:4321

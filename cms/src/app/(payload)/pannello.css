@@ -1,0 +1,103 @@
+/*
+ * Pannello Serralunga
+ * Version: 1.00
+ * Aspetto del pannello di redazione: stessi caratteri e colori del sito
+ * (carta, inchiostro, oro), barra laterale scura, angoli vivi.
+ */
+:root {
+  --sl-inchiostro: #16150f;
+  --sl-carta: #f2efe8;
+  --sl-oro: #a08a5f;
+  --sl-oro-chiaro: #c9b78f;
+  --font-body: 'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --style-radius-s: 0px;
+  --style-radius-m: 0px;
+  --style-radius-l: 0px;
+}
+
+html[data-theme='light'] {
+  --theme-bg: #faf9f6;
+  --theme-input-bg: #ffffff;
+  --theme-success-500: var(--sl-oro);
+}
+
+body { font-family: var(--font-body); letter-spacing: 0.005em; }
+h1, h2, h3, .doc-header__title, .list-header h1 { font-family: var(--font-serif); font-weight: 400; letter-spacing: 0; }
+
+/* Barra laterale */
+.nav {
+  background: var(--sl-inchiostro);
+  border-right: 0;
+  --theme-text: #ebe7dc;
+  --theme-elevation-0: var(--sl-inchiostro);
+  --theme-elevation-50: #1f1e17;
+  --theme-elevation-100: #2a2920;
+  --theme-elevation-150: #34322a;
+  --theme-elevation-400: #8f8b7c;
+  --theme-elevation-500: #a39f90;
+  --theme-elevation-800: #ebe7dc;
+  --theme-elevation-1000: #ffffff;
+  color: #ebe7dc;
+}
+.nav a, .nav button { color: #cfcabb; }
+.nav a:hover, .nav a:focus-visible { color: #ffffff; }
+.nav .nav-group__toggle { color: var(--sl-oro-chiaro); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
+.nav .nav__link { padding-block: 5px; font-size: 14px; }
+.nav .nav__link.active, .nav .nav__link[aria-current='page'] { color: #ffffff; }
+.nav .nav__link-indicator { background: var(--sl-oro); }
+.nav__controls a, .nav__controls button { color: #cfcabb; }
+
+.sl-frontend { margin: 0 0 28px; }
+.sl-frontend__pulsante {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 13px 14px; background: var(--sl-oro); color: #16150f !important;
+  font-size: 12px; font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase; text-decoration: none;
+  transition: background 200ms ease;
+}
+.sl-frontend__pulsante:hover, .sl-frontend__pulsante:focus-visible { background: #ffffff; color: #16150f !important; }
+.sl-frontend__pulsante--testata { padding: 9px 14px; font-size: 11px; white-space: nowrap; }
+.sl-frontend__pulsante--testata:hover { background: var(--sl-inchiostro); color: #f2efe8 !important; }
+.sl-frontend__nota { margin: 10px 0 0; font-size: 12px; line-height: 1.5; color: #8f8b7c; }
+
+.sl-icona {
+  display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+  font-family: var(--font-serif); font-size: 22px; line-height: 1; color: var(--theme-text);
+}
+.sl-logo { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.sl-logo__nome { font-family: var(--font-serif); font-size: 44px; letter-spacing: 0.16em; text-transform: uppercase; line-height: 1; }
+.sl-logo__nota { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--sl-oro); }
+
+/* Cruscotto */
+.sl-cruscotto { margin-bottom: 48px; }
+.sl-cruscotto__kicker { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--sl-oro); }
+.sl-cruscotto__titolo { margin: 0 0 28px; font-size: 40px; line-height: 1.1; }
+.sl-cruscotto__griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.sl-azione {
+  position: relative; display: flex; flex-direction: column; gap: 8px; min-height: 132px; padding: 22px 22px 44px;
+  background: var(--theme-elevation-0); border: 1px solid var(--theme-elevation-150);
+  color: var(--theme-text); text-decoration: none; transition: border-color 200ms ease, transform 200ms ease;
+}
+.sl-azione:hover, .sl-azione:focus-visible { border-color: var(--sl-oro); transform: translateY(-2px); }
+.sl-azione__titolo { font-family: var(--font-serif); font-size: 24px; line-height: 1.15; }
+.sl-azione__testo { font-size: 13px; line-height: 1.5; color: var(--theme-elevation-600); }
+.sl-azione__freccia { position: absolute; left: 22px; bottom: 16px; color: var(--sl-oro); }
+.sl-azione--primaria { background: var(--sl-inchiostro); border-color: var(--sl-inchiostro); color: #f2efe8; }
+.sl-azione--primaria .sl-azione__testo { color: #b9b4a5; }
+
+/* Elenchi, schede e moduli */
+.dashboard__label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--theme-elevation-500); font-family: var(--font-body); }
+.dashboard .card { border: 1px solid var(--theme-elevation-150); background: var(--theme-elevation-0); box-shadow: none; }
+.dashboard .card:hover { border-color: var(--sl-oro); }
+.btn { letter-spacing: 0.08em; }
+.btn--style-primary { --bg-color: var(--sl-inchiostro); --hover-bg: #2a2920; --color: #f2efe8; --hover-color: #ffffff; }
+html[data-theme='dark'] .btn--style-primary { --bg-color: var(--sl-oro); --hover-bg: var(--sl-oro-chiaro); --color: #16150f; --hover-color: #16150f; }
+.field-label, .field-type > label { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--theme-elevation-600); }
+.field-description { font-size: 13px; line-height: 1.5; }
+input:focus-visible, textarea:focus-visible, .rs__control--is-focused { outline: 2px solid var(--sl-oro) !important; outline-offset: 1px; }
+.tabs-field__tab-button--active::after, .tabs-field__tab-button:hover::after { background: var(--sl-oro) !important; }
+.table th { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--theme-elevation-500); }
+.collection-list__header h1, .doc-header__title { font-size: 34px; }
+.pill { letter-spacing: 0.06em; }
+.login__brand { margin-bottom: 36px; }
+.template-minimal { background: var(--theme-bg); }

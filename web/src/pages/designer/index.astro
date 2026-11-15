@@ -10,7 +10,7 @@ import { percorso, traduttore } from '../../lib/lingua'
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => percorso(L, p)
-const pagina = await globale('pagina-designer', 1, L)
+const pagina = await globale('pagina-designer', 2, L)
 const designer = await elenco('designer', { depth: 1 }, L)
 const segnaposto = Array.from({ length: pagina.segnaposto || 0 })
 ---
@@ -21,6 +21,7 @@ const segnaposto = Array.from({ length: pagina.segnaposto || 0 })
   percorso={[{ nome: t('I designer'), url: '/designer/' }]}
   pagina="designer"
   doc="globals/pagina-designer"
+  blocchi={pagina.blocchi ?? []}
 >
   <section class="intro-pagina" id="designer-intro">
     <div class="wrap intro-pagina__griglia">
@@ -44,7 +45,7 @@ const segnaposto = Array.from({ length: pagina.segnaposto || 0 })
       {pagina.cta?.kicker && <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta.kicker}</span>}
       <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo} />
       <Testo class="testo" campo="cta.testo" t={pagina.cta?.testo} />
-      {pagina.cta?.pulsante && <a href={u(pagina.cta.link || '/#listino')} class="btn btn--chiaro">{pagina.cta.pulsante}</a>}
+      {pagina.cta?.pulsante && <a href={u(pagina.cta.link || '/#listino')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={pagina.cta.link || ''}>{pagina.cta.pulsante}</a>}
     </div>
   </section>
 </Base>

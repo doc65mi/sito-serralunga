@@ -1,12 +1,13 @@
 import type { GlobalConfig } from 'payload'
 
+import { blocchiField } from '../blocchi'
 import { pubblico, soloRedazione } from '../access'
 import { area, link, seoField, testo } from '../fields'
 
 /** Template: template/Designer.dc.html (elenco dei designer). */
 export const PaginaDesigner: GlobalConfig = {
   slug: 'pagina-designer',
-  label: 'Pagina I designer',
+  label: 'I designer',
   admin: { group: 'Pagine' },
   access: { read: pubblico, update: soloRedazione },
   fields: [
@@ -32,6 +33,7 @@ export const PaginaDesigner: GlobalConfig = {
         { type: 'row', fields: [testo('pulsante', 'Pulsante'), link('link', 'Link')] },
       ],
     },
+    blocchiField,
     seoField,
   ],
 }

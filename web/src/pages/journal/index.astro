@@ -1,0 +1,67 @@
+---
+/** Journal (Version: 1.00): elenco degli articoli, dal più recente. Testata in Pagine > Journal. */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import { elenco, globale, SITO } from '../../lib/cms'
+import { piatto } from '../../lib/testo'
+import { INFO, percorso, traduttore } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const [pagina, articoli] = await Promise.all([globale('pagina-journal', 2, L), elenco('articoli', { depth: 1, sort: '-data', limit: 60 }, L)])
+const CATEGORIE: Record<string, string> = { storie: t('Storie'), guide: t('Guide'), designer: t('Designer'), progetti: t('Progetti') }
+const giorno = (d?: string) => (d ? new Date(d).toLocaleDateString(INFO[L].html, { day: 'numeric', month: 'long', year: 'numeric' }) : '')
+const jsonld = articoli.length
+  ? [{
+      '@type': 'ItemList',
+      itemListElement: articoli.map((a, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITO}${u(`/journal/${a.slug}/`)}`, name: piatto(a.titolo) })),
+    }]
+  : []
+---
+<Base
+  titolo={pagina.seo?.titolo || `${piatto(pagina.titolo || 'Journal')} | Serralunga`}
+  descrizione={pagina.seo?.descrizione || pagina.testo}
+  immagine={pagina.seo?.immagine}
+  percorso={[{ nome: 'Journal', url: '/journal/' }]}
+  jsonld={jsonld}
+  tipoPagina="CollectionPage"
+  pagina="journal"
+  doc="globals/pagina-journal"
+  blocchi={pagina.blocchi ?? []}
+>
+  <section class="intro-pagina" id="journal-intro">
+    <div class="wrap intro-pagina__griglia">
+      <div>
+        {pagina.kicker && <span class="kicker" data-campo="kicker">{pagina.kicker}</span>}
+        <Testo as="h1" class="titolo titolo--display" campo="titolo" t={pagina.titolo || 'Journal'} />
+      </div>
+      <Testo class="testo" campo="testo" t={pagina.testo} />
+    </div>
+  </section>
+
+  <section class="pad ambiente-sez" id="journal-elenco" aria-label={t('Elenco degli articoli')}>
+    <div class="wrap">
+      {articoli.length > 0 ? (
+        <div class="elenco-spunti">
+          {articoli.map((a, k) => (
+            <article class:list={['card-spunto', k === 0 && 'card-spunto--larga']}>
+              <a href={u(`/journal/${a.slug}/`)} class="card-spunto">
+                <div class:list={['foto zoom', k === 0 ? 'r-219' : 'r-169']}><Img media={a.immagine} sizes="(max-width: 700px) 100vw, 50vw" larghezza={1800} nota={t('foto da fornire')} /></div>
+                <div class="card-spunto__testi">
+                  <span class="card-case__etichetta">{CATEGORIE[a.categoria] || 'Journal'}{a.data && <> · <time datetime={String(a.data).slice(0, 10)}>{giorno(a.data)}</time></>}</span>
+                  <h2 class="card-case__titolo">{a.titolo}</h2>
+                  {a.estratto && <Testo class="testo testo--card" t={a.estratto} />}
+                  <span class="card__azione">{t('Leggi l’articolo →')}</span>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <Testo class="nota-vuota" campo="notaVuota" t={pagina.notaVuota || t('I primi articoli sono in preparazione.')} />
+      )}
+    </div>
+  </section>
+</Base>

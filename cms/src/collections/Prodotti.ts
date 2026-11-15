@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { blocchiField } from '../blocchi'
 import { pubblicatiOppureRedazione, soloRedazione } from '../access'
 import { area, coppie, immagine, link, ordine, paragrafi, seoField, slugField, testo } from '../fields'
 
@@ -218,6 +219,7 @@ export const Prodotti: CollectionConfig = {
         },
       ],
     },
+    blocchiField,
     seoField,
   ],
 }

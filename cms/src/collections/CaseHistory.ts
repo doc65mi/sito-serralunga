@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { blocchiField } from '../blocchi'
 import { pubblicatiOppureRedazione, soloRedazione } from '../access'
 import { CATEGORIE_INSTALLAZIONI } from '../globals/PaginaInstallazioni'
 import { area, coppie, immagine, ordine, paragrafi, seoField, slugField, testo } from '../fields'
@@ -182,6 +183,7 @@ export const CaseHistory: CollectionConfig = {
         },
       ],
     },
+    blocchiField,
     seoField,
   ],
 }

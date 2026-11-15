@@ -1,0 +1,108 @@
+---
+/**
+ * Articolo del Journal (Version: 1.00).
+ * Struttura pensata per motori di ricerca e assistenti: sommario in testa che risponde da solo,
+ * titoli di sezione veri, domande e risposte in fondo, dati strutturati Article e FAQPage.
+ */
+import Base from '../../layouts/Base.astro'
+import CardProdotto from '../../components/CardProdotto.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import { perSlug, SITO, type Doc } from '../../lib/cms'
+import { corpoArticolo, parole } from '../../lib/articolo'
+import { isMedia, originale } from '../../lib/media'
+import { piatto } from '../../lib/testo'
+import { INFO, percorso, traduttore } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const a = await perSlug('articoli', Astro.params.slug || '', 2, L)
+if (!a) return Astro.rewrite('/404')
+const html = corpoArticolo(a.corpo)
+const prodotti = ((a.prodotti || []) as Doc[]).filter((p) => p && typeof p === 'object')
+const designer = ((a.designer || []) as Doc[]).filter((d) => d && typeof d === 'object')
+const domande = ((a.domande || []) as Doc[]).filter((d) => d.domanda && d.risposta)
+const CATEGORIE: Record<string, string> = { storie: t('Storie'), guide: t('Guide'), designer: t('Designer'), progetti: t('Progetti') }
+const giorno = (d?: string) => (d ? new Date(d).toLocaleDateString(INFO[L].html, { day: 'numeric', month: 'long', year: 'numeric' }) : '')
+const indirizzo = `${SITO}${u(`/journal/${a.slug}/`)}`
+const jsonld: Doc[] = [{
+  '@type': 'Article',
+  '@id': `${indirizzo}#articolo`,
+  mainEntityOfPage: { '@id': `${indirizzo}#pagina` },
+  headline: piatto(a.titolo),
+  description: piatto(a.seo?.descrizione || a.estratto),
+  image: isMedia(a.immagine) ? [originale(a.immagine)] : undefined,
+  datePublished: a.data || a.createdAt,
+  dateModified: a.updatedAt,
+  author: a.autore ? { '@type': 'Person', name: a.autore } : { '@id': `${SITO}/#organizzazione` },
+  publisher: { '@id': `${SITO}/#organizzazione` },
+  articleSection: CATEGORIE[a.categoria],
+  wordCount: parole(html) || undefined,
+  about: designer.map((d) => ({ '@type': 'Person', name: d.nome, url: d.schedaPubblicata ? `${SITO}${u(`/designer/${d.slug}/`)}` : undefined })),
+  mentions: prodotti.map((p) => ({ '@type': 'Product', name: p.nome, url: p.schedaPubblicata ? `${SITO}${u(`/prodotti/${p.slug}/`)}` : undefined })),
+}]
+if (domande.length) jsonld.push({
+  '@type': 'FAQPage',
+  '@id': `${indirizzo}#faq`,
+  mainEntity: domande.map((d) => ({ '@type': 'Question', name: piatto(d.domanda), acceptedAnswer: { '@type': 'Answer', text: piatto(d.risposta) } })),
+})
+---
+<Base
+  titolo={a.seo?.titolo || `${piatto(a.titolo)} | Serralunga`}
+  descrizione={a.seo?.descrizione || a.estratto}
+  immagine={a.seo?.immagine || a.immagine}
+  percorso={[{ nome: 'Journal', url: '/journal/' }, { nome: piatto(a.titolo), url: `/journal/${a.slug}/` }]}
+  jsonld={jsonld}
+  pagina={`articolo-${a.slug}`}
+  doc={`collections/articoli/${a.id}`}
+  blocchi={a.blocchi ?? []}
+>
+  <article class="articolo">
+    <header class="intro-pagina" id="articolo-intro">
+      <div class="wrap intro-pagina__griglia">
+        <div>
+          <span class="kicker">{CATEGORIE[a.categoria] || 'Journal'}{a.data && <> · <time datetime={String(a.data).slice(0, 10)}>{giorno(a.data)}</time></>}</span>
+          <h1 class="titolo titolo--display" data-campo="titolo">{a.titolo}</h1>
+        </div>
+        <Testo class="testo" campo="estratto" t={a.estratto} />
+      </div>
+    </header>
+
+    <div class="pad"><div class="wrap"><div class="foto r-219 spunto__apertura"><Img campo="immagine" media={a.immagine} priorita larghezza={2600} nota={t('foto da fornire')} /></div></div></div>
+
+    {html && <section class="sez-int pad" id="articolo-testo"><div class="articolo__testo" set:html={html} /></section>}
+
+    {(designer.length > 0 || a.autore) && (
+      <div class="pad"><p class="testo articolo__firma">
+        {a.autore && <span>{t('Testo')}: {a.autore}</span>}
+        {designer.length > 0 && <span>{t('Design')}: {designer.map((d, k) => <>{k > 0 && ', '}{d.schedaPubblicata ? <a href={u(`/designer/${d.slug}/`)}>{d.nome}</a> : d.nome}</>)}</span>}
+      </p></div>
+    )}
+
+    {domande.length > 0 && (
+      <section class="sez-int pad blocco--carta" id="articolo-domande">
+        <div class="wrap blocco__colonna">
+          <header class="blocco__testata"><h2 class="titolo titolo--l">{t('Domande frequenti')}</h2></header>
+          <dl class="domande">
+            {domande.map((d, k) => (
+              <div class="domande__voce">
+                <dt data-campo={`domande.${k}.domanda`}>{d.domanda}</dt>
+                <Testo as="dd" class="testo" campo={`domande.${k}.risposta`} t={d.risposta} />
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+    )}
+
+    {prodotti.length > 0 && (
+      <section class="sez-int pad" id="articolo-prodotti">
+        <div class="wrap">
+          <h2 class="titolo titolo--l">{t('I prodotti citati')}</h2>
+          <div class="blocco__prodotti blocco__prodotti--spazio">{prodotti.map((p) => <CardProdotto p={p} />)}</div>
+        </div>
+      </section>
+    )}
+  </article>
+</Base>

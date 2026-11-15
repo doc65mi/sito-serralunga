@@ -84,7 +84,6 @@ const EN: Record<string, string> = {
   Citazione: 'Quote',
   'video da fornire — fermo immagine attivo': 'video to be supplied — still image active',
   Numeri: 'Figures',
-  Installazioni: 'Installations',
   'Filtra le installazioni': 'Filter the installations',
   Tutte: 'All',
   Hotel: 'Hotels',
@@ -106,7 +105,6 @@ const EN: Record<string, string> = {
   'La firma del progetto': 'The designer behind it',
   'Scheda di': 'Profile of',
   'Tutti i designer Serralunga': 'All Serralunga designers',
-  'Case history': 'Case history',
   'Dove questo\ndisegno è già di casa': 'Where this design\nis already at home',
   'Prodotti correlati': 'Related products',
   'Documentazione contract': 'Contract documentation',
@@ -140,6 +138,15 @@ const EN: Record<string, string> = {
   'Errore 404': 'Error 404',
   'Questa pagina\nnon c’è più': 'This page\nis no longer here',
   'Forse è stata spostata. Riparti dalla home o scopri i nostri designer.': 'It may have been moved. Start again from the home page or discover our designers.',
+  Storie: 'Stories',
+  Guide: 'Guides',
+  Progetti: 'Projects',
+  'Elenco degli articoli': 'List of articles',
+  'Leggi l’articolo →': 'Read the article →',
+  'I primi articoli sono in preparazione.': 'The first articles are being prepared.',
+  Testo: 'Text',
+  'Domande frequenti': 'Frequently asked questions',
+  'I prodotti citati': 'Products mentioned',
 }
 
 const DIZIONARI: Record<Lingua, Record<string, string>> = { it: {}, en: EN }

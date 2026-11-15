@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
+import { blocchiField } from '../blocchi'
 import { pubblico, soloRedazione } from '../access'
 import { area, immagine, link, seoField, testo } from '../fields'
 
@@ -14,7 +15,7 @@ export const CATEGORIE_INSTALLAZIONI = [
 /** Pagina Installazioni (Version: 1.00): macro sezioni che raccontano gli ambiti e mostrano le case history. */
 export const PaginaInstallazioni: GlobalConfig = {
   slug: 'pagina-installazioni',
-  label: 'Pagina Installazioni',
+  label: 'Installazioni',
   admin: { group: 'Pagine' },
   access: { read: pubblico, update: soloRedazione },
   fields: [
@@ -58,6 +59,7 @@ export const PaginaInstallazioni: GlobalConfig = {
         { type: 'row', fields: [testo('pulsante', 'Pulsante'), link('link', 'Link')] },
       ],
     },
+    blocchiField,
     seoField,
   ],
 }

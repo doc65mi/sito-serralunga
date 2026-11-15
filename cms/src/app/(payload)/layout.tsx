@@ -1,6 +1,10 @@
-/* File generato dal modello Payload: non modificare a mano. */
+/* File generato dal modello Payload: si aggiungono solo i caratteri e lo stile del pannello. */
 import config from '@payload-config'
 import '@payloadcms/next/css'
+import '@fontsource/jost/latin-300.css'
+import '@fontsource/jost/latin-400.css'
+import '@fontsource/cormorant-garamond/latin-400.css'
+import './pannello.css'
 import type { ServerFunctionClient } from 'payload'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import React from 'react'

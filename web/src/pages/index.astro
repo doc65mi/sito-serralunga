@@ -45,6 +45,7 @@ const tel = (a.telefono || '').replace(/[^+\d]/g, '')
   immagine={h.seo?.immagine || hero.immagine}
   pagina="home"
   doc="globals/home"
+  blocchi={h.blocchi ?? []}
   nudo
 >
   <Fragment slot="testata">
@@ -96,8 +97,8 @@ const tel = (a.telefono || '').replace(/[^+\d]/g, '')
       <div class="hf-hero__riga">
         <Testo campo="hero.testo" t={hero.testo} />
         <div class="hf-hero__azioni">
-          {hero.link1Etichetta && <a href={qui(hero.link1)} class="hf-btn-vetro" data-campo="hero.link1Etichetta">{hero.link1Etichetta}</a>}
-          {hero.link2Etichetta && <a href={qui(hero.link2)} class="hf-btn-chiaro" data-campo="hero.link2Etichetta">{hero.link2Etichetta}</a>}
+          {hero.link1Etichetta && <a href={qui(hero.link1)} class="hf-btn-vetro" data-campo="hero.link1Etichetta" data-campo-link="hero.link1" data-link={hero.link1 || ''}>{hero.link1Etichetta}</a>}
+          {hero.link2Etichetta && <a href={qui(hero.link2)} class="hf-btn-chiaro" data-campo="hero.link2Etichetta" data-campo-link="hero.link2" data-link={hero.link2 || ''}>{hero.link2Etichetta}</a>}
           {video && <button type="button" class="hf-play" data-play="hero-video" aria-label={t('Play o pausa del video')}>❙❙</button>}
         </div>
       </div>
@@ -139,7 +140,7 @@ const tel = (a.telefono || '').replace(/[^+\d]/g, '')
               ))}
             </div>
           )}
-          {chi.pulsante && <a href={qui(chi.link)} class="hf-btn-scuro" data-campo="chiSiamo.pulsante">{chi.pulsante}</a>}
+          {chi.pulsante && <a href={qui(chi.link)} class="hf-btn-scuro" data-campo="chiSiamo.pulsante" data-campo-link="chiSiamo.link" data-link={chi.link || ''}>{chi.pulsante}</a>}
         </div>
       </div>
     </section>
@@ -186,7 +187,7 @@ const tel = (a.telefono || '').replace(/[^+\d]/g, '')
           ))}
         </div>
         {inst.pulsante && (
-          <div class="hf-inst__azione"><a href={qui(inst.link)} class="hf-btn-largo" data-campo="installazioni.pulsante">{inst.pulsante}</a></div>
+          <div class="hf-inst__azione"><a href={qui(inst.link)} class="hf-btn-largo" data-campo="installazioni.pulsante" data-campo-link="installazioni.link" data-link={inst.link || ''}>{inst.pulsante}</a></div>
         )}
       </div>
     </section>

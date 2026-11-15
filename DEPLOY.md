@@ -1,6 +1,6 @@
 # Avvio e pubblicazione
 
-Version: 1.05
+Version: 1.06
 
 Quattro servizi Docker: `db` (PostgreSQL 16), `cms` (Payload), `web` (Astro) e `proxy` (Caddy). Solo il proxy è aperto verso l'esterno: **sito e pannello stanno sulla stessa porta**, il pannello su `/admin`.
 Il database e le foto caricate stanno in due volumi: `db-dati` e `media`. **Sono gli unici da salvare nei backup.**
@@ -110,3 +110,10 @@ Quando si cambia lo schema del CMS (campi nuovi): `cd cms && npx payload migrate
 ## 3. Plesk (alternativa)
 
 Con l'estensione **Docker** di Plesk si può usare `docker-compose.yml` (quello con la porta pubblicata) e un dominio con proxy inverso verso la porta del servizio `proxy`. Coolify resta consigliato perché gestisce build, certificati e rideploy da GitHub.
+
+## Dopo l'aggiornamento alla versione con AI, blocchi e Journal
+
+1. Le migrazioni partono da sole all'avvio del servizio `cms`.
+2. Lanciare una volta `npm run seed:aggiorna` dal terminale del servizio `cms`: porta le foto in AVIF e crea ciò che manca, senza toccare i testi.
+3. Entrare nel pannello, Impostazioni > Intelligenza artificiale, inserire la chiave API del fornitore scelto e spuntare «Abilita i pulsanti AI».
+4. Quando il sito va in linea, impostare `BLOCCA_INDICIZZAZIONE=0`: finché vale 1 il file robots.txt chiude il sito a motori di ricerca e assistenti.

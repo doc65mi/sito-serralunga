@@ -34,6 +34,7 @@ const pos = (a?: string) => (a === 'alto' ? 'pos-alto' : a === 'basso' ? 'pos-ba
   footerBreve
   pagina={`case-${c.slug}`}
   doc={`collections/case-history/${c.id}`}
+  blocchi={c.blocchi ?? []}
 >
   <section class="apertura" id="case-apertura" aria-labelledby="case-titolo">
     <Img campo="immagine" media={c.immagine} class="kb" priorita larghezza={2600} />

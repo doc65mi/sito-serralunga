@@ -10,7 +10,7 @@ import { percorso, traduttore } from '../../lib/lingua'
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => percorso(L, p)
-const [pagina, spunti] = await Promise.all([globale('pagina-spunti', 1, L), elenco('spunti', { depth: 1 }, L)])
+const [pagina, spunti] = await Promise.all([globale('pagina-spunti', 2, L), elenco('spunti', { depth: 1 }, L)])
 ---
 <Base
   titolo={pagina.seo?.titolo || `${piatto(pagina.titolo || t('Spunti e idee'))} | Serralunga`}
@@ -19,6 +19,7 @@ const [pagina, spunti] = await Promise.all([globale('pagina-spunti', 1, L), elen
   percorso={[{ nome: t('Spunti e idee'), url: '/spunti-e-idee/' }]}
   pagina="spunti"
   doc="globals/pagina-spunti"
+  blocchi={pagina.blocchi ?? []}
 >
   <section class="intro-pagina" id="spunti-intro">
     <div class="wrap intro-pagina__griglia">
@@ -57,7 +58,7 @@ const [pagina, spunti] = await Promise.all([globale('pagina-spunti', 1, L), elen
       {pagina.cta?.kicker && <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta.kicker}</span>}
       <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo} />
       <Testo class="testo" campo="cta.testo" t={pagina.cta?.testo} />
-      {pagina.cta?.pulsante && <a href={u(pagina.cta.link || '/#listino')} class="btn btn--chiaro" data-campo="cta.pulsante">{pagina.cta.pulsante}</a>}
+      {pagina.cta?.pulsante && <a href={u(pagina.cta.link || '/#listino')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={pagina.cta.link || ''}>{pagina.cta.pulsante}</a>}
     </div>
   </section>
 </Base>

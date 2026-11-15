@@ -15,7 +15,8 @@ import '../styles/site.css'
 
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
-import { impostazioni, SITO, type Doc } from '../lib/cms'
+import Blocchi from '../components/Blocchi.astro'
+import { impostazioni, SITO, spaziDi, type Doc } from '../lib/cms'
 import { isMedia, originale } from '../lib/media'
 import { piatto } from '../lib/testo'
 import { INFO, LINGUE, percorso as inLingua, senzaLingua, traduttore } from '../lib/lingua'
@@ -32,14 +33,20 @@ interface Props {
   doc?: string
   /** La pagina porta la propria testata e il proprio footer (slot "testata" e "piede"): è il caso della home. */
   nudo?: boolean
+  /** Blocchi aggiuntivi del documento (campo "blocchi"): compaiono in fondo alla pagina. */
+  blocchi?: Doc[] | null
+  /** Tipo di pagina per i dati strutturati (WebPage se non indicato). */
+  tipoPagina?: string
 }
-const { titolo, descrizione, immagine, percorso = [], jsonld = [], footerBreve = false, pagina, doc, nudo = false } = Astro.props
+const { titolo, descrizione, immagine, percorso = [], jsonld = [], footerBreve = false, pagina, doc, nudo = false, blocchi, tipoPagina = 'WebPage' } = Astro.props
 // Chi ha fatto l'accesso al pannello (stesso indirizzo) riceve anche lo strumento di modifica.
 const redazione = Astro.cookies.has('payload-token')
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => inLingua(L, p)
 const imp = await impostazioni(L)
+// Gli spazi fotografici del documento servono a Img.astro: si leggono prima di disegnare la pagina.
+Astro.locals.spazi = doc ? await spaziDi(doc, L) : {}
 const a = imp.azienda || {}
 const sito = SITO
 // Astro.url è già senza /en (vedi middleware): si ricostruisce l'indirizzo di ogni lingua.
@@ -79,7 +86,32 @@ const briciole = percorso.length
       })),
     }]
   : []
-const grafo = JSON.stringify({ '@context': 'https://schema.org', '@graph': [organizzazione, ...briciole, ...jsonld.map((j) => ({ inLanguage: INFO[L].html, ...j }))] })
+// Il sito e la pagina: servono ai motori di ricerca e agli assistenti per citare la fonte giusta.
+const sitoWeb = {
+  '@type': 'WebSite',
+  '@id': `${sito}/#sito`,
+  url: `${sito}/`,
+  name: imp.nomeSito || 'Serralunga',
+  publisher: { '@id': `${sito}/#organizzazione` },
+  inLanguage: LINGUE.map((l) => INFO[l].html),
+}
+const paginaWeb = {
+  '@type': tipoPagina,
+  '@id': `${canonico}#pagina`,
+  inLanguage: INFO[L].html,
+  url: canonico,
+  name: piatto(titolo),
+  description: descrizione ? piatto(descrizione) : undefined,
+  isPartOf: { '@id': `${sito}/#sito` },
+  about: { '@id': `${sito}/#organizzazione` },
+  primaryImageOfPage: og ? { '@type': 'ImageObject', url: og, caption: isMedia(immagine) ? immagine.alt : undefined } : undefined,
+}
+// Domande e risposte dei blocchi: una sola FAQPage per pagina.
+const domande = (blocchi || []).filter((b) => b?.blockType === 'domande').flatMap((b) => b.voci || []).filter((v: Doc) => v?.domanda && v?.risposta)
+const faq = domande.length
+  ? [{ '@type': 'FAQPage', '@id': `${canonico}#domande`, mainEntity: domande.map((v: Doc) => ({ '@type': 'Question', name: piatto(v.domanda), acceptedAnswer: { '@type': 'Answer', text: piatto(v.risposta) } })) }]
+  : []
+const grafo = JSON.stringify({ '@context': 'https://schema.org', '@graph': [organizzazione, sitoWeb, paginaWeb, ...briciole, ...faq, ...jsonld.map((j) => ({ inLanguage: INFO[L].html, ...j }))] })
   .replace(/</g, '\\u003c')
 const accento = imp.accento || '#A08A5F'
 ---
@@ -101,6 +133,9 @@ const accento = imp.accento || '#A08A5F'
     <meta property="og:url" content={canonico} />
     {og && <meta property="og:image" content={og} />}
     {LINGUE.filter((l) => l !== L).map((l) => <meta property="og:locale:alternate" content={INFO[l].og} />)}
+    {og && isMedia(immagine) && immagine.alt && <meta property="og:image:alt" content={immagine.alt} />}
+    <meta name="twitter:card" content={og ? 'summary_large_image' : 'summary'} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="theme-color" content="#16150F" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script type="application/ld+json" set:html={grafo} />
@@ -120,6 +155,8 @@ const accento = imp.accento || '#A08A5F'
       )}
       <main id="contenuto" data-pagina={pagina} data-doc={doc} data-lingua={L}>
         <slot />
+        <Blocchi blocchi={blocchi} />
+        {redazione && doc && blocchi !== undefined && <div class="redazione-blocchi" data-blocchi></div>}
       </main>
       {nudo ? <slot name="piede" /> : <Footer imp={imp} breve={footerBreve} />}
       {!redazione && (

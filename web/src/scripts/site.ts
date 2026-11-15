@@ -59,6 +59,113 @@ for (const frecce of $$('[data-frecce]')) {
   )
 }
 
+/*
+ * Spazi fotografici: con più foto diventano uno slider (frecce, tastiera, trascinamento);
+ * con data-lightbox le foto si aprono a tutto schermo. Markup in components/Img.astro.
+ */
+const FRECCIA = (dir: number) =>
+  `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" d="${dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}"/></svg>`
+const it = document.documentElement.lang.startsWith('it')
+const PAROLE = it
+  ? { prima: 'Foto precedente', dopo: 'Foto successiva', chiudi: 'Chiudi', apri: 'Apri la foto a tutto schermo', di: 'di' }
+  : { prima: 'Previous photo', dopo: 'Next photo', chiudi: 'Close', apri: 'Open the photo full screen', di: 'of' }
+
+/** Indirizzo della versione più grande dichiarata nel srcset della foto. */
+function piuGrande(img: HTMLImageElement): string {
+  const fonte = img.parentElement?.querySelector('source')?.getAttribute('srcset') || img.getAttribute('srcset') || ''
+  const ultima = fonte.split(',').map((v) => v.trim().split(/\s+/)[0]).filter(Boolean).pop()
+  return ultima || img.currentSrc || img.src
+}
+
+let lightbox: HTMLDialogElement | null = null
+function apriLightbox(foto: HTMLImageElement[], da: number) {
+  if (!lightbox) {
+    lightbox = document.createElement('dialog')
+    lightbox.className = 'lightbox'
+    lightbox.innerHTML = `
+      <button type="button" class="lightbox__chiudi" aria-label="${PAROLE.chiudi}">×</button>
+      <button type="button" class="lightbox__freccia lightbox__freccia--prima" aria-label="${PAROLE.prima}">${FRECCIA(-1)}</button>
+      <figure class="lightbox__figura"><img alt="" /><figcaption></figcaption></figure>
+      <button type="button" class="lightbox__freccia lightbox__freccia--dopo" aria-label="${PAROLE.dopo}">${FRECCIA(1)}</button>`
+    document.body.append(lightbox)
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || (e.target as HTMLElement).closest('.lightbox__chiudi')) lightbox!.close()
+    })
+  }
+  const box = lightbox
+  const img = box.querySelector('img')!
+  const nota = box.querySelector('figcaption')!
+  const frecce = $$<HTMLButtonElement>('.lightbox__freccia', box)
+  let k = da
+  const mostra = (n: number) => {
+    k = (n + foto.length) % foto.length
+    img.src = piuGrande(foto[k])
+    img.alt = foto[k].alt
+    nota.textContent = foto.length > 1 ? `${foto[k].alt}${foto[k].alt ? ' · ' : ''}${k + 1} ${PAROLE.di} ${foto.length}` : foto[k].alt
+  }
+  frecce.forEach((f) => (f.hidden = foto.length < 2))
+  frecce[0].onclick = () => mostra(k - 1)
+  frecce[1].onclick = () => mostra(k + 1)
+  box.onkeydown = (e) => {
+    if (e.key === 'ArrowLeft') mostra(k - 1)
+    if (e.key === 'ArrowRight') mostra(k + 1)
+  }
+  mostra(da)
+  box.showModal()
+}
+
+for (const prima of $$<HTMLElement>('picture[data-spazio]')) {
+  const cornice = prima.parentElement
+  const principale = prima.querySelector('img')
+  if (!cornice || !principale) continue
+  const foto = [principale, ...$$<HTMLImageElement>(':scope > .im--altra > img', cornice)]
+  let k = 0
+  if (foto.length > 1) {
+    cornice.classList.add('spazio')
+    if (getComputedStyle(cornice).position === 'static') cornice.classList.add('spazio--relativo')
+    const comandi = document.createElement('div')
+    comandi.className = 'spazio__comandi'
+    comandi.innerHTML = `
+      <button type="button" data-verso="-1" aria-label="${PAROLE.prima}">${FRECCIA(-1)}</button>
+      <span class="spazio__conto" aria-live="polite"></span>
+      <button type="button" data-verso="1" aria-label="${PAROLE.dopo}">${FRECCIA(1)}</button>`
+    cornice.append(comandi)
+    const conto = comandi.querySelector('.spazio__conto')!
+    const mostra = (n: number) => {
+      k = (n + foto.length) % foto.length
+      foto.forEach((f, j) => f.classList.toggle('spazio-attiva', j === k))
+      principale.classList.toggle('spazio-sotto', k !== 0)
+      conto.textContent = `${k + 1} / ${foto.length}`
+      cornice.dataset.spazioIndice = String(k)
+    }
+    comandi.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-verso]')
+      if (!b) return
+      e.preventDefault()
+      e.stopPropagation()
+      mostra(k + Number(b.dataset.verso))
+    })
+    // Trascinamento col dito
+    let x0: number | null = null
+    cornice.addEventListener('pointerdown', (e) => (x0 = e.pointerType === 'touch' ? e.clientX : null))
+    cornice.addEventListener('pointerup', (e) => {
+      if (x0 !== null && Math.abs(e.clientX - x0) > 44) mostra(k + (e.clientX < x0 ? 1 : -1))
+      x0 = null
+    })
+    mostra(0)
+  }
+  if (prima.hasAttribute('data-lightbox')) {
+    cornice.classList.add('spazio--lightbox')
+    cornice.addEventListener('click', (e) => {
+      const el = e.target as HTMLElement
+      if (document.documentElement.classList.contains('in-modifica') || el.closest('.spazio__comandi')) return
+      if (!(el instanceof HTMLImageElement) || !foto.includes(el)) return
+      e.preventDefault()
+      apriLightbox(foto, k)
+    })
+  }
+}
+
 /* Galleria della scheda prodotto */
 for (const gal of $$('[data-galleria]')) {
   const foto = $$('[data-vista]', gal)

@@ -1,6 +1,7 @@
 import { CMS_PUBLIC } from './cms'
 
 export type Media = {
+  id?: number
   url?: string
   alt?: string
   width?: number

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { blocchiField } from '../blocchi'
 import { pubblicatiOppureRedazione, soloRedazione } from '../access'
 import { area, immagine, ordine, paragrafi, seoField, slugField, testo } from '../fields'
 
@@ -45,6 +46,7 @@ export const Spunti: CollectionConfig = {
       hasMany: true,
       label: 'Designer dei pezzi',
     },
+    blocchiField,
     seoField,
   ],
 }

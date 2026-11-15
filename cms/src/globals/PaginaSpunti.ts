@@ -1,12 +1,13 @@
 import type { GlobalConfig } from 'payload'
 
+import { blocchiField } from '../blocchi'
 import { pubblico, soloRedazione } from '../access'
 import { area, link, seoField, testo } from '../fields'
 
 /** Pagina Spunti e idee (Version: 1.00): elenco degli esempi d'uso dei prodotti. */
 export const PaginaSpunti: GlobalConfig = {
   slug: 'pagina-spunti',
-  label: 'Pagina Spunti e idee',
+  label: 'Spunti e idee',
   admin: { group: 'Pagine' },
   access: { read: pubblico, update: soloRedazione },
   fields: [
@@ -25,6 +26,7 @@ export const PaginaSpunti: GlobalConfig = {
         { type: 'row', fields: [testo('pulsante', 'Pulsante'), link('link', 'Link')] },
       ],
     },
+    blocchiField,
     seoField,
   ],
 }

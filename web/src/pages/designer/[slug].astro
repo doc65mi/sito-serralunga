@@ -13,7 +13,7 @@ import { percorso, traduttore } from '../../lib/lingua'
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => percorso(L, p)
-const d = await perSlug('designer', Astro.params.slug || '', 1, L)
+const d = await perSlug('designer', Astro.params.slug || '', 2, L)
 if (!d || !d.schedaPubblicata) return Astro.rewrite('/404')
 
 const pezzi = await elenco('prodotti', { 'where[designer][equals]': d.id, depth: 1 }, L)
@@ -37,6 +37,7 @@ const jsonld = [{
   jsonld={jsonld}
   pagina={`designer-${d.slug}`}
   doc={`collections/designer/${d.id}`}
+  blocchi={d.blocchi ?? []}
 >
   <section class="bio" id="designer-bio">
     <div class="wrap bio__griglia">
