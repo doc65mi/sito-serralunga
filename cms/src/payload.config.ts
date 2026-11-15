@@ -33,6 +33,9 @@ const dirname = path.dirname(filename)
 
 const sitoPubblico = process.env.SITO_URL || 'http://localhost:4321'
 
+// In locale lo stesso sito si apre sia come localhost sia come 127.0.0.1: valgono entrambi.
+const origini = [...new Set([sitoPubblico, process.env.CMS_URL || ''].filter(Boolean).flatMap((u) => [u, u.replace('//localhost', '//127.0.0.1'), u.replace('//127.0.0.1', '//localhost')]))]
+
 // L'email parte solo se il server SMTP è configurato (vedi .env.example).
 const email = process.env.SMTP_HOST
   ? nodemailerAdapter({
@@ -108,8 +111,8 @@ export default buildConfig({
   }),
   email,
   sharp,
-  cors: [sitoPubblico].filter(Boolean),
+  cors: origini,
   // Il cookie di accesso vale solo per richieste che partono dal sito stesso.
-  csrf: [sitoPubblico, process.env.CMS_URL || ''].filter(Boolean),
+  csrf: origini,
   upload: { limits: { fileSize: 200_000_000 } },
 })
