@@ -1,5 +1,5 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * Controllo SEO del sito: legge la sitemap, apre ogni pagina (HTML del server) e segnala i problemi di
  * title, description, H1 e gerarchia dei titoli, canonical, hreflang, Open Graph, dati strutturati, alt e link.
  * Uso: node tools/controllo-seo.mjs http://127.0.0.1:8091
@@ -8,7 +8,8 @@
 import fs from 'node:fs'
 const B = (process.argv[2] || process.env.B || 'http://127.0.0.1:8080').replace(/\/$/, '');
 const strip = (s) => s.replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/g, ' ').replace(/\s+/g, ' ').trim();
-const attr = (tag, n) => { const m = new RegExp(`\\b${n}=("([^"]*)"|'([^']*)')`, 'i').exec(tag); return m ? (m[2] ?? m[3]) : null; };
+// Un attributo senza valore (alt) vale come stringa vuota.
+const attr = (tag, n) => { const m = new RegExp(`\\b${n}=("([^"]*)"|'([^']*)')`, 'i').exec(tag); if (m) return m[2] ?? m[3]; return new RegExp(`\\s${n}(\\s|/?>)`, 'i').test(tag) ? '' : null; };
 (async () => {
   // Sito in prova (BLOCCA_INDICIZZAZIONE=1): robots.txt chiude tutto e le pagine dichiarano noindex, ed è voluto.
   const inProva = /Disallow: \/\s*$/m.test(await (await fetch(B + '/robots.txt')).text());
@@ -59,7 +60,10 @@ const attr = (tag, n) => { const m = new RegExp(`\\b${n}=("([^"]*)"|'([^']*)')`,
     if (!tipi.some((t) => /BreadcrumbList/.test(t)) && p !== '/' && p !== '/en/') P(p, 'BreadcrumbList mancante');
     const imgs = [...body.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]);
     const senzaAlt = imgs.filter((x) => attr(x, 'alt') === null).length;
-    const altVuoto = imgs.filter((x) => attr(x, 'alt') === '' && attr(x, 'aria-hidden') !== 'true' && attr(x, 'role') !== 'presentation').length;
+    // Le miniature dentro un pulsante con etichetta sono decorative: l'alt vuoto lì è corretto.
+    const fuoriPulsanti = body.replace(/<(button|a)\b[^>]*aria-label=[^>]*>[\s\S]*?<\/\1>/gi, '');
+    const imgsDaDescrivere = [...fuoriPulsanti.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]);
+    const altVuoto = imgsDaDescrivere.filter((x) => attr(x, 'alt') === '' && attr(x, 'aria-hidden') !== 'true' && attr(x, 'role') !== 'presentation').length;
     const senzaMisure = imgs.filter((x) => !attr(x, 'width') || !attr(x, 'height')).length;
     const nonLazy = imgs.filter((x) => attr(x, 'loading') !== 'lazy').length;
     if (senzaAlt) P(p, `${senzaAlt} immagini senza attributo alt`);

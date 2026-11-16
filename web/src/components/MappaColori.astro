@@ -113,6 +113,9 @@ const Titolo = livello
       mappa.querySelectorAll<HTMLElement>('[data-gruppo]').forEach((g) => {
         g.hidden = f !== 'tutti' && g.dataset.gruppo !== f
       })
+      // La scheda mostra il primo colore visibile del filtro scelto.
+      const visibile = mappa.querySelector<HTMLButtonElement>('[data-gruppo]:not([hidden]) .colore')
+      if (visibile) mostra(visibile)
     })
     const mostra = (c: HTMLButtonElement) => {
       if (!scheda) return

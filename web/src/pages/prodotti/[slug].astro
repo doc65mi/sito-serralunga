@@ -49,7 +49,6 @@ const jsonld = [{
   immagine={p.seo?.immagine || viste[0]}
   percorso={[{ nome: t('Prodotti'), url: '/#collezioni' }, { nome: p.nome, url: `/prodotti/${p.slug}/` }]}
   jsonld={jsonld}
-  footerBreve
   pagina={`prodotto-${p.slug}`}
   doc={`collections/prodotti/${p.id}`}
   blocchi={p.blocchi ?? []}

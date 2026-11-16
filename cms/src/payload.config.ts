@@ -16,6 +16,7 @@ import { Prodotti } from './collections/Prodotti'
 import { Spunti } from './collections/Spunti'
 import { Materiali } from './collections/Materiali'
 import { Colori } from './collections/Colori'
+import { Pagine } from './collections/Pagine'
 import { SpaziFoto } from './collections/SpaziFoto'
 import { Articoli } from './collections/Articoli'
 import { endpointAi } from './ai/endpoints'
@@ -83,10 +84,11 @@ export default buildConfig({
         if (collectionConfig?.slug === 'spunti') return `${versoSito}/spunti-e-idee/${data?.slug}/`
         if (collectionConfig?.slug === 'prodotti') return `${versoSito}/prodotti/${data?.slug}/`
         if (collectionConfig?.slug === 'designer') return `${versoSito}/designer/${data?.slug}/`
+        if (collectionConfig?.slug === 'pagine') return `${versoSito}/${data?.slug}/`
         if (collectionConfig?.slug === 'case-history') return `${versoSito}/case-history/${data?.slug}/`
         return `${versoSito}/`
       },
-      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'materiali'],
+      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'materiali', 'pagine'],
       globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal', 'pagina-materiali'],
       breakpoints: [
         { label: 'Telefono', name: 'telefono', width: 390, height: 844 },
@@ -105,7 +107,7 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, CaseHistory, Spunti, Materiali, Colori, Articoli, Designer, Media, SpaziFoto, Richieste, Users],
+  collections: [Prodotti, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Designer, Media, SpaziFoto, Richieste, Users],
   globals: [Home, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, Impostazioni, Ai],
   endpoints: endpointAi,
   editor: lexicalEditor(),

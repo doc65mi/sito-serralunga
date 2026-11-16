@@ -1,0 +1,80 @@
+---
+/**
+ * Pagine di servizio (Version: 1.00): Contatti, Listino, FAQ, pagine legali.
+ * Contenuto dalla collezione "pagine" del pannello; le domande frequenti arrivano dal blocco
+ * "Domande e risposte" (dati strutturati FAQPage in Base.astro).
+ */
+import Base from '../layouts/Base.astro'
+import Img from '../components/Img.astro'
+import Testo from '../components/Testo.astro'
+import ModuloRichiesta from '../components/ModuloRichiesta.astro'
+import { impostazioni, perSlug, type Doc } from '../lib/cms'
+import { isMedia } from '../lib/media'
+import { piatto } from '../lib/testo'
+import { traduttore } from '../lib/lingua'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const p = await perSlug('pagine', Astro.params.slug || '', 2, L)
+if (!p) return Astro.rewrite('/404')
+const imp = await impostazioni(L)
+const a = imp.azienda || {}
+const tel = (a.telefono || '').replace(/[^+\d]/g, '')
+const contatti = p.mostraContatti
+---
+<Base
+  titolo={p.seo?.titolo || `${piatto(p.titolo)} | Serralunga`}
+  descrizione={p.seo?.descrizione || p.intro}
+  immagine={p.seo?.immagine || p.immagine}
+  percorso={[{ nome: piatto(p.titolo), url: `/${p.slug}/` }]}
+  tipoPagina={p.slug === 'contatti' ? 'ContactPage' : 'WebPage'}
+  pagina={`pagina-${p.slug}`}
+  doc={`collections/pagine/${p.id}`}
+  blocchi={p.blocchi ?? []}
+>
+  <article>
+    <header class="intro-pagina" id="pagina-intro">
+      <div class="wrap intro-pagina__griglia">
+        <div>
+          {p.kicker && <span class="kicker" data-campo="kicker">{p.kicker}</span>}
+          <h1 class="titolo titolo--display" data-campo="titolo">{p.titolo}</h1>
+        </div>
+        {p.intro && <Testo class="testo" campo="intro" t={p.intro} />}
+      </div>
+    </header>
+
+    {isMedia(p.immagine) && (
+      <div class="pad"><div class="wrap"><div class="foto r-219"><Img campo="immagine" media={p.immagine} priorita larghezza={2600} /></div></div></div>
+    )}
+
+    {(contatti || (p.paragrafi || []).length > 0) && (
+      <section class="sez-int pad" id="pagina-testo">
+        <div class="wrap pagina-servizio">
+          {(p.paragrafi || []).length > 0 && (
+            <div class="pagina-servizio__testo">
+              {p.paragrafi.map((x: Doc, k: number) => <Testo class="testo testo--forte" campo={`paragrafi.${k}.testo`} t={x.testo} />)}
+            </div>
+          )}
+          {contatti && (
+            <address class="pagina-servizio__dati">
+              <span class="kicker">{a.marchio || 'Serralunga'}</span>
+              <span>{a.ragioneSociale}<br />{a.indirizzo}<br />{a.cap} {a.citta} ({a.provincia}), {a.paese}</span>
+              {a.telefono && <a href={`tel:${tel}`}>{a.telefono}</a>}
+              {a.email && <a href={`mailto:${a.email}`}>{a.email}</a>}
+              {a.piva && <span>{t('P.IVA')} {a.piva}{a.rea ? ` · REA ${a.rea}` : ''}</span>}
+            </address>
+          )}
+        </div>
+      </section>
+    )}
+  </article>
+
+  {p.modulo?.mostra && (
+    <section class="sez-int pad scuro" id="pagina-modulo" aria-labelledby="pagina-modulo-titolo">
+      <div class="centro centro--s">
+        <h2 class="titolo titolo--cta" id="pagina-modulo-titolo" data-campo="modulo.titolo">{p.modulo.titolo || t('Raccontateci il vostro progetto')}</h2>
+        <ModuloRichiesta pulsante={p.modulo.pulsante || undefined} grazie={p.modulo.grazie || undefined} pagina={`/${p.slug}/`} />
+      </div>
+    </section>
+  )}
+</Base>

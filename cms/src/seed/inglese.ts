@@ -325,6 +325,52 @@ Object.assign(EN, {
     'Ideas for furnishing terraces, gardens, outdoor dining areas and poolsides with Serralunga pots, seating and lighting.',
 })
 
+// Navigazione 2026-11 (menu superiore e inferiore, footer) e pagine di servizio
+Object.assign(EN, {
+  Contatti: 'Contacts',
+  'Richiedi catalogo': 'Request catalogue',
+  Listino: 'Price list',
+  Faq: 'FAQ',
+  Materiali: 'Materials',
+  'Polietilene e Clean Fighter': 'Polyethylene and Clean Fighter',
+  Colori: 'Colours',
+  Sostenibilità: 'Sustainability',
+  Catalogo: 'Catalogue',
+  Sedute: 'Seating',
+  Tavoli: 'Tables',
+  'Pool & lettini': 'Pool & loungers',
+  Illuminazione: 'Lighting',
+  Accessori: 'Accessories',
+  'La nostra storia': 'Our story',
+  Produzione: 'Production',
+  'I colori': 'Colours',
+  Residenziale: 'Residential',
+  Urbano: 'Urban',
+  Cataloghi: 'Catalogues',
+  'Area riservata': 'Reserved area',
+  Professionisti: 'Professionals',
+  'Spunti e idee': 'Ideas and inspiration',
+  'Domande frequenti': 'Frequently asked questions',
+  'Listino riservato': 'Trade price list',
+  'Serralunga, Biella dal 1825': 'Serralunga, Biella since 1825',
+  'Per progetti contract, forniture e informazioni sui prodotti scriveteci o chiamateci: il nostro ufficio contract vi ricontatterà.':
+    'For contract projects, supplies and product information, write to us or call us: our contract office will get back to you.',
+  'Raccontateci il vostro progetto': 'Tell us about your project',
+  'Invia la richiesta': 'Send the request',
+  'Grazie: il nostro ufficio contract vi ricontatterà a breve.': 'Thank you: our contract office will get back to you shortly.',
+  'Contatti | Serralunga Contract': 'Contacts | Serralunga Contract',
+  'Contatti di Serralunga, Biella: ufficio contract per hotel, ristoranti, architetti e rivenditori. Scriveteci per forniture, campioni colore e progetti.':
+    'Contact Serralunga, Biella: contract office for hotels, restaurants, architects and dealers. Write to us for supplies, colour samples and projects.',
+  'Contract e rivenditori': 'Contract and dealers',
+  'Richiedi il listino': 'Request the price list',
+  'Grazie: riceverete catalogo, cartella colori e listino entro 24 ore lavorative.':
+    'Thank you: you will receive the catalogue, colour chart and price list within 24 working hours.',
+  'Listino riservato B2B | Serralunga Contract': 'Trade price list | Serralunga Contract',
+  'Listino Serralunga riservato a hotel, ristoranti, studi di architettura e rivenditori: richiedete catalogo, cartella colori e condizioni dedicate.':
+    'Serralunga trade price list for hotels, restaurants, architecture studios and dealers: request the catalogue, colour chart and dedicated terms.',
+  'Domande frequenti | Serralunga': 'FAQ | Serralunga',
+})
+
 const SALTA = new Set(['id', 'slug', 'createdAt', 'updatedAt', '_status', 'link', 'link1', 'link2', 'hex', 'email', 'url'])
 
 /** Unisce italiano e inglese: resta l'inglese già scritto, altrimenti la traduzione, altrimenti l'italiano. */
@@ -351,7 +397,7 @@ const pulisci = (d: Record<string, unknown>) => {
 }
 
 const GLOBALI = ['impostazioni', 'home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti'] as const
-const COLLEZIONI = ['designer', 'case-history', 'prodotti', 'spunti'] as const
+const COLLEZIONI = ['designer', 'case-history', 'prodotti', 'spunti', 'pagine'] as const
 
 /**
  * Riempie i campi inglesi ancora vuoti. `solo` limita il lavoro ad alcuni documenti

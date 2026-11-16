@@ -30,11 +30,10 @@ interface Props {
   immagine?: unknown
   percorso?: { nome: string; url: string }[]
   jsonld?: Doc[]
-  footerBreve?: boolean
   pagina?: string
   /** Documento del CMS mostrato dalla pagina, per la modifica dalla pagina: 'globals/home' o 'collections/prodotti/12'. */
   doc?: string
-  /** La pagina porta la propria testata e il proprio footer (slot "testata" e "piede"): è il caso della home. */
+  /** Pagina con apertura a tutto schermo e stile della home (classi hf-*). Testata e footer restano quelli comuni. */
   nudo?: boolean
   /** Blocchi aggiuntivi del documento (campo "blocchi"): compaiono in fondo alla pagina. */
   blocchi?: Doc[] | null
@@ -47,7 +46,7 @@ interface Props {
   /** Tipo Open Graph: 'article' per articoli e case history. */
   tipoOg?: 'website' | 'article'
 }
-const { titolo, descrizione, immagine, percorso = [], jsonld = [], footerBreve = false, pagina, doc, nudo = false, blocchi, tipoPagina = 'WebPage', percorsoNascosto = false, noindex = false, tipoOg = 'website' } = Astro.props
+const { titolo, descrizione, immagine, percorso = [], jsonld = [], pagina, doc, nudo = false, blocchi, tipoPagina = 'WebPage', percorsoNascosto = false, noindex = false, tipoOg = 'website' } = Astro.props
 // Chi ha fatto l'accesso al pannello (stesso indirizzo) riceve anche lo strumento di modifica.
 const redazione = Astro.cookies.has('payload-token')
 const L = Astro.locals.lingua
@@ -169,7 +168,7 @@ const accento = imp.accento || '#A08A5F'
   <body>
     <a class="salta" href="#contenuto">{t('Vai al contenuto')}</a>
     <div class:list={['pagina', nudo && 'pagina--home', imp.mostraDidascalie === false && 'senza-didascalie']}>
-      {nudo ? <slot name="testata" /> : <Header imp={imp} corrente={base} />}
+      <Header imp={imp} corrente={base} />
       {percorso.length > 0 && !percorsoNascosto && (
         <nav aria-label={t('Percorso')}>
           <ol class="percorso">
@@ -183,7 +182,7 @@ const accento = imp.accento || '#A08A5F'
         <Blocchi blocchi={blocchi} />
         {redazione && doc && blocchi !== undefined && <div class="redazione-blocchi" data-blocchi></div>}
       </main>
-      {nudo ? <slot name="piede" /> : <Footer imp={imp} breve={footerBreve} />}
+      <Footer imp={imp} />
       {!redazione && (
         <aside class="accesso-redazione" aria-label={t('Redazione')}>
           <a href={`/admin/login?redirect=${encodeURIComponent(u(base))}`} rel="nofollow">{t('Accesso redazione')}</a>

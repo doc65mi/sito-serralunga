@@ -421,9 +421,41 @@ export async function completaMateriali(payload: Payload, media: Media, log: (m:
 
   // 2. Pagine dei materiali
   let prodotti: ProdottoShop[] = []
+  /** Pezzi del materiale da products.json (vuoto se serralunga.com non risponde: si riprova al prossimo aggiornamento). */
+  const pezziDi = async (m: Materiale) => {
+    const out: { nome: Bi; tipo: Bi; immagine: number | null; link: string; fonte: string }[] = []
+    if (!m.pezzi) return out
+    const filtro = m.pezzi.filtro
+    try {
+      if (!prodotti.length) prodotti = await catalogo()
+      const scelti = prodotti.filter(
+        (p) =>
+          !RICAMBI.test(`${p.product_type} ${p.title} ${p.handle}`) &&
+          (filtro.test(p.title) || filtro.test(p.handle) || p.tags.some((t) => filtro.test(t))),
+      )
+      for (const p of scelti.slice(0, 36)) {
+        const foto = p.images?.[0]?.src
+        out.push({
+          nome: b(p.title, p.titoloEn || p.title),
+          tipo: b(p.product_type || '', p.tipoEn || p.product_type || ''),
+          immagine: foto ? await media(foto.replace(/^\/\//, 'https://'), p.title.slice(0, 120)) : null,
+          link: `/prodotti/${p.handle}/`,
+          fonte: p.handle,
+        })
+      }
+    } catch (err) {
+      payload.logger.warn(`[seed] materiali/${m.slug}: pezzi non letti da serralunga.com: ${(err as Error).message}`)
+    }
+    return out
+  }
+
   for (const m of MATERIALI) {
     const c = await payload.find({ collection: 'materiali', where: { slug: { equals: m.slug } }, limit: 1, depth: 0, draft: true })
-    if (c.docs[0]) continue
+    const esistente = c.docs[0] as unknown as Esistente | undefined
+    if (esistente) {
+      await completaEsistente(payload, media, log, m, esistente, pezziDi)
+      continue
+    }
     const immagine = await media(m.foto, m.alt.it)
     const capFoto: (number | null)[] = []
     for (const k of m.capitoli) capFoto.push(k.foto ? await media(k.foto, (k.alt || m.alt).it) : null)
@@ -432,31 +464,7 @@ export async function completaMateriali(payload: Payload, media: Media, log: (m:
       const id = await media(g.foto, g.alt.it)
       if (id) galleria.push({ alt: g.alt, id })
     }
-
-    const pezzi: { nome: Bi; tipo: Bi; immagine: number | null; link: string; fonte: string }[] = []
-    if (m.pezzi) {
-      const filtro = m.pezzi.filtro
-      try {
-        if (!prodotti.length) prodotti = await catalogo()
-        const scelti = prodotti.filter(
-          (p) =>
-            !RICAMBI.test(`${p.product_type} ${p.title} ${p.handle}`) &&
-            (filtro.test(p.title) || filtro.test(p.handle) || p.tags.some((t) => filtro.test(t))),
-        )
-        for (const p of scelti.slice(0, 36)) {
-          const foto = p.images?.[0]?.src
-          pezzi.push({
-            nome: b(p.title, p.titoloEn || p.title),
-            tipo: b(p.product_type || '', p.tipoEn || p.product_type || ''),
-            immagine: foto ? await media(foto.replace(/^\/\//, 'https://'), p.title.slice(0, 120)) : null,
-            link: `/prodotti/${p.handle}/`,
-            fonte: p.handle,
-          })
-        }
-      } catch (err) {
-        payload.logger.warn(`[seed] materiali/${m.slug}: pezzi non letti da serralunga.com: ${(err as Error).message}`)
-      }
-    }
+    const pezzi = await pezziDi(m)
 
     const dati = (l: 'it' | 'en', righe?: Righe) => ({
       titolo: m.titolo[l],
@@ -509,5 +517,80 @@ export async function completaMateriali(payload: Payload, media: Media, log: (m:
       }
     }
     log(`cartella colori: ${COLORI.length} colori`)
+  } else {
+    // Campioni non scaricati la volta precedente: si riprova solo su quelli del seed ancora vuoti.
+    const r = await payload.find({ collection: 'colori', limit: 200, depth: 0, sort: 'ordine' })
+    let aggiunti = 0
+    for (const doc of r.docs as unknown as { id: number; codice: string; nome: string; campione?: number | null }[]) {
+      if (doc.campione) continue
+      const c = COLORI.find((x) => x.codice === doc.codice && x.nome === doc.nome && x.foto)
+      if (!c?.foto) continue
+      const campione = await media(c.foto, `Campione colore ${c.nome} (${c.codice})`)
+      if (campione) {
+        await payload.update({ collection: 'colori', id: doc.id, data: { campione } as never, depth: 0 })
+        aggiunti++
+      }
+    }
+    if (aggiunti) log(`cartella colori: aggiunti ${aggiunti} campioni`)
   }
+}
+
+type Esistente = {
+  id: number
+  immagine?: number | null
+  capitoli?: ({ id: string; immagine?: number | null } & Record<string, unknown>)[] | null
+  galleria?: unknown[] | null
+  pezzi?: unknown[] | null
+}
+
+/**
+ * Pagina già presente: si aggiungono solo le foto e i pezzi che la volta precedente non si erano
+ * potuti scaricare. Testi e righe modificati dalla redazione restano come sono.
+ */
+async function completaEsistente(
+  payload: Payload,
+  media: Media,
+  log: (m: string) => void,
+  m: Materiale,
+  doc: Esistente,
+  pezziDi: (m: Materiale) => Promise<{ nome: Bi; tipo: Bi; immagine: number | null; link: string; fonte: string }[]>,
+) {
+  const dati: Record<string, unknown> = {}
+  if (!doc.immagine) {
+    const id = await media(m.foto, m.alt.it)
+    if (id) dati.immagine = id
+  }
+  const capitoli = doc.capitoli || []
+  if (capitoli.some((r, k) => !r.immagine && m.capitoli[k]?.foto)) {
+    const righe = []
+    let nuove = 0
+    for (const [k, r] of capitoli.entries()) {
+      const s = m.capitoli[k]
+      const immagine = !r.immagine && s?.foto ? await media(s.foto, (s.alt || m.alt).it) : r.immagine
+      if (immagine && !r.immagine) nuove++
+      righe.push({ ...r, immagine })
+    }
+    if (nuove) dati.capitoli = righe
+  }
+  let galleria: { alt: Bi; id: number }[] = []
+  if (!doc.galleria?.length && m.galleria?.length) {
+    for (const g of m.galleria) {
+      const id = await media(g.foto, g.alt.it)
+      if (id) galleria.push({ alt: g.alt, id })
+    }
+    if (galleria.length) dati.galleria = galleria.map((x) => ({ immagine: x.id, didascalia: x.alt.it }))
+  }
+  let pezzi: Awaited<ReturnType<typeof pezziDi>> = []
+  if (!doc.pezzi?.length && m.pezzi) {
+    pezzi = await pezziDi(m)
+    if (pezzi.length) dati.pezzi = pezzi.map((x) => ({ nome: x.nome.it, tipo: x.tipo.it, immagine: x.immagine, link: x.link, fonte: x.fonte }))
+  }
+  if (!Object.keys(dati).length) return
+  const salvato = (await payload.update({ collection: 'materiali', id: doc.id, data: dati as never, depth: 0 })) as unknown as Record<string, { id?: string }[] | undefined>
+  // Righe nuove (galleria, pezzi): testi inglesi sulle stesse righe.
+  const en: Record<string, unknown> = {}
+  if (dati.galleria) en.galleria = galleria.map((x, k) => ({ id: salvato.galleria?.[k]?.id, immagine: x.id, didascalia: x.alt.en }))
+  if (dati.pezzi) en.pezzi = pezzi.map((x, k) => ({ id: salvato.pezzi?.[k]?.id, nome: x.nome.en, tipo: x.tipo.en, immagine: x.immagine, link: x.link, fonte: x.fonte }))
+  if (Object.keys(en).length) await payload.update({ collection: 'materiali', id: doc.id, locale: 'en', data: en as never, depth: 0 })
+  log(`materiali/${m.slug}: completati ${Object.keys(dati).join(', ')}`)
 }
