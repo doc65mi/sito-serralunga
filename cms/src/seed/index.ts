@@ -235,6 +235,7 @@ async function completaPagine() {
   }
   const imp = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as {
     menu?: { etichetta?: string; link?: string; evidenza?: boolean }[]
+    menuSuperiore?: unknown[]
   }
   const menu = [...(imp.menu || [])]
   let cambiato = false
@@ -244,7 +245,9 @@ async function completaPagine() {
       cambiato = true
     }
   }
-  if (!menu.some((v) => v.link === '/spunti-e-idee/')) {
+  // Solo per il vecchio menu a una riga: con la navigazione 2.x Spunti e idee sta nella tendina di Progetti.
+  const navNuova = !!imp.menuSuperiore?.length
+  if (!navNuova && !menu.some((v) => v.link === '/spunti-e-idee/')) {
     const dopo = menu.findIndex((v) => v.link === '/designer/')
     menu.splice(dopo >= 0 ? dopo + 1 : menu.filter((v) => !v.evidenza).length, 0, { etichetta: 'Spunti e idee', link: '/spunti-e-idee/' })
     cambiato = true
@@ -259,6 +262,33 @@ async function completaPagine() {
   if (!nav.menuSuperiore?.length) {
     await payload.updateGlobal({ slug: 'impostazioni', data: { menuSuperiore: MENU_SUPERIORE, menu: MENU, colonne: COLONNE } as never })
     log('navigazione: menu superiore, menu inferiore con tendine e colonne del footer')
+  }
+  // Navigazione 2.01: Installazioni e Spunti e idee sotto Progetti, Designer sotto Heritage (alberatura:
+  // Mondo Serralunga > Designer). Si aggiungono solo le sottovoci mancanti, il resto del menu non cambia.
+  {
+    type Voce = { id?: string; etichetta?: string; link?: string; voci?: Voce[] }
+    const imp2 = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { menu?: Voce[] }
+    let menu2: Voce[] = JSON.parse(JSON.stringify(imp2.menu || []))
+    const aggiunte: string[] = []
+    // Voce "Spunti e idee" di primo livello aggiunta per errore dal vecchio aggiornamento: ora è una sottovoce.
+    const prima = menu2.length
+    menu2 = menu2.filter((v) => !(v.link === '/spunti-e-idee/' && !v.voci?.length))
+    if (menu2.length !== prima) aggiunte.push('(tolta Spunti e idee dal primo livello)')
+    for (const modello of MENU) {
+      const voce = menu2.find((v) => v.link === modello.link)
+      if (!voce) continue
+      voce.voci = voce.voci || []
+      for (const x of modello.voci || []) {
+        if (!voce.voci.some((y) => y.link === x.link)) {
+          voce.voci.push({ ...x })
+          aggiunte.push(`aggiunta ${voce.etichetta} > ${x.etichetta}`)
+        }
+      }
+    }
+    if (aggiunte.length) {
+      await payload.updateGlobal({ slug: 'impostazioni', data: { menu: menu2 } as never })
+      log(`menu: ${aggiunte.join(', ')}`)
+    }
   }
   // Pagine di servizio (Contatti, Listino, FAQ): si creano solo se mancano.
   for (const pg of PAGINE) {
