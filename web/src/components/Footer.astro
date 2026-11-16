@@ -1,50 +1,54 @@
 ---
-/** Footer completo (home, designer) o breve (scheda prodotto, case history), come nei template. */
-import { isMedia, urlFile } from '../lib/media'
+/**
+ * Footer unico di tutto il sito, home compresa (Version: 2.00): marchio, colonne di link,
+ * contatti e riga legale. Si cambia nel pannello: Impostazioni del sito > Footer.
+ */
+import { isMedia, originale, src, tipoRidotte } from '../lib/media'
+import { esterno } from '../lib/testo'
 import type { Doc } from '../lib/cms'
 import { percorso, traduttore } from '../lib/lingua'
-interface Props { imp: Doc; breve?: boolean }
-const { imp, breve = false } = Astro.props
+interface Props { imp: Doc }
+const { imp } = Astro.props
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => percorso(L, p)
 const a = imp.azienda || {}
 const logo = isMedia(imp.logo) ? imp.logo : null
+const logoAvif = logo && tipoRidotte(logo) === 'image/avif' ? src(logo, 400) : ''
+const nome = imp.nomeSito || 'Serralunga'
 const copyright = (imp.copyright || '© {anno} Serralunga').replace('{anno}', String(new Date().getFullYear()))
 const tel = (a.telefono || '').replace(/[^+\d]/g, '')
+const fuori = (link?: string) => (esterno(link) ? { target: '_blank', rel: 'noopener' } : {})
 ---
-<footer class:list={['footer', breve && 'footer--breve']}>
-  {!breve && (
-    <div class="wrap footer__griglia">
-      <div class="footer__marchio">
-        {logo ? <img src={urlFile(logo)} alt={imp.nomeSito || 'Serralunga'} width={logo.width} height={logo.height} loading="lazy" /> : <span class="logo__testo">{imp.nomeSito}</span>}
-        {imp.descrizione && <p>{imp.descrizione}</p>}
-      </div>
-      {(imp.colonne || []).map((c: Doc) => (
-        <nav class="footer__col" aria-label={c.titolo}>
-          <span class="footer__titolo">{c.titolo}</span>
-          {(c.link || []).map((l: Doc) => <a href={u(l.link) || '#'}>{l.etichetta}</a>)}
-        </nav>
-      ))}
-      <div class="footer__col">
-        <span class="footer__titolo">{t('Contatti')}</span>
-        <address>
-          <span>{a.ragioneSociale} — {a.indirizzo}<br />{a.cap} {a.citta}, {a.paese}</span>
-          {a.email && <a href={`mailto:${a.email}`}>{a.email}</a>}
-          {a.telefono && <a href={`tel:${tel}`}>{a.telefono}</a>}
-          {a.piva && <span>{t('P.IVA')} {a.piva}</span>}
-        </address>
-      </div>
+<footer class="piede">
+  <div class="piede__griglia">
+    <div class="piede__marchio">
+      {logo ? (
+        <picture>
+          {logoAvif && <source srcset={logoAvif} type="image/avif" />}
+          <img src={originale(logo)} alt={nome} width={logo.width} height={logo.height} loading="lazy" decoding="async" />
+        </picture>
+      ) : <span class="logo__testo">{nome}</span>}
+      {imp.descrizione && <p>{imp.descrizione}</p>}
     </div>
-  )}
-  <div class="wrap footer__fondo">
+    {(imp.colonne || []).map((c: Doc) => (
+      <nav class="piede__col" aria-label={c.titolo}>
+        <span class="piede__titolo">{c.titolo}</span>
+        {(c.link || []).map((l: Doc) => <a href={u(l.link) || '#'} {...fuori(l.link)}>{l.etichetta}</a>)}
+      </nav>
+    ))}
+    <address class="piede__col">
+      <span class="piede__titolo">{t('Contatti')}</span>
+      <span>{a.ragioneSociale} — {a.indirizzo}<br />{a.cap} {a.citta}, {a.paese}</span>
+      {a.email && <a href={`mailto:${a.email}`}>{a.email}</a>}
+      {a.telefono && <a href={`tel:${tel}`}>{a.telefono}</a>}
+      {a.piva && <span>{t('P.IVA')} {a.piva}</span>}
+    </address>
+  </div>
+  <div class="piede__fondo">
     <span>{copyright}</span>
-    {breve ? (
-      <span>{a.ragioneSociale} — {a.citta}, {a.paese} · {a.email}</span>
-    ) : (
-      <span class="footer__legali">
-        {(imp.legali || []).map((l: Doc) => (l.link ? <a href={u(l.link)}>{l.etichetta}</a> : <span>{l.etichetta}</span>))}
-      </span>
-    )}
+    <span class="piede__legali">
+      {(imp.legali || []).map((l: Doc) => (l.link ? <a href={u(l.link)}>{l.etichetta}</a> : <span>{l.etichetta}</span>))}
+    </span>
   </div>
 </footer>

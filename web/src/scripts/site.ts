@@ -1,5 +1,5 @@
 /**
- * site.ts — comportamenti condivisi (Version: 1.00)
+ * site.ts — comportamenti condivisi (Version: 1.01)
  * Ricavati dai template (classe Component di ogni .dc.html): slide della home,
  * caroselli, galleria prodotto, comparsa allo scorrimento, video, modulo richieste.
  */
@@ -16,13 +16,34 @@ for (const btn of $$<HTMLButtonElement>('[data-menu]')) {
     const aperto = header?.classList.toggle('aperto') ?? false
     btn.setAttribute('aria-expanded', String(aperto))
   })
-  header?.querySelectorAll('.nav a').forEach((a) =>
+  header?.querySelectorAll('.testa__menu a').forEach((a) =>
     a.addEventListener('click', () => {
       header.classList.remove('aperto')
       btn.setAttribute('aria-expanded', 'false')
     }),
   )
 }
+
+/* Tendine del menu principale: su schermi stretti si aprono con la freccia accanto alla voce */
+for (const btn of $$<HTMLButtonElement>('[data-tendina-apri]')) {
+  btn.addEventListener('click', () => {
+    const voce = btn.closest('[data-tendina]')
+    const aperta = voce?.classList.toggle('aperta') ?? false
+    btn.setAttribute('aria-expanded', String(aperta))
+  })
+}
+/* Esc chiude menu e tendine */
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return
+  for (const voce of $$('[data-tendina].aperta')) {
+    voce.classList.remove('aperta')
+    voce.querySelector('[data-tendina-apri]')?.setAttribute('aria-expanded', 'false')
+  }
+  for (const testa of $$('[data-header].aperto')) {
+    testa.classList.remove('aperto')
+    testa.querySelector('[data-menu]')?.setAttribute('aria-expanded', 'false')
+  }
+})
 
 /* Slide della home: cambio ogni 7 secondi, punti, frecce */
 for (const hero of $$('[data-hero]')) {
