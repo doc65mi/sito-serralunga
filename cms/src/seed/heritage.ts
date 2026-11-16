@@ -19,8 +19,6 @@ type Dati = Record<string, unknown>
 
 const F = 'https://serralunga.com/cdn/shop/files'
 const P = 'https://serralunga.com/cdn/shop/products'
-// Tavola storica della landing "L'originale vaso italiano": una foto per tappa.
-const H = 'https://serralunga.com/pages/assets/images/heritage'
 
 /** Foto: indirizzo, testo alternativo italiano e inglese. Si chiede sempre l'originale (min = 1600). */
 const FOTO = {
@@ -289,7 +287,9 @@ export async function paginaHeritageDati(media: Media): Promise<Dati> {
       anno: t.anno,
       titolo: t.titolo,
       testo: t.testo,
-      immagine: t.foto ? await media(`${H}/${t.foto}`, t.alt || `${t.anno}, ${t.titolo}`) : null,
+      // Le foto della tavola storica non sono pubblicate su serralunga.com (la landing le chiama
+      // con un percorso che risponde 404): si caricano dalla pagina quando il cliente le fornisce.
+      immagine: null,
     })
   }
   return {

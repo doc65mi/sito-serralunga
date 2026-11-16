@@ -16,6 +16,8 @@ import { percorso } from '../../lib/lingua'
 const L = Astro.locals.lingua
 const u = (p?: string) => percorso(L, p)
 const en = L === 'en'
+// Chi ha fatto l'accesso vede anche gli spazi vuoti delle foto della timeline, per caricarle dalla pagina.
+const redazione = Astro.cookies.has('payload-token')
 const [p, sottopagine, designer] = await Promise.all([
   globale('pagina-heritage', 2, L),
   elenco('pagine-heritage', { depth: 1, sort: 'ordine' }, L).catch(() => [] as Doc[]),
@@ -102,7 +104,7 @@ const jsonld: Doc[] = tappe.length
           {tappe.map((x, k) => (
             <li class:list={['tappa', !x.immagine && 'tappa--fine']} data-reveal>
               <span class="tappa__anno" data-campo={`timeline.tappe.${k}.anno`}>{x.anno}</span>
-              {x.immagine && <div class="foto r-43"><Img campo={`timeline.tappe.${k}.immagine`} media={x.immagine} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={900} /></div>}
+              {(x.immagine || redazione) && <div class="foto r-43"><Img campo={`timeline.tappe.${k}.immagine`} media={x.immagine} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={900} nota={en ? 'archive photo to be supplied' : 'foto d’archivio da fornire'} /></div>}
               <h3 class="tappa__titolo" data-campo={`timeline.tappe.${k}.titolo`}>{x.titolo}</h3>
               <Testo class="testo testo--s" campo={`timeline.tappe.${k}.testo`} t={x.testo} />
             </li>
