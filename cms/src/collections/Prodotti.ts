@@ -21,7 +21,25 @@ export const MATERIALI = [
   { label: 'Decorato', value: 'decorato' },
 ]
 
-/** Template: template/Aqua Lounger - Scheda tecnica.dc.html */
+/**
+ * Version: 1.01. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * 1.01: campioni dalla cartella colori (quadrati 30×30) e disegno quotato generato dalle misure.
+ */
+
+/** Sagome del disegno quotato (componente web/src/components/DisegnoQuotato.astro). */
+export const FORME_DISEGNO = [
+  { label: 'Pianta quadrata o rettangolare (cubo, colonna, fioriera)', value: 'parallelepipedo' },
+  { label: 'Cilindro (pianta tonda, fianchi dritti)', value: 'cilindro' },
+  { label: 'Vaso tondo svasato (più largo in alto)', value: 'troncoConico' },
+]
+
+const cm = (name: string, label: string, condizione: (d: Record<string, unknown>) => boolean, description?: string) => ({
+  name,
+  type: 'number' as const,
+  label,
+  min: 0,
+  admin: { step: 0.1, description, condition: (_: unknown, s: Record<string, unknown>) => !!s?.forma && condizione(s) },
+})
 export const Prodotti: CollectionConfig = {
   slug: 'prodotti',
   labels: { singular: 'Prodotto', plural: 'Prodotti' },
@@ -185,6 +203,17 @@ export const Prodotti: CollectionConfig = {
               ],
             },
             area('notaColori', 'Nota sotto i colori'),
+            {
+              name: 'campioni',
+              type: 'relationship',
+              relationTo: 'colori',
+              hasMany: true,
+              label: 'Colori disponibili dalla cartella colori (quadrati 30×30)',
+              admin: {
+                description:
+                  'Scegli i colori della cartella (Contenuti › Colori) in cui il prodotto è a listino: nella scheda compaiono come quadrati 30×30 con codice e nome, accanto alle dimensioni. Il colore viene dal campione della cartella.',
+              },
+            },
             coppie('dimensioni', 'Dimensioni'),
             testo('pulsante', 'Pulsante principale', { defaultValue: 'Richiedi scheda e campionatura' }),
           ],
@@ -200,7 +229,45 @@ export const Prodotti: CollectionConfig = {
               fields: [
                 area('titolo', 'Titolo', { defaultValue: 'Disegno\ne proporzioni' }),
                 area('testo', 'Testo'),
-                immagine('immagine', 'Disegno quotato'),
+                {
+                  name: 'quote',
+                  type: 'group',
+                  label: 'Disegno quotato automatico',
+                  admin: {
+                    description:
+                      'Scegli la sagoma e inserisci le misure dichiarate (in cm): la scheda disegna prospetto e pianta in scala con le quote, accanto alle dimensioni. Non inserire misure non verificate.',
+                  },
+                  fields: [
+                    {
+                      name: 'forma',
+                      type: 'select',
+                      label: 'Sagoma',
+                      options: FORME_DISEGNO,
+                      admin: { description: 'Vuoto = nessun disegno automatico.' },
+                    },
+                    {
+                      type: 'row',
+                      fields: [
+                        cm('larghezza', 'Larghezza / lunghezza (cm)', (s) => s.forma === 'parallelepipedo'),
+                        cm('profondita', 'Profondità (cm)', (s) => s.forma === 'parallelepipedo'),
+                        cm('diametro', 'Diametro massimo Ø (cm)', (s) => s.forma !== 'parallelepipedo'),
+                        cm('diametroBase', 'Diametro alla base (cm)', (s) => s.forma === 'troncoConico', 'Se non è dichiarato lascialo vuoto: la svasatura del disegno resta indicativa e senza quota.'),
+                        cm('altezza', 'Altezza (cm)', () => true),
+                        {
+                          name: 'peso',
+                          type: 'number',
+                          label: 'Peso (kg)',
+                          min: 0,
+                          admin: { step: 0.1, condition: (_: unknown, s: Record<string, unknown>) => !!s?.forma },
+                        },
+                      ],
+                    },
+                    testo('fonte', 'Fonte delle misure', {
+                      admin: { description: 'Es. Scheda serralunga.com. Compare sotto il disegno.' },
+                    }),
+                  ],
+                },
+                immagine('immagine', 'Disegno quotato (immagine)'),
                 {
                   name: 'file',
                   type: 'upload',

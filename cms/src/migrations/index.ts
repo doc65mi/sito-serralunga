@@ -9,6 +9,7 @@ import * as migration_20261116_082127_sezione_contract from './20261116_082127_s
 import * as migration_20261116_083258_materiali_colori from './20261116_083258_materiali_colori';
 import * as migration_20261116_083653_catalogo_categorie from './20261116_083653_catalogo_categorie';
 import * as migration_20261116_084128_heritage from './20261116_084128_heritage';
+import * as migration_20261116_174732_disegno_quotato_campioni from './20261116_174732_disegno_quotato_campioni';
 
 export const migrations = [
   {
@@ -64,6 +65,11 @@ export const migrations = [
   {
     up: migration_20261116_084128_heritage.up,
     down: migration_20261116_084128_heritage.down,
-    name: '20261116_084128_heritage'
+    name: '20261116_084128_heritage',
+  },
+  {
+    up: migration_20261116_174732_disegno_quotato_campioni.up,
+    down: migration_20261116_174732_disegno_quotato_campioni.down,
+    name: '20261116_174732_disegno_quotato_campioni'
   },
 ];

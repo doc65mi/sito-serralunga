@@ -594,6 +594,34 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
 .colori__elenco li { width: 40px; height: 40px; border-radius: 50%; border: 1px solid transparent; }
 .colori__elenco li.chiaro { border-color: var(--line-strong); }
 .colori__nota { font-size: 13px; color: var(--muted); }
+/* Colori disponibili dalla cartella colori: quadrati 30×30 (Scheda prodotto 1.01) */
+.campioni { display: flex; flex-direction: column; gap: 16px; }
+.campioni__elenco { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 18px; list-style: none; margin: 0; padding: 0; }
+.campioni__voce { display: grid; grid-template-columns: 30px 1fr; column-gap: 10px; align-items: center; color: #000; }
+.campioni__quadrato { grid-row: span 2; display: block; width: 30px; height: 30px; overflow: hidden; border: 1px solid transparent; }
+.campioni__quadrato.chiaro { border-color: var(--line-strong); }
+.campioni__quadrato img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.campioni__codice { font: 500 11px/1.2 var(--sans); letter-spacing: .14em; color: #000; }
+.campioni__nome { font-size: 13px; line-height: 1.25; color: #000; }
+.campioni__link { align-self: flex-start; font-size: 13px; color: #000; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Disegno quotato generato dalle misure (DisegnoQuotato.astro) */
+.quotato { margin: 0; display: flex; flex-direction: column; gap: 16px; }
+.quotato__tavola { background: var(--paper-2); border: 1px solid var(--line); padding: 18px 14px; display: flex; justify-content: center; }
+.quotato__svg { width: 100%; height: auto; display: block; }
+.quotato__svg text { font-family: var(--sans); fill: #000; font-size: 13px; }
+.quotato__viste text { font-size: 11px; font-weight: 500; }
+.quotato__pezzo { fill: rgba(22, 21, 15, 0.05); stroke: #000; stroke-width: 1.6; }
+.quotato__nascosto { fill: none; stroke: #000; stroke-width: 1; stroke-dasharray: 6 4; }
+.quotato__asse { fill: none; stroke: #000; stroke-width: .6; stroke-dasharray: 14 4 2 4; }
+.quotato__quote path { fill: none; stroke: #000; stroke-width: .9; }
+.misure.quotato__misure { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+@media (max-width: 560px) {
+  .quotato__svg text { font-size: 24px; }
+  .quotato__viste text { font-size: 18px; }
+}
+.quotato__nota { font-size: 13px; line-height: 1.5; color: #000; }
+
 .misure { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); margin: 0; }
 .misure > div { padding: 20px 0; border-bottom: 1px solid var(--line-soft); }
 .misure dt { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }

@@ -1,0 +1,131 @@
+---
+/**
+ * Disegno quotato (Version: 1.00).
+ * Prospetto e pianta in scala, disegnati in SVG dalle misure della scheda prodotto
+ * (Payload: prodotti › Specifiche e disegno › Disegno quotato automatico).
+ * Sagome: parallelepipedo (L × P × H), cilindro (Ø × H), troncoConico (Ø in alto, Ø base facoltativo, H).
+ * Si quotano solo le misure inserite: se manca il diametro di base la svasatura è indicativa e senza quota.
+ * Testo e linee neri (regola del sito); il disegno ha titolo e descrizione per lettori di schermo e motori.
+ */
+import type { Doc } from '../lib/cms'
+
+interface Props {
+  q: Doc
+  nome: string
+  id?: string
+}
+const { q, nome, id = 'disegno-quotato' } = Astro.props
+const L = Astro.locals.lingua
+const tt = (it: string, en: string) => (L === 'en' ? en : it)
+
+const n = (v: unknown) => (typeof v === 'number' && v > 0 ? v : 0)
+const forma: string = q?.forma || ''
+const H = n(q?.altezza)
+const tondo = forma === 'cilindro' || forma === 'troncoConico'
+const W = tondo ? n(q?.diametro) : n(q?.larghezza)
+const D = tondo ? W : n(q?.profondita) || W
+const Db = forma === 'troncoConico' ? n(q?.diametroBase) : forma === 'cilindro' ? W : 0
+const valido = !!forma && H > 0 && W > 0
+
+const fmt = (v: number) => new Intl.NumberFormat(L === 'en' ? 'en-GB' : 'it-IT', { maximumFractionDigits: 1 }).format(v)
+const quota = (v: number, diam = false) => `${diam ? 'Ø ' : ''}${fmt(v)} cm`
+
+// Scala unica per prospetto e pianta: la misura più grande occupa al massimo 300 unità e le due viste
+// affiancate stanno in circa 600 unità, così 1 unità ≈ 1 px e i testi delle quote restano leggibili.
+const S = valido ? Math.min(300 / Math.max(W, H, D), 190 / W) : 1
+const fw = W * S, fh = H * S, pd = D * S
+// Base del vaso svasato: quella dichiarata, altrimenti il 72% del diametro (solo grafica, senza quota).
+const bw = forma === 'troncoConico' ? (Db ? Db * S : fw * 0.72) : fw
+const M = 24, TOP = 78, GAP = 104, QD = 30
+const fx = M, fy = TOP
+const px = fx + fw + GAP
+const py = TOP
+const larg = px + fw + QD + 46 + M
+const alt = TOP + Math.max(fh, pd) + QD + 36
+
+/** Linea di quota con trattini obliqui alle estremità (convenzione del disegno tecnico). */
+const tick = (x: number, y: number) => `M${x - 5} ${y + 5} L${x + 5} ${y - 5}`
+const orizz = (x1: number, x2: number, y: number, y0: number) => {
+  const s = y >= y0 ? 1 : -1 // quota sotto (1) o sopra (-1) il pezzo
+  return {
+    linee: `M${x1} ${y0 + 4 * s} V${y + 6 * s} M${x2} ${y0 + 4 * s} V${y + 6 * s} M${x1 - 6} ${y} H${x2 + 6} ${tick(x1, y)} ${tick(x2, y)}`,
+    tx: (x1 + x2) / 2,
+    ty: s > 0 ? y + 18 : y - 9,
+  }
+}
+const vert = (y1: number, y2: number, x: number, x0: number) => ({
+  linee: `M${x0 + 4} ${y1} H${x + 6} M${x0 + 4} ${y2} H${x + 6} M${x} ${y1 - 6} V${y2 + 6} ${tick(x, y1)} ${tick(x, y2)}`,
+  tx: x + 16,
+  ty: (y1 + y2) / 2,
+})
+
+const fondo = fy + fh
+// Vaso svasato: Ø massimo quotato in alto, Ø di base (se dichiarato) in basso.
+const qW = forma === 'troncoConico' ? orizz(fx, fx + fw, fy - QD, fy) : orizz(fx, fx + fw, fondo + QD, fondo)
+const qH = vert(fy, fondo, fx + fw + QD, fx + fw)
+const qBase = forma === 'troncoConico' && Db ? orizz(fx + (fw - bw) / 2, fx + (fw + bw) / 2, fondo + QD, fondo) : null
+const pfondo = py + pd
+const qPW = orizz(px, px + fw, pfondo + QD, pfondo)
+const qPD = forma === 'parallelepipedo' ? vert(py, pfondo, px + fw + QD, px + fw) : null
+
+const misure = [
+  tondo ? { k: tt('Diametro', 'Diameter'), v: quota(W, true) } : { k: tt('Larghezza', 'Width'), v: quota(W) },
+  ...(forma === 'parallelepipedo' ? [{ k: tt('Profondità', 'Depth'), v: quota(D) }] : []),
+  ...(forma === 'troncoConico' && Db ? [{ k: tt('Diametro di base', 'Base diameter'), v: quota(Db, true) }] : []),
+  { k: tt('Altezza', 'Height'), v: quota(H) },
+  ...(n(q?.peso) ? [{ k: tt('Peso', 'Weight'), v: `${fmt(n(q.peso))} kg` }] : []),
+]
+const descr = `${tt('Disegno quotato di', 'Dimensioned drawing of')} ${nome}: ${misure.map((m) => `${m.k.toLowerCase()} ${m.v}`).join(', ')}.`
+const nota = [
+  tt('Disegno schematico in scala, quote in centimetri.', 'Schematic drawing to scale, dimensions in centimetres.'),
+  forma === 'troncoConico' && !Db ? tt('Svasatura indicativa: il diametro di base non è dichiarato.', 'Indicative taper: the base diameter is not stated.') : '',
+  q?.fonte || '',
+].filter(Boolean).join(' ')
+---
+{valido && (
+  <figure class="quotato" id={id}>
+    <span class="etichetta">{tt('Dimensioni', 'Dimensions')}</span>
+    <div class="quotato__tavola">
+    <svg class="quotato__svg" viewBox={`0 0 ${Math.round(larg)} ${Math.round(alt)}`} style={`max-width:${Math.round(larg)}px`} role="img" aria-labelledby={`${id}-t ${id}-d`} xmlns="http://www.w3.org/2000/svg">
+      <title id={`${id}-t`}>{`${tt('Disegno quotato', 'Dimensioned drawing')} — ${nome}`}</title>
+      <desc id={`${id}-d`}>{descr}</desc>
+      <g class="quotato__viste" font-size="11" letter-spacing="2.4">
+        <text x={fx} y="16">{tt('PROSPETTO', 'ELEVATION')}</text>
+        <text x={px} y="16">{tt('PIANTA', 'PLAN')}</text>
+      </g>
+
+      {/* Prospetto */}
+      {forma === 'troncoConico' ? (
+        <path class="quotato__pezzo" d={`M${fx} ${fy} H${fx + fw} L${fx + (fw + bw) / 2} ${fondo} H${fx + (fw - bw) / 2} Z`} />
+      ) : (
+        <rect class="quotato__pezzo" x={fx} y={fy} width={fw} height={fh} />
+      )}
+      <path class="quotato__asse" d={`M${fx + fw / 2} ${fy - 10} V${fondo + 10}`} />
+
+      {/* Pianta */}
+      {tondo ? (
+        <>
+          <circle class="quotato__pezzo" cx={px + fw / 2} cy={py + fw / 2} r={fw / 2} />
+          {forma === 'troncoConico' && <circle class="quotato__nascosto" cx={px + fw / 2} cy={py + fw / 2} r={bw / 2} />}
+          <path class="quotato__asse" d={`M${px - 10} ${py + fw / 2} H${px + fw + 10} M${px + fw / 2} ${py - 10} V${py + fw + 10}`} />
+        </>
+      ) : (
+        <rect class="quotato__pezzo" x={px} y={py} width={fw} height={pd} />
+      )}
+
+      {/* Quote */}
+      <g class="quotato__quote">
+        <path d={qW.linee} /><text x={qW.tx} y={qW.ty} text-anchor="middle">{quota(W, tondo)}</text>
+        <path d={qH.linee} /><text x={qH.tx} y={qH.ty} text-anchor="middle" transform={`rotate(-90 ${qH.tx} ${qH.ty})`} dy="4">{quota(H)}</text>
+        {qBase && <><path d={qBase.linee} /><text x={qBase.tx} y={qBase.ty} text-anchor="middle">{quota(Db, true)}</text></>}
+        <path d={qPW.linee} /><text x={qPW.tx} y={qPW.ty} text-anchor="middle">{quota(W, tondo)}</text>
+        {qPD && <><path d={qPD.linee} /><text x={qPD.tx} y={qPD.ty} text-anchor="middle" transform={`rotate(-90 ${qPD.tx} ${qPD.ty})`} dy="4">{quota(D)}</text></>}
+      </g>
+    </svg>
+    </div>
+    <dl class="misure quotato__misure">
+      {misure.map((m) => <div><dt>{m.k}</dt><dd>{m.v}</dd></div>)}
+    </dl>
+    <figcaption class="quotato__nota">{nota}</figcaption>
+  </figure>
+)}

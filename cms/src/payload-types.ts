@@ -252,6 +252,10 @@ export interface Prodotti {
    * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
    */
   notaColori?: string | null;
+  /**
+   * Scegli i colori della cartella (Contenuti › Colori) in cui il prodotto è a listino: nella scheda compaiono come quadrati 30×30 con codice e nome, accanto alle dimensioni. Il colore viene dal campione della cartella.
+   */
+  campioni?: (number | Colori)[] | null;
   dimensioni?:
     | {
         etichetta: string;
@@ -276,6 +280,28 @@ export interface Prodotti {
      * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
      */
     testo?: string | null;
+    /**
+     * Scegli la sagoma e inserisci le misure dichiarate (in cm): la scheda disegna prospetto e pianta in scala con le quote, accanto alle dimensioni. Non inserire misure non verificate.
+     */
+    quote?: {
+      /**
+       * Vuoto = nessun disegno automatico.
+       */
+      forma?: ('parallelepipedo' | 'cilindro' | 'troncoConico') | null;
+      larghezza?: number | null;
+      profondita?: number | null;
+      diametro?: number | null;
+      /**
+       * Se non è dichiarato lascialo vuoto: la svasatura del disegno resta indicativa e senza quota.
+       */
+      diametroBase?: number | null;
+      altezza?: number | null;
+      peso?: number | null;
+      /**
+       * Es. Scheda serralunga.com. Compare sotto il disegno.
+       */
+      fonte?: string | null;
+    };
     immagine?: (number | null) | Media;
     file?: (number | null) | Media;
   };
@@ -1013,6 +1039,38 @@ export interface Categorie {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Cartella colori mostrata in /materiali/colori/ e in Heritage › I colori.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "colori".
+ */
+export interface Colori {
+  id: number;
+  codice: string;
+  nome: string;
+  /**
+   * Es. “bianco ghiaccio”, “grigio chiaro · design”.
+   */
+  descrizione?: string | null;
+  famiglia: 'standard' | 'laccato';
+  finitura?: ('lucido' | 'opaco') | null;
+  metallizzato?: boolean | null;
+  /**
+   * Foto del campione di colore.
+   */
+  campione?: (number | null) | Media;
+  /**
+   * Si calcola da solo dalla foto del campione; si può correggere a mano. Colora i quadrati 30×30 delle schede prodotto.
+   */
+  hex?: string | null;
+  /**
+   * Numeri più bassi compaiono prima.
+   */
+  ordine?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1759,34 +1817,6 @@ export interface Materiali {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * Cartella colori mostrata in /materiali/colori/ e in Heritage › I colori.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "colori".
- */
-export interface Colori {
-  id: number;
-  codice: string;
-  nome: string;
-  /**
-   * Es. “bianco ghiaccio”, “grigio chiaro · design”.
-   */
-  descrizione?: string | null;
-  famiglia: 'standard' | 'laccato';
-  finitura?: ('lucido' | 'opaco') | null;
-  metallizzato?: boolean | null;
-  /**
-   * Foto del campione di colore.
-   */
-  campione?: (number | null) | Media;
-  /**
-   * Numeri più bassi compaiono prima.
-   */
-  ordine?: number | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2963,6 +2993,7 @@ export interface ProdottiSelect<T extends boolean = true> {
         id?: T;
       };
   notaColori?: T;
+  campioni?: T;
   dimensioni?:
     | T
     | {
@@ -2983,6 +3014,18 @@ export interface ProdottiSelect<T extends boolean = true> {
     | {
         titolo?: T;
         testo?: T;
+        quote?:
+          | T
+          | {
+              forma?: T;
+              larghezza?: T;
+              profondita?: T;
+              diametro?: T;
+              diametroBase?: T;
+              altezza?: T;
+              peso?: T;
+              fonte?: T;
+            };
         immagine?: T;
         file?: T;
       };
@@ -3796,6 +3839,7 @@ export interface ColoriSelect<T extends boolean = true> {
   finitura?: T;
   metallizzato?: T;
   campione?: T;
+  hex?: T;
   ordine?: T;
   updatedAt?: T;
   createdAt?: T;

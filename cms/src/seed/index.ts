@@ -29,6 +29,7 @@ import { applicaInglese } from './inglese'
 import { completaMateriali } from './materiali'
 import { nomeFile } from '../collections/Media'
 import { proteggi } from './prudenza'
+import { completaSchedeEsempio } from './schede-esempio'
 import { completato, fase, fatto, giaFatti, segna } from './punto'
 
 const payload = await getPayload({ config })
@@ -38,8 +39,13 @@ const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
 // dal pannello o dalla pagina non sono in GitHub): propongono le modifiche, che si applicano
 // a mano dal pannello (Strumenti) con una copia di sicurezza. Vedi prudenza.ts.
 let cambiaStruttura: typeof payload.updateGlobal = payload.updateGlobal.bind(payload)
+// Senza protezione (seed completo di un sito nuovo) i campi nuovi si scrivono direttamente.
+let riempiVuoti = (a: { collection: string; id: number | string; data: Record<string, unknown>; locale?: string }): Promise<unknown> =>
+  payload.update({ collection: a.collection as never, id: a.id, locale: (a.locale || 'it') as never, depth: 0, data: a.data as never })
 if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer' || process.env.SEED_SOLO === 'catalogo') {
-  cambiaStruttura = proteggi(payload, process.env.SEED_SOLO === 'catalogo' ? 'catalogo' : 'aggiorna', log).cambiaStruttura
+  const prudenza = proteggi(payload, process.env.SEED_SOLO === 'catalogo' ? 'catalogo' : 'aggiorna', log)
+  cambiaStruttura = prudenza.cambiaStruttura
+  riempiVuoti = prudenza.riempiVuoti
   if (giaFatti()) log(`ripresa dal punto salvato: ${giaFatti()} passaggi già completati`)
 }
 
@@ -384,6 +390,7 @@ async function completaPagine() {
 // Separato da seed:aggiorna perché scarica centinaia di foto.
 if (process.env.SEED_SOLO === 'catalogo') {
   await fase('prodotti', () => importaCatalogo(payload, media, log), log)
+  await fase('disegni-e-campioni', () => completaSchedeEsempio(payload, riempiVuoti, log), log)
   await fase('foto-avif', () => rigeneraFormati(payload, log), log)
   const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
   if (saltate.length) log(`${saltate.length} foto non caricate (si possono aggiungere dal pannello Media)`)
@@ -420,6 +427,7 @@ if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer'
   await fase('heritage', () => completaHeritage(payload, media, log), log)
   await fase('contract', completaContract, log)
   await fase('materiali', () => completaMateriali(payload, media, log), log)
+  await fase('disegni-e-campioni', () => completaSchedeEsempio(payload, riempiVuoti, log), log)
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
   await fase('segnaposto-designer', () => payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never }), log)
   await fase('testi-inglesi', () => applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer', 'pagine'] }), log)
@@ -486,6 +494,7 @@ await completaDesigner()
 
 // 5c. Catalogo B2B (categorie e schede prodotto da serralunga.com)
 await importaCatalogo(payload, media, log)
+await completaSchedeEsempio(payload, riempiVuoti, log)
 
 // 6. Inglese: riempie i campi ancora vuoti con le traduzioni di partenza
 await applicaInglese(payload, log)

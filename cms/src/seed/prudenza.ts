@@ -1,5 +1,5 @@
 /**
- * Version: 1.01
+ * Version: 1.02
  * Protezione dei contenuti per seed:aggiorna e seed:catalogo.
  *
  * Il sito si modifica dal pannello e dalla pagina: quelle modifiche stanno solo nel database,
@@ -15,6 +15,10 @@
  * e solo quando il campo nuovo è ancora vuoto (es. il doppio menu della navigazione 2.x: finché il menu
  * superiore è vuoto il sito non l'ha mai avuto, quindi nessuno l'ha modificato). Si applica sempre,
  * anche in modalità prudente, dopo aver salvato una copia completa della pagina globale.
+ *
+ * Eccezione voluta (riempiVuoti, 1.02): campi NUOVI di un documento esistente (es. disegno quotato e campioni
+ * colore della scheda prodotto, colore pieno della cartella colori) si scrivono solo se nel documento sono
+ * ancora vuoti: nessuno li ha mai compilati, quindi non si perde nessuna modifica. Copia di sicurezza prima.
  *
  * Con SEED_APPLICA=1 (pulsante "Applica" nel pannello) le modifiche si applicano, ma prima di
  * ognuna si salva una copia completa (tutte le lingue) del documento in .compiti/copie/<data>/.
@@ -145,6 +149,33 @@ export function proteggi(payload: Payload, compito: string, log: (m: string) => 
     return updateGlobal(args as never)
   }) as unknown as typeof updateGlobal
 
+  /** Vedi l'eccezione in testa al file: scrive solo i campi ancora vuoti, gli altri restano come sono. */
+  const vuoto = (v: unknown): boolean =>
+    v === null || v === undefined || v === '' || (Array.isArray(v) && v.length === 0) ||
+    (typeof v === 'object' && !Array.isArray(v) && Object.values(v as object).every(vuoto))
+  const riempiVuoti = async (args: { collection: string; id: number | string; data: Record<string, unknown>; locale?: string }) => {
+    // Senza ripiego sull'italiano: un campo inglese vuoto deve risultare vuoto.
+    const attuale = (await payload.findByID({ collection: args.collection as never, id: args.id, depth: 0, locale: (args.locale || 'it') as never, fallbackLocale: false as never, draft: true })) as unknown as Record<string, unknown>
+    const gruppo = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
+    // Unisce in profondità nei gruppi: un valore nuovo entra solo dove il campo attuale è vuoto.
+    const unisci = (ora: Record<string, unknown>, nuovo: Record<string, unknown>): Record<string, unknown> | null => {
+      const out: Record<string, unknown> = {}
+      for (const [k, v] of Object.entries(nuovo)) {
+        if (gruppo(ora[k]) && gruppo(v)) {
+          const sotto = unisci(ora[k] as Record<string, unknown>, v)
+          if (sotto) out[k] = sotto
+        } else if (vuoto(ora[k])) out[k] = v
+      }
+      return Object.keys(out).length ? { ...ora, ...out } : null
+    }
+    const data = unisci(attuale, args.data) || {}
+    for (const k of Object.keys(data)) if (!(k in args.data)) delete data[k]
+    if (!Object.keys(data).length) return null
+    copia(`${args.collection}-${args.id}`, await payload.findByID({ collection: args.collection as never, id: args.id, depth: 0, locale: 'all' as never, draft: true }))
+    log(`campi nuovi compilati: ${args.collection}/${attuale.slug || attuale.codice || args.id} → ${Object.keys(data).join(', ')}`)
+    return update({ collection: args.collection as never, id: args.id, locale: (args.locale || 'it') as never, depth: 0, data: data as never })
+  }
+
   log(applica ? `modalità applica: prima di ogni modifica si salva una copia in ${copie}` : 'modalità prudente: si aggiunge solo ciò che manca, i contenuti esistenti non si toccano')
-  return { applica, proposte, cambiaStruttura }
+  return { applica, proposte, cambiaStruttura, riempiVuoti }
 }

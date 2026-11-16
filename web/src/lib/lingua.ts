@@ -109,6 +109,8 @@ const EN: Record<string, string> = {
   Vista: 'View',
   'Disegno di': 'Design by',
   'Cartella colori': 'Colour chart',
+  'Colori disponibili': 'Available colours',
+  'Cartella colori completa': 'Full colour chart',
   'Richiedi scheda e campionatura': 'Request data sheet and samples',
   'Disegno tecnico': 'Technical drawing',
   Specifiche: 'Specifications',

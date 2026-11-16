@@ -1,7 +1,8 @@
 ---
 /**
- * Scheda prodotto — Version: 1.00. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * Scheda prodotto — Version: 1.01. Template: template/Aqua Lounger - Scheda tecnica.dc.html
  * Usata dalle schede del Catalogo (/catalogo/{categoria}/{slug}/) e dal vecchio /prodotti/{slug}/.
+ * 1.01: quadrati 30×30 dei colori della cartella colori e disegno quotato (DisegnoQuotato.astro).
  * Taglio B2B: niente prezzi al pubblico, varianti con codice articolo e richiesta di preventivo.
  */
 import Base from '../layouts/Base.astro'
@@ -11,6 +12,7 @@ import Frecce from './Frecce.astro'
 import CardCase from './CardCase.astro'
 import CardProdotto from './CardProdotto.astro'
 import ModuloRichiesta from './ModuloRichiesta.astro'
+import DisegnoQuotato from './DisegnoQuotato.astro'
 import { SITO, type Doc } from '../lib/cms'
 import { isMedia, src, urlFile } from '../lib/media'
 import { chiaro, piatto } from '../lib/testo'
@@ -49,6 +51,12 @@ const finiture: Doc[] = (p.finiture || []).filter((f: Doc) => f?.nome)
 const codici = finiture.map((f) => f.codice).filter(Boolean)
 const MATERIALI: Record<string, string> = { polietilene: t('Polietilene'), moleskin: 'Moleskin', corten: 'Corten', laccato: t('Laccato'), vellutato: t('Vellutato'), decorato: t('Decorato') }
 const materiali = (p.materiali || []).map((m: string) => MATERIALI[m] || m)
+// Colori scelti dalla cartella colori (collezione "colori"): quadrati 30×30 col colore pieno del campione.
+const campioni: Doc[] = (p.campioni || []).filter((c: unknown) => c && typeof c === 'object' && ((c as Doc).hex || isMedia((c as Doc).campione)))
+const q: Doc = p.disegno?.quote || {}
+const conQuote = !!q.forma && q.altezza > 0 && (q.diametro > 0 || q.larghezza > 0)
+const tondo = q.forma === 'cilindro' || q.forma === 'troncoConico'
+const cmq = (v: number) => ({ '@type': 'QuantitativeValue', value: v, unitCode: 'CMT' })
 const descrizione = p.seo?.descrizione || piatto(p.descrizione || '').slice(0, 158)
 
 const jsonld = [{
@@ -63,7 +71,17 @@ const jsonld = [{
   image: viste.filter(isMedia).map((m) => src(m, 1800)),
   sku: codici[0],
   material: materiali.length ? materiali.join(', ') : p.specifiche?.find((s: Doc) => /material/i.test(s.etichetta))?.valore,
-  ...(finiture.length > 1 ? { color: finiture.slice(0, 40).map((f) => f.nome).join(', ') } : {}),
+  ...(campioni.length
+    ? { color: campioni.map((c) => `${c.nome} (${c.codice})`).join(', ') }
+    : finiture.length > 1 ? { color: finiture.slice(0, 40).map((f) => f.nome).join(', ') } : {}),
+  ...(conQuote
+    ? {
+        height: cmq(q.altezza),
+        width: cmq(tondo ? q.diametro : q.larghezza),
+        depth: cmq(tondo ? q.diametro : q.profondita || q.larghezza),
+        ...(q.peso > 0 ? { weight: { '@type': 'QuantitativeValue', value: q.peso, unitCode: 'KGM' } } : {}),
+      }
+    : {}),
   ...(d ? { creator: { '@type': 'Person', name: d.nome } } : {}),
 }]
 ---
@@ -114,11 +132,31 @@ const jsonld = [{
             {p.notaColori && <span class="colori__nota" data-campo="notaColori">{p.notaColori}</span>}
           </div>
         )}
+        {campioni.length > 0 && (
+          <div class="campioni" id="prodotto-colori">
+            <span class="etichetta">{t('Colori disponibili')}</span>
+            <ul class="campioni__elenco">
+              {campioni.map((c) => (
+                <li class="campioni__voce">
+                  <span
+                    class:list={['campioni__quadrato', c.hex && chiaro(c.hex) && 'chiaro']}
+                    style={c.hex ? `background:${c.hex}` : undefined}
+                    aria-hidden="true"
+                  >{!c.hex && <Img media={c.campione} alt="" sizes="30px" larghezza={400} />}</span>
+                  <span class="campioni__codice">{c.codice}</span>
+                  <span class="campioni__nome">{c.nome}</span>
+                </li>
+              ))}
+            </ul>
+            <a class="campioni__link" href={u('/materiali/colori/')}>{t('Cartella colori completa')}</a>
+          </div>
+        )}
         {(p.dimensioni || []).length > 0 && (
           <dl class="misure">
             {p.dimensioni.map((m: Doc) => <div><dt>{m.etichetta}</dt><dd>{m.valore}</dd></div>)}
           </dl>
         )}
+        {conQuote && <DisegnoQuotato q={q} nome={p.nome} />}
         {finiture.length > 0 && (
           <details class="varianti" open={finiture.length <= 12}>
             <summary><span class="etichetta">{t('Varianti a listino')}</span> <span class="varianti__n">{finiture.length}</span></summary>
