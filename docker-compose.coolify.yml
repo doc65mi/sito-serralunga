@@ -1,4 +1,4 @@
-# Serralunga su Coolify — Astro + Payload, database PostgreSQL di Coolify. Version: 1.03
+# Serralunga su Coolify — Astro + Payload, database PostgreSQL di Coolify. Version: 1.04
 # In Coolify: prima si crea il database (New Resource → Database → PostgreSQL), poi questa
 # applicazione: New Resource → repository GitHub → Build Pack "Docker Compose",
 # Docker Compose Location: /docker-compose.coolify.yml. Passi completi in DEPLOY.md,
@@ -30,6 +30,9 @@ services:
       SEED_PASSWORD: ${SEED_PASSWORD:?password del primo utente del pannello}
       # 1 = al primo avvio, con il database vuoto, carica da solo utente, testi e foto di partenza.
       SEED_AUTOMATICO: ${SEED_AUTOMATICO:-1}
+      # 1 = dopo un deploy con contenuti nuovi, aggiunge da solo ciò che manca (seed:aggiorna e
+      # seed:catalogo in modalità prudente): non modifica mai i contenuti già presenti.
+      AGGIORNAMENTO_AUTOMATICO: ${AGGIORNAMENTO_AUTOMATICO:-1}
       NOTIFICHE_EMAIL: ${NOTIFICHE_EMAIL:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}

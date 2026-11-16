@@ -1,4 +1,4 @@
-# Serralunga su Coolify, variante "tutto in uno" — Astro + Payload + Postgres. Version: 1.03
+# Serralunga su Coolify, variante "tutto in uno" — Astro + Payload + Postgres. Version: 1.04
 # Il database è un servizio di questo stesso file. Si usa solo se non si vuole creare
 # il database PostgreSQL come risorsa di Coolify (scelta consigliata: docker-compose.coolify.yml).
 # Docker Compose Location: /docker-compose.coolify-tutto.yml (passi in DEPLOY.md).
@@ -41,6 +41,9 @@ services:
       SEED_PASSWORD: ${SEED_PASSWORD:?password del primo utente del pannello}
       # 1 = al primo avvio, con il database vuoto, carica da solo utente, testi e foto di partenza.
       SEED_AUTOMATICO: ${SEED_AUTOMATICO:-1}
+      # 1 = dopo un deploy con contenuti nuovi, aggiunge da solo ciò che manca (seed:aggiorna e
+      # seed:catalogo in modalità prudente): non modifica mai i contenuti già presenti.
+      AGGIORNAMENTO_AUTOMATICO: ${AGGIORNAMENTO_AUTOMATICO:-1}
       NOTIFICHE_EMAIL: ${NOTIFICHE_EMAIL:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}

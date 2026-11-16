@@ -4,7 +4,7 @@ type Media = (sorgente: string, alt: string) => Promise<number | null>
 const S = 'https://serralunga.com/cdn/shop'
 
 /**
- * Navigazione (Version: 2.00, alberatura del 2026-11-16): menu superiore di servizio e menu
+ * Navigazione (Version: 2.01, alberatura del 2026-11-16): menu superiore di servizio e menu
  * inferiore principale, entrambi allineati a destra; footer con tre colonne.
  */
 export const MENU_SUPERIORE = [
@@ -16,7 +16,14 @@ export const MENU_SUPERIORE = [
 ]
 
 export const MENU = [
-  { etichetta: 'Progetti', link: '/installazioni/' },
+  {
+    etichetta: 'Progetti',
+    link: '/installazioni/',
+    voci: [
+      { etichetta: 'Installazioni', link: '/installazioni/' },
+      { etichetta: 'Spunti e idee', link: '/spunti-e-idee/' },
+    ],
+  },
   {
     etichetta: 'Materiali',
     link: '/materiali/',
@@ -48,6 +55,7 @@ export const MENU = [
       { etichetta: 'Living different', link: '/heritage/living-different/' },
       { etichetta: 'Produzione', link: '/heritage/produzione/' },
       { etichetta: 'I colori', link: '/heritage/i-colori/' },
+      { etichetta: 'Designer', link: '/designer/' },
     ],
   },
   {
