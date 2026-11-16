@@ -1,5 +1,5 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * Ritratti dei designer migliorati con l'AI (npm run ai:ritratti).
  *
  * Per molti designer serralunga.com pubblica solo una miniatura (225 px): ingrandita risulta sgranata.
@@ -12,8 +12,11 @@
  *   credito "Ritratto migliorato con AI" e la scheda resta segnata come ritratto provvisorio, da rivedere.
  * - La foto di prima resta nella libreria: per tornare indietro basta riselezionarla nella scheda.
  * - AI_RITRATTI_SOLO=slug1,slug2 limita il lavoro ad alcuni designer; AI_RITRATTI_PROVA=1 non salva nulla.
+ * - AI_RITRATTI_MODELLO=nome prova un altro modello per le immagini solo per questa esecuzione, senza cambiare
+ *   le impostazioni; AI_RITRATTI_USCITA=cartella salva lì una copia di ogni risultato (anche in prova), per confrontarli.
  * Ogni ritratto consuma una generazione di immagine sul credito del fornitore.
  */
+import fs from 'fs'
 import path from 'path'
 
 import { getPayload } from 'payload'
@@ -36,6 +39,9 @@ const payload = await getPayload({ config })
 const riga = (t: string) => console.log(`[ai:ritratti] ${t}`)
 const c = await configAi(payload)
 const f = c.fornitoreImmagini
+const modelloProva = (process.env.AI_RITRATTI_MODELLO || '').trim()
+if (modelloProva) c.immagini[f] = modelloProva
+const uscita = (process.env.AI_RITRATTI_USCITA || '').trim()
 if (!c.chiavi[f] || !c.immagini[f]) {
   riga(`manca la chiave o il modello per le immagini (${f}): si impostano nel pannello, Impostazioni > Intelligenza artificiale`)
   process.exit(1)
@@ -100,6 +106,10 @@ for (const d of designerFonti()) {
     const altaFinale = Math.round(largaFinale / proporzione)
     const webp = await sharp(esito.dati).resize({ width: largaFinale, height: altaFinale, fit: 'cover', position: 'attention' }).webp({ quality: 90, effort: 5 }).toBuffer()
     riga(`${d.slug}: da ${info.width}x${info.height} a ${largaFinale}x${altaFinale} in ${Date.now() - inizio} ms${prova ? ' (prova, non salvato)' : ''}`)
+    if (uscita) {
+      fs.mkdirSync(uscita, { recursive: true })
+      fs.writeFileSync(path.join(uscita, `${d.slug}--${c.immagini[f].replace(/[^a-z0-9.]+/gi, '-')}.webp`), webp)
+    }
     if (!prova) {
       const media = await payload.create({
         collection: 'media',
