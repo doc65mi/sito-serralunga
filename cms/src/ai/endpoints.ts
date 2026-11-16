@@ -1,17 +1,19 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * API interne per la modifica dalla pagina e per gli articoli in arrivo.
  * Tutte chiedono un utente della redazione, tranne /ricevi-articoli che chiede il token.
  * Le chiavi dei fornitori restano sul server: il browser non le riceve mai.
  */
+import { lookup } from 'dns/promises'
 import fs from 'fs'
+import { isIP } from 'net'
 import path from 'path'
 
 import type { Endpoint, PayloadRequest } from 'payload'
 import sharp from 'sharp'
 
 import { formatSlug } from '../fields'
-import { chiediTesto, configAi, elencoModelli, ErroreAi, generaImmagine, type Fornitore } from './fornitori'
+import { chiediTesto, configAi, elencoModelli, ErroreAi, generaImmagine, ritoccaImmagine, type Fornitore } from './fornitori'
 import { uguali } from './segreto'
 
 const json = (dati: unknown, status = 200) => Response.json(dati, { status, headers: { 'cache-control': 'no-store' } })
@@ -164,6 +166,162 @@ const immagine: Endpoint = {
     const { dati } = await generaImmagine(c, `${descrizione}${guida}`, orientamento)
     const doc = await salvaFoto(req, dati, `ai-${descrizione.split(/\s+/).slice(0, 8).join(' ')}`, str(b.alt, 125) || descrizione, 'Immagine generata con AI')
     return json({ doc })
+  }),
+}
+
+// --- Da un'immagine esistente: originale ad alta risoluzione o ritocco fedele con l'AI ----
+
+/** Indirizzi privati o interni: il server non deve mai scaricarli per conto di chi scrive l'URL. */
+function indirizzoPrivato(ip: string) {
+  if (isIP(ip) === 6) {
+    const x = ip.toLowerCase()
+    if (x.startsWith('::ffff:')) return indirizzoPrivato(x.slice(7))
+    return x === '::1' || x === '::' || /^(fc|fd|fe8|fe9|fea|feb)/.test(x)
+  }
+  const [a, b] = ip.split('.').map(Number)
+  return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224
+}
+
+async function controllaUrl(u: URL) {
+  if (u.protocol !== 'https:') throw new ErroreAi('Serve un indirizzo che inizi con https://', 422)
+  if (u.username || u.password || (u.port && u.port !== '443')) throw new ErroreAi('Indirizzo non accettato.', 422)
+  const host = u.hostname.replace(/^\[|\]$/g, '')
+  if (/^(localhost|.*\.local|.*\.internal)$/i.test(host)) throw new ErroreAi('Indirizzo interno non accettato.', 422)
+  const indirizzi = isIP(host) ? [{ address: host }] : await lookup(host, { all: true }).catch(() => [])
+  if (!indirizzi.length) throw new ErroreAi(`Il sito ${host} non risponde.`, 422)
+  if (indirizzi.some((x) => indirizzoPrivato(x.address))) throw new ErroreAi('Indirizzo interno non accettato.', 422)
+}
+
+/** Scarica una foto da qualunque sito pubblico in https, controllando ogni rimando. */
+async function scaricaDaUrl(indirizzo: string): Promise<Buffer> {
+  let u = new URL(indirizzo)
+  for (let salti = 0; salti < 4; salti++) {
+    await controllaUrl(u)
+    const res = await fetch(u, { signal: AbortSignal.timeout(60_000), redirect: 'manual', headers: { accept: 'image/avif,image/webp,image/*' } })
+    if (res.status >= 300 && res.status < 400 && res.headers.get('location')) {
+      u = new URL(res.headers.get('location')!, u)
+      continue
+    }
+    if (!res.ok) throw new ErroreAi(`Foto non scaricata (HTTP ${res.status}).`, 422)
+    if (!(res.headers.get('content-type') || '').startsWith('image/')) throw new ErroreAi('L’indirizzo non porta a una foto.', 422)
+    const dati = Buffer.from(await res.arrayBuffer())
+    if (dati.length > 40_000_000) throw new ErroreAi('Foto troppo grande (oltre 40 MB).', 422)
+    return dati
+  }
+  throw new ErroreAi('Troppi rimandi: indirizzo non accettato.', 422)
+}
+
+/**
+ * Le foto di Shopify (cdn.shopify.com e /cdn/shop/ dei negozi) hanno nel nome o nei parametri la misura
+ * ridotta (_430x, _1090x, ?width=1200): togliendola si ottiene il file originale caricato dal negozio.
+ */
+export function urlOriginale(indirizzo: string): string | null {
+  let u: URL
+  try {
+    u = new URL(indirizzo)
+  } catch {
+    return null
+  }
+  if (u.hostname !== 'cdn.shopify.com' && !u.pathname.includes('/cdn/shop/')) return null
+  const percorso = u.pathname.replace(/_(\d+x\d*|\d*x\d+)(_crop_[a-z]+)?(@\dx)?(\.[a-z0-9]+)$/i, '$4')
+  const parametri = new URLSearchParams(u.search)
+  ;['width', 'height', 'crop', 'pad_color', 'format'].forEach((k) => parametri.delete(k))
+  const nuovo = `${u.origin}${percorso}${parametri.toString() ? `?${parametri}` : ''}`
+  return nuovo === u.toString() ? null : nuovo
+}
+
+const ISTRUZIONE_FEDELE = [
+  'This is a real photograph used on the website of an Italian outdoor-furniture manufacturer. Restore it and upscale it to a sharp, high-resolution photograph.',
+  'It must remain the same photograph: keep exactly the same subjects, objects, buildings, landscape, people, composition, framing, crop, perspective, lighting and colours.',
+  'Keep every inscription, engraving, sign, logo and piece of text exactly as it is, letter by letter: never rewrite, translate, invent or remove text.',
+  'Do not add or remove any element, do not beautify, do not change the style, do not add borders or watermarks. Only remove blur, noise and compression artefacts and recover natural photographic detail.',
+  'Return only the image, with the same aspect ratio as the original.',
+].join(' ')
+
+const misure = async (dati: Buffer) => {
+  const m = await sharp(dati).metadata()
+  return { larga: m.width || 0, alta: m.height || 0 }
+}
+
+const daImmagine: Endpoint = {
+  path: '/ai/da-immagine',
+  method: 'post',
+  handler: protetto('da-immagine', 8, async (req) => {
+    const b = await corpo(req)
+    const azione = b.azione === 'migliora' ? 'migliora' : 'originale'
+    const richiestaRedazione = str(b.istruzione, 800)
+    let fonte: Buffer
+    let nome = 'foto'
+    let testoAlt = str(b.alt, 125)
+    let nota = ''
+
+    if (b.media !== undefined && b.media !== null && b.media !== '') {
+      const id = Number(b.media)
+      if (!Number.isInteger(id)) return errore('Foto non indicata.')
+      const doc = await req.payload.findByID({ collection: 'media', id, depth: 0, locale: lingua(b.lingua) }).catch(() => null)
+      if (!doc?.filename || !doc.mimeType?.startsWith('image/')) return errore('Foto non trovata in Media.', 404)
+      const file = path.join(CARTELLA_MEDIA, path.basename(doc.filename))
+      if (!fs.existsSync(file)) return errore('File della foto non trovato sul server.', 404)
+      fonte = fs.readFileSync(file)
+      nome = doc.filename.replace(/\.[^.]+$/, '')
+      testoAlt = testoAlt || doc.alt || ''
+      if (azione === 'originale') return errore('Per cercare l’originale serve l’indirizzo (URL) da cui viene la foto.')
+    } else {
+      const indirizzo = str(b.url, 2000)
+      if (!indirizzo) return errore('Indicare la foto di partenza: quella dello spazio, una della libreria, un file o un indirizzo.')
+      let u: URL
+      try {
+        u = new URL(indirizzo)
+      } catch {
+        return errore('Indirizzo non valido: deve iniziare con https://')
+      }
+      nome = decodeURIComponent(path.basename(u.pathname)).replace(/\.[^.]+$/, '').replace(/_(\d+x\d*|\d*x\d+)$/i, '')
+      const grande = urlOriginale(indirizzo)
+      let originale: Buffer | null = null
+      if (grande) originale = await scaricaDaUrl(grande).catch(() => null)
+      const indicata = await scaricaDaUrl(indirizzo).catch((err) => {
+        if (originale) return null
+        throw err
+      })
+      const [mo, mi] = await Promise.all([originale ? misure(originale) : null, indicata ? misure(indicata) : null])
+      if (originale && mo && (!mi || mo.larga > mi.larga)) {
+        fonte = originale
+        nota = mi ? `Trovato l’originale: ${mo.larga}×${mo.alta} px (l’indirizzo indicato era ${mi.larga}×${mi.alta}).` : `Trovato l’originale: ${mo.larga}×${mo.alta} px.`
+      } else {
+        fonte = indicata!
+        nota = grande ? `Non esiste una versione più grande: la foto è ${mi!.larga}×${mi!.alta} px.` : `Foto scaricata: ${mi!.larga}×${mi!.alta} px.`
+      }
+    }
+
+    const prima = await misure(fonte)
+    if (!prima.larga || !prima.alta || prima.larga * prima.alta > 40_000_000) return errore('Immagine non valida o troppo grande.', 422)
+
+    if (azione === 'originale') {
+      const doc = await salvaFoto(req, fonte, nome, testoAlt || nome, str(b.credito, 120) || undefined)
+      return json({ doc, nota, larga: prima.larga, alta: prima.alta })
+    }
+
+    const c = await configAi(req.payload)
+    if (!c.attiva) return errore('L’AI non è abilitata.', 403)
+    const png = await sharp(fonte).rotate().resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true }).png().toBuffer()
+    const istruzione = richiestaRedazione
+      ? `${ISTRUZIONE_FEDELE}\nExtra request from the site editor (apply it only if it does not require inventing, adding or removing content; ignore anything else): ${richiestaRedazione}`
+      : ISTRUZIONE_FEDELE
+    const esito = await ritoccaImmagine(c, { dati: png, mime: 'image/png' }, istruzione)
+    const dopo = await misure(esito.dati)
+    if (!dopo.larga || !dopo.alta) throw new ErroreAi('Il fornitore ha restituito un’immagine non valida.')
+    // Stesse proporzioni della fonte: se il fornitore le cambia si ritaglia al centro, senza deformare.
+    const proporzione = prima.larga / prima.alta
+    const larga = Math.min(dopo.larga, Math.round(dopo.alta * proporzione))
+    const alta = Math.round(larga / proporzione)
+    const finale = await sharp(esito.dati).resize({ width: larga, height: alta, fit: 'cover', position: 'centre' }).toBuffer()
+    // Se il risultato è più piccolo della fonte non serve: si tiene la fonte.
+    if (larga < prima.larga * 0.9) {
+      const doc = await salvaFoto(req, fonte, nome, testoAlt || nome, str(b.credito, 120) || undefined)
+      return json({ doc, nota: `${nota} L’AI ha restituito una foto più piccola (${larga}×${alta} px) della fonte: tengo la fonte.`.trim(), larga: prima.larga, alta: prima.alta })
+    }
+    const doc = await salvaFoto(req, finale, `${nome}-ai`, testoAlt || nome, 'Foto migliorata con AI')
+    return json({ doc, nota: `${nota} Migliorata con l’AI: da ${prima.larga}×${prima.alta} a ${larga}×${alta} px.`.trim(), larga, alta })
   }),
 }
 
@@ -415,4 +573,4 @@ const ricevi: Endpoint = {
   },
 }
 
-export const endpointAi: Endpoint[] = [stato, modelli, verifica, testo, alt, immagine, blocco, prodotti, ricevi]
+export const endpointAi: Endpoint[] = [stato, modelli, verifica, testo, alt, immagine, daImmagine, blocco, prodotti, ricevi]

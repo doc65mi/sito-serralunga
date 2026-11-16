@@ -1,5 +1,5 @@
 /**
- * Modifica dalla pagina (Version: 3.04).
+ * Modifica dalla pagina (Version: 3.05).
  * Si carica solo se il browser ha il cookie del pannello (vedi Base.astro) e
  * verifica l'utente con /api/users/me. Sito e pannello stanno sullo stesso
  * indirizzo, quindi le chiamate usano il cookie di accesso di Payload.
@@ -10,7 +10,8 @@
  * - [data-campo-img]: immagine. Ogni foto ha il pulsante «Cambia foto»: si sceglie un file,
  *   si carica in Media e si collega al campo.
  *   Dal menu di ogni foto: aggiungere altre foto (lo spazio diventa uno slider), accendere la
- *   lightbox, scrivere il testo alternativo (anche con l'AI), generare un'immagine con l'AI.
+ *   lightbox, scrivere il testo alternativo (anche con l'AI), migliorare la foto con l'AI (partendo dalla
+ *   foto attuale, dalla libreria, da un file o da un URL) o crearne una nuova.
  * - [data-campo-link]: pulsante. Insieme al testo si cambia l'indirizzo a cui porta.
  * - Pulsante AI nella barra del testo: istruzione → proposta → Inserisci → Salva.
  * - [data-blocco] e «Aggiungi blocco»: blocchi in fondo alla pagina, scelti a mano o descritti all'AI.
@@ -690,7 +691,7 @@ function avvia(utente: Json) {
       }
     }
     if (img?.dataset.media) voci.push(['Testo alternativo (SEO)', () => testoAlternativo(img)])
-    if (!lista) voci.push(['Genera un\'immagine con l\'AI', () => void conAi('immagini', () => aiImmagine(el, cornice))])
+    voci.push(['Immagine con l\'AI (migliora o crea)', () => aiImmagine(el, cornice)])
     const menu = document.createElement('div')
     menu.className = 'redazione-menu'
     menu.setAttribute('role', 'menu')
@@ -824,42 +825,221 @@ function avvia(utente: Json) {
     })
   }
 
+  /**
+   * Immagine con l'AI, due modalità:
+   * - «Seleziona immagine»: si parte da una foto esistente (quella dello spazio, la libreria Media, un file
+   *   o un indirizzo). «Cerca l'originale» scarica la versione più grande (per le foto Shopify toglie la
+   *   misura ridotta dall'indirizzo); «Migliora con l'AI» la ingrandisce e la ripulisce senza inventare nulla.
+   * - «Crea nuova immagine»: genera un'immagine nuova da una descrizione.
+   * Il risultato si salva in Media (le misure AVIF le crea il pannello); un clic sull'anteprima sceglie il
+   * punto da tenere visibile quando lo spazio taglia la foto. «Usa in questo spazio» la mette nella pagina.
+   */
   function aiImmagine(el: HTMLElement, cornice?: Element | null) {
     const r = (cornice || el).getBoundingClientRect()
     const orientamento = r.width > r.height * 1.15 ? 'orizzontale' : r.height > r.width * 1.15 ? 'verticale' : 'quadrata'
+    const proporzione = r.width && r.height ? `${Math.round(r.width)} / ${Math.round(r.height)}` : '4 / 3'
+    const { img: attuale, indice } = mostrata(el)
+    const idAttuale = attuale?.dataset.media && !el.hasAttribute('data-segnaposto') ? Number(attuale.dataset.media) : null
     const d = finestra('Immagine con l\'AI', `
-      <p class="redazione-ai__nota">Crea una nuova immagine da una descrizione: non ritocca la foto attuale. È un'immagine di fantasia, da non usare per mostrare prodotti o progetti reali. La generazione può richiedere fino a due minuti e consuma credito del fornitore.</p>
-      <label>Descrizione dell'immagine (formato ${orientamento})<textarea class="redazione-ai__istruzione" rows="4"></textarea></label>
-      <button type="button" class="redazione-ai__vai">Genera immagine</button>
-      <div class="redazione-ai__anteprima" hidden><img alt="" /></div>
+      <div class="redazione-ai__schede" role="tablist">
+        <button type="button" role="tab" aria-selected="true" data-scheda="seleziona">Seleziona immagine</button>
+        <button type="button" role="tab" aria-selected="false" data-scheda="crea">Crea nuova immagine</button>
+      </div>
+      <div class="redazione-ai__pannello" data-pannello="seleziona" role="tabpanel">
+        <p class="redazione-ai__nota">Parti da una foto che esiste già. «Cerca l'originale» scarica la versione più grande disponibile, senza AI e senza costi. «Migliora con l'AI» la ingrandisce e la ripulisce: non aggiunge e non toglie nulla e lascia le scritte come sono, ma va sempre controllata.</p>
+        <fieldset class="redazione-ai__fonti">
+          <legend>Foto di partenza</legend>
+          ${idAttuale ? `<label><input type="radio" name="fonte" value="attuale" checked /><img class="redazione-ai__miniatura" src="${esc(attuale!.currentSrc || attuale!.src)}" alt="" /> Foto attuale di questo spazio</label>` : ''}
+          <label><input type="radio" name="fonte" value="url" ${idAttuale ? '' : 'checked'} /> Da un indirizzo (URL)</label>
+          <label><input type="radio" name="fonte" value="libreria" /> Dalla libreria Media</label>
+          <label><input type="radio" name="fonte" value="file" /> Da un file del computer</label>
+        </fieldset>
+        <label data-per="url" ${idAttuale ? 'hidden' : ''}>Indirizzo della foto<input type="url" class="redazione-ai__url" placeholder="https://cdn.shopify.com/s/files/…/foto_430x.jpg" /></label>
+        <div class="redazione-ai__libreria" data-per="libreria" hidden>
+          <input type="search" class="redazione-ai__cerca" placeholder="Cerca nella libreria per nome o testo alternativo" aria-label="Cerca nella libreria" />
+          <div class="redazione-ai__griglia" role="group" aria-label="Foto della libreria"></div>
+        </div>
+        <div class="redazione-ai__riga" data-per="file" hidden><button type="button" class="redazione-ai__file">Scegli il file…</button><span class="redazione-ai__nome-file"></span></div>
+        <label>Cosa fare (facoltativo, solo per «Migliora con l'AI»)<textarea class="redazione-ai__richiesta" rows="2" placeholder="Es.: aumenta la risoluzione, rendi leggibile la scritta sulla pietra"></textarea></label>
+        <div class="redazione-ai__riga">
+          <button type="button" class="redazione-ai__vai" data-azione="originale">Cerca l'originale</button>
+          <button type="button" class="redazione-ai__vai" data-azione="migliora">Migliora con l'AI</button>
+        </div>
+      </div>
+      <div class="redazione-ai__pannello" data-pannello="crea" role="tabpanel" hidden>
+        <p class="redazione-ai__nota">Crea un'immagine nuova da una descrizione: è un'immagine di fantasia, da non usare per mostrare prodotti o progetti reali. Per partire da una foto esistente usa «Seleziona immagine».</p>
+        <label>Descrizione dell'immagine (formato ${orientamento})<textarea class="redazione-ai__istruzione" rows="4"></textarea></label>
+        <button type="button" class="redazione-ai__vai" data-azione="crea">Genera immagine</button>
+      </div>
+      <div class="redazione-ai__risultato" hidden>
+        <figure><div class="redazione-ai__punto"><img alt="" /><span class="redazione-ai__mirino"></span></div><figcaption>Clic sulla foto per scegliere il punto che deve restare visibile.</figcaption></figure>
+        <figure><div class="redazione-ai__resa" style="aspect-ratio:${proporzione}"><img alt="" /></div><figcaption>Come apparirà nello spazio</figcaption></figure>
+      </div>
       <button type="button" class="redazione-ai__usa" disabled>Usa in questo spazio</button>`)
     const dico = statoDi(d)
-    const vai = d.querySelector<HTMLButtonElement>('.redazione-ai__vai')!
-    const usa = d.querySelector<HTMLButtonElement>('.redazione-ai__usa')!
-    const anteprima = d.querySelector<HTMLElement>('.redazione-ai__anteprima')!
-    let generata: Json | null = null
-    vai.addEventListener('click', async () => {
-      vai.disabled = true
-      dico('Generazione in corso: può richiedere fino a due minuti…')
-      try {
-        const risposta = await postJson('/api/ai/immagine', { descrizione: d.querySelector<HTMLTextAreaElement>('.redazione-ai__istruzione')!.value, orientamento, alt: altDi(el) })
-        generata = risposta.doc
-        anteprima.hidden = false
-        anteprima.querySelector('img')!.src = generata!.url
-        usa.disabled = false
-        dico('Immagine pronta e salvata in Media. «Usa in questo spazio» la mette nella pagina.')
-      } catch (err) {
-        dico((err as Error).message, true)
-      }
-      vai.disabled = false
+    const $ = <T extends HTMLElement>(s: string) => d.querySelector<T>(s)!
+    const usa = $<HTMLButtonElement>('.redazione-ai__usa')
+    const risultato = $('.redazione-ai__risultato')
+    const mirino = $('.redazione-ai__mirino')
+    const resa = $<HTMLImageElement>('.redazione-ai__resa img')
+    let pronta: Json | null = null
+    let idFile: number | null = null
+    let idLibreria: number | null = null
+    let fuoco = { x: 50, y: 50 }
+
+    // Schede
+    d.querySelectorAll<HTMLButtonElement>('[data-scheda]').forEach((t) =>
+      t.addEventListener('click', () => {
+        d.querySelectorAll<HTMLButtonElement>('[data-scheda]').forEach((x) => x.setAttribute('aria-selected', String(x === t)))
+        d.querySelectorAll<HTMLElement>('[data-pannello]').forEach((p) => (p.hidden = p.dataset.pannello !== t.dataset.scheda))
+      }),
+    )
+
+    // Foto di partenza
+    const fonte = () => d.querySelector<HTMLInputElement>('input[name="fonte"]:checked')?.value || 'url'
+    const aggiornaFonte = () => {
+      d.querySelectorAll<HTMLElement>('[data-per]').forEach((x) => (x.hidden = x.dataset.per !== fonte()))
+      $<HTMLButtonElement>('[data-azione="originale"]').disabled = fonte() !== 'url'
+      if (fonte() === 'libreria' && !$('.redazione-ai__griglia').childElementCount) void libreria('')
+    }
+    d.querySelectorAll('input[name="fonte"]').forEach((x) => x.addEventListener('change', aggiornaFonte))
+    aggiornaFonte()
+
+    let attesa = 0
+    $<HTMLInputElement>('.redazione-ai__cerca').addEventListener('input', (e) => {
+      window.clearTimeout(attesa)
+      attesa = window.setTimeout(() => void libreria((e.target as HTMLInputElement).value), 300)
     })
-    usa.addEventListener('click', async () => {
-      if (!generata) return
+    async function libreria(testo: string) {
+      const griglia = $('.redazione-ai__griglia')
+      const filtro = testo.trim()
+        ? `&where[or][0][filename][like]=${encodeURIComponent(testo.trim())}&where[or][1][alt][like]=${encodeURIComponent(testo.trim())}`
+        : ''
       try {
-        await salva(el.dataset.campoImg!, generata.id)
-        d.close()
-        ricarica('Immagine messa nella pagina.')
+        const r = await richiesta(`/api/media?limit=60&sort=-createdAt&depth=0&${q}${filtro}`)
+        griglia.innerHTML = ''
+        for (const m of (r.docs || []) as Json[]) {
+          if (!String(m.mimeType || '').startsWith('image/')) continue
+          const b = document.createElement('button')
+          b.type = 'button'
+          b.setAttribute('aria-pressed', String(m.id === idLibreria))
+          b.title = `${m.alt || m.filename} (${m.width}×${m.height} px)`
+          b.innerHTML = `<img src="${esc(m.sizes?.mini?.url || m.url)}" alt="${esc(m.alt || m.filename || '')}" loading="lazy" />`
+          b.addEventListener('click', () => {
+            idLibreria = m.id
+            griglia.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
+            dico(`Scelta: ${m.alt || m.filename} (${m.width}×${m.height} px).`)
+          })
+          griglia.append(b)
+        }
+        if (!griglia.childElementCount) griglia.textContent = 'Nessuna foto trovata.'
       } catch (err) {
+        dico(`Libreria non letta: ${(err as Error).message}`, true)
+      }
+    }
+
+    $<HTMLButtonElement>('.redazione-ai__file').addEventListener('click', async () => {
+      const [file] = await scegliFile()
+      if (!file) return
+      dico('Caricamento del file in Media…')
+      try {
+        idFile = (await carica(file, altDi(el))).id
+        $('.redazione-ai__nome-file').textContent = file.name
+        dico('File caricato: ora puoi migliorarlo con l\'AI o usarlo così com\'è.')
+        mostra(await richiesta(`/api/media/${idFile}?depth=0&${q}`), '')
+      } catch (err) {
+        dico(`File non caricato: ${(err as Error).message}`, true)
+      }
+    })
+
+    // Risultato: anteprima, punto da tenere visibile, resa nello spazio
+    function mostra(doc: Json, nota: string) {
+      pronta = doc
+      fuoco = { x: doc.focalX ?? 50, y: doc.focalY ?? 50 }
+      const src = `${doc.url}${doc.url.includes('?') ? '&' : '?'}v=${Date.now()}`
+      $<HTMLImageElement>('.redazione-ai__punto img').src = src
+      resa.src = src
+      segnaFuoco()
+      risultato.hidden = false
+      usa.disabled = false
+      dico(`${nota ? `${nota} ` : ''}Foto salvata in Media. «Usa in questo spazio» la mette nella pagina.`)
+    }
+    function segnaFuoco() {
+      mirino.style.left = `${fuoco.x}%`
+      mirino.style.top = `${fuoco.y}%`
+      resa.style.objectPosition = `${fuoco.x}% ${fuoco.y}%`
+    }
+    $<HTMLImageElement>('.redazione-ai__punto img').addEventListener('click', (e) => {
+      const im = e.currentTarget as HTMLImageElement
+      // L'immagine è in object-fit: contain: si calcola il punto sulla foto vera, non sul riquadro.
+      const box = im.getBoundingClientRect()
+      const scala = Math.min(box.width / im.naturalWidth, box.height / im.naturalHeight)
+      const w = im.naturalWidth * scala
+      const h = im.naturalHeight * scala
+      const x = (e.clientX - box.left - (box.width - w) / 2) / w
+      const y = (e.clientY - box.top - (box.height - h) / 2) / h
+      if (x < 0 || x > 1 || y < 0 || y > 1) return
+      fuoco = { x: Math.round(x * 100), y: Math.round(y * 100) }
+      mirino.style.left = `${((box.width - w) / 2 + x * w) / box.width * 100}%`
+      mirino.style.top = `${((box.height - h) / 2 + y * h) / box.height * 100}%`
+      resa.style.objectPosition = `${fuoco.x}% ${fuoco.y}%`
+    })
+
+    // Azioni
+    d.querySelectorAll<HTMLButtonElement>('[data-azione]').forEach((b) =>
+      b.addEventListener('click', async () => {
+        const azione = b.dataset.azione!
+        // «Cerca l'originale» non usa l'AI; le altre azioni sì: se è spenta si spiega che cosa manca.
+        if (azione !== 'originale' && !ai.immagini) {
+          await leggiStatoAi()
+          if (!ai.immagini) return aiDaAttivare('immagini')
+        }
+        const corpoRichiesta: Json = { azione, alt: altDi(el), lingua, istruzione: $<HTMLTextAreaElement>('.redazione-ai__richiesta').value }
+        if (azione !== 'crea') {
+          const f = fonte()
+          if (f === 'attuale') corpoRichiesta.media = idAttuale
+          else if (f === 'libreria') corpoRichiesta.media = idLibreria
+          else if (f === 'file') corpoRichiesta.media = idFile
+          else corpoRichiesta.url = $<HTMLInputElement>('.redazione-ai__url').value.trim()
+          if (f !== 'url' && !corpoRichiesta.media) return dico(f === 'file' ? 'Scegli prima il file.' : 'Scegli prima una foto della libreria.', true)
+          if (f === 'url' && !/^https:\/\//.test(corpoRichiesta.url)) return dico('Scrivi l\'indirizzo della foto: deve iniziare con https://', true)
+        }
+        d.querySelectorAll<HTMLButtonElement>('[data-azione]').forEach((x) => (x.disabled = true))
+        dico(azione === 'originale' ? 'Cerco la versione più grande della foto…' : 'L\'AI sta lavorando: può richiedere fino a due minuti…')
+        try {
+          const risposta =
+            azione === 'crea'
+              ? await postJson('/api/ai/immagine', { descrizione: $<HTMLTextAreaElement>('.redazione-ai__istruzione').value, orientamento, alt: altDi(el) })
+              : await postJson('/api/ai/da-immagine', corpoRichiesta)
+          mostra(risposta.doc, risposta.nota || '')
+        } catch (err) {
+          dico((err as Error).message, true)
+        }
+        d.querySelectorAll<HTMLButtonElement>('[data-azione]').forEach((x) => (x.disabled = false))
+        aggiornaFonte()
+      }),
+    )
+
+    usa.addEventListener('click', async () => {
+      if (!pronta) return
+      usa.disabled = true
+      try {
+        if (fuoco.x !== (pronta.focalX ?? 50) || fuoco.y !== (pronta.focalY ?? 50))
+          await richiesta(`/api/media/${pronta.id}?${q}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ focalX: fuoco.x, focalY: fuoco.y }) })
+        if (el.dataset.campoLista) {
+          const ids: number[] = (await leggi(el.dataset.campoLista)) || []
+          ids[indice] = pronta.id
+          await salva(el.dataset.campoLista, ids)
+        } else if (indice > 0) {
+          const s = await leggiSpazio(el)
+          const ids: number[] = [...(s?.immagini || [])]
+          ids[indice - 1] = pronta.id // la prima foto dello spazio è quella del campo, non dell'elenco
+          await scriviSpazio(el, { immagini: ids })
+        } else await salva(el.dataset.campoImg!, pronta.id)
+        d.close()
+        ricarica('Foto messa nella pagina.')
+      } catch (err) {
+        usa.disabled = false
         dico((err as Error).message, true)
       }
     })
