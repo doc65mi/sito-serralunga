@@ -243,3 +243,9 @@ html[data-theme='light'] .collapsible__toggle-wrap svg .stroke,
 html[data-theme='light'] .array-field svg .stroke, html[data-theme='light'] .blocks-field svg .stroke { stroke: #000 !important; stroke-width: 1.6px; }
 html[data-theme='light'] .nav-group__indicator svg .fill { fill: #000 !important; }
 html[data-theme='light'] .nav-group__indicator, html[data-theme='light'] .collapsible__indicator { opacity: 1; color: #000; }
+/* Elenco dei modelli AI: apri/chiudi (Version: 1.03) */
+.sl-modello__apri { height: 40px; padding: 0 16px; background: transparent; border: 1px solid #000; color: #000; font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.sl-modello__apri:hover, .sl-modello__apri:focus-visible { background: #000; color: #fff; }
+.sl-modello__testa-elenco { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px; background: #ddd6c6; color: #000; font-size: 14px; font-weight: 600; }
+.sl-modello__chiudi { padding: 4px 10px; background: #000; color: #fff; border: 0; font: inherit; font-size: 14px; cursor: pointer; }
+.sl-modello__chiudi:hover, .sl-modello__chiudi:focus-visible { background: var(--sl-oro); color: #000; }
