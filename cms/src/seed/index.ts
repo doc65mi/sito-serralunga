@@ -37,8 +37,9 @@ const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
 // seed:aggiorna e seed:catalogo non modificano mai contenuti già presenti (le modifiche fatte
 // dal pannello o dalla pagina non sono in GitHub): propongono le modifiche, che si applicano
 // a mano dal pannello (Strumenti) con una copia di sicurezza. Vedi prudenza.ts.
+let cambiaStruttura: typeof payload.updateGlobal = payload.updateGlobal.bind(payload)
 if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer' || process.env.SEED_SOLO === 'catalogo') {
-  proteggi(payload, process.env.SEED_SOLO === 'catalogo' ? 'catalogo' : 'aggiorna', log)
+  cambiaStruttura = proteggi(payload, process.env.SEED_SOLO === 'catalogo' ? 'catalogo' : 'aggiorna', log).cambiaStruttura
   if (giaFatti()) log(`ripresa dal punto salvato: ${giaFatti()} passaggi già completati`)
 }
 
@@ -273,7 +274,8 @@ async function completaPagine() {
   // Si applica una volta sola, finché il menu superiore è vuoto: dopo si cambia dal pannello.
   const nav = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { menuSuperiore?: unknown[] }
   if (!nav.menuSuperiore?.length) {
-    await payload.updateGlobal({ slug: 'impostazioni', data: { menuSuperiore: MENU_SUPERIORE, menu: MENU, colonne: COLONNE } as never })
+    // Il doppio menu non c'è mai stato su questo sito: si applica anche in modalità prudente (con copia).
+    await cambiaStruttura({ slug: 'impostazioni', data: { menuSuperiore: MENU_SUPERIORE, menu: MENU, colonne: COLONNE } as never })
     log('navigazione: menu superiore, menu inferiore con tendine e colonne del footer')
   }
   // Navigazione 2.01/2.02: Installazioni e Spunti e idee sotto Progetti, Designer voce a sé dopo Catalogo

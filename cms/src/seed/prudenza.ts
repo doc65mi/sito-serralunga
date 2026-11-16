@@ -1,5 +1,5 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * Protezione dei contenuti per seed:aggiorna e seed:catalogo.
  *
  * Il sito si modifica dal pannello e dalla pagina: quelle modifiche stanno solo nel database,
@@ -10,6 +10,11 @@
  * - fanno eccezione i documenti creati in questa stessa esecuzione (es. il testo inglese di una
  *   scheda appena creata), le pagine globali mai salvate, e le versioni AVIF ridotte delle foto
  *   (rigenerate dal file caricato: testo, alt e punto focale non cambiano).
+ *
+ * Eccezione voluta (cambiaStruttura): un cambio di struttura del sito che il seed applica una volta sola
+ * e solo quando il campo nuovo è ancora vuoto (es. il doppio menu della navigazione 2.x: finché il menu
+ * superiore è vuoto il sito non l'ha mai avuto, quindi nessuno l'ha modificato). Si applica sempre,
+ * anche in modalità prudente, dopo aver salvato una copia completa della pagina globale.
  *
  * Con SEED_APPLICA=1 (pulsante "Applica" nel pannello) le modifiche si applicano, ma prima di
  * ognuna si salva una copia completa (tutte le lingue) del documento in .compiti/copie/<data>/.
@@ -131,6 +136,15 @@ export function proteggi(payload: Payload, compito: string, log: (m: string) => 
     return updateGlobal(args as never)
   }) as unknown as typeof updateGlobal
 
+  /** Vedi l'eccezione in testa al file: copia di sicurezza, poi modifica diretta. */
+  const cambiaStruttura = (async (args: Record<string, unknown>) => {
+    const slug = String(args.slug)
+    copia(`globale-${slug}`, await payload.findGlobal({ slug: slug as never, depth: 0, locale: 'all' as never, draft: true }))
+    globaliSalvati.add(slug)
+    log(`cambio di struttura applicato: pagina globale ${slug} (copia salvata in ${copie})`)
+    return updateGlobal(args as never)
+  }) as unknown as typeof updateGlobal
+
   log(applica ? `modalità applica: prima di ogni modifica si salva una copia in ${copie}` : 'modalità prudente: si aggiunge solo ciò che manca, i contenuti esistenti non si toccano')
-  return { applica, proposte }
+  return { applica, proposte, cambiaStruttura }
 }
