@@ -1,5 +1,5 @@
 /**
- * Schede di tutti i designer con pezzi nel catalogo attuale (Version: 1.01).
+ * Schede di tutti i designer con pezzi nel catalogo attuale (Version: 1.02).
  * Fonte: le schede prodotto di serralunga.com (nome, ritratto, nota biografica, collezioni firmate).
  * Le biografie sono riassunti redazionali dei dati pubblicati lì, in italiano e in inglese:
  * vanno riviste dal cliente. Dove serralunga.com non riporta una biografia, la scheda
@@ -69,6 +69,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Laura Aquili & Ergian Alberg',
     slug: 'aquili-alberg',
+    foto: 'aquilialberg.jpg?v=1771517194',
     ruolo: [`Architetti`, 'Architects'],
     prov: ['Studio · Milano', 'Studio · Milan'],
     pezzi: ['Milo'],
@@ -150,6 +151,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Aldo Cibic',
     slug: 'aldo-cibic',
+    foto: 'Aldo_Cibic.webp?v=1771517188',
     ruolo: AD,
     prov: ['Architetto e designer · Italia', 'Architect and designer · Italy'],
     pezzi: ['Porcino'],
@@ -188,6 +190,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Marta Daza Fernandez',
     slug: 'marta-daza-fernandez',
+    foto: 'Marta-Daza-Fernandez.jpg?v=1676381833',
     ruolo: D,
     pezzi: ['Memory Pot'],
   },
@@ -247,6 +250,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Giovanni Giacobone & Massimo Roj',
     slug: 'giacobone-roj',
+    foto: 'Giovanni_Giacobone_-_Massimo_Roj.jpg?v=1676383464',
     ruolo: [`Architetti`, 'Architects'],
     prov: ['Progetto CMR · Italia', 'Progetto CMR · Italy'],
     pezzi: ['Solea'],
@@ -302,6 +306,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Lineeverdi',
     slug: 'lineeverdi',
+    foto: 'Lineeverdi_x-sito.jpg?v=1676381207',
     ruolo: [`Studio di paesaggio`, 'Landscape studio'],
     prov: ['Stefania Naretto e Chiara Otella · Torino', 'Stefania Naretto and Chiara Otella · Turin'],
     pezzi: ['Kentia'],
@@ -325,6 +330,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Vico Magistretti',
     slug: 'vico-magistretti',
+    foto: 'Vico_magistretti.jpg?v=1676383305',
     ruolo: AD,
     prov: ['Architetto e designer · Milano, 1920–2006', 'Architect and designer · Milan, 1920–2006'],
     pezzi: ['Russell'],
@@ -497,6 +503,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Brian Steendyk',
     slug: 'brian-steendyk',
+    foto: 'Brian_Steendyk.jpg?v=1771517340',
     ruolo: AD,
     prov: ['Architetto e designer · Australia', 'Architect and designer · Australia'],
     pezzi: ['Cero'],
@@ -508,6 +515,7 @@ const VOCI: Voce[] = [
   {
     nome: 'Patricia Urquiola',
     slug: 'patricia-urquiola',
+    foto: 'Patricia_Urquiola.jpg?v=1666096691',
     ruolo: AD,
     prov: ['Architetto e designer · Spagna / Italia', 'Architect and designer · Spain / Italy'],
     pezzi: ['Cassero'],
