@@ -16,6 +16,8 @@ import { Media } from './collections/Media'
 import { Prodotti } from './collections/Prodotti'
 import { Categorie } from './collections/Categorie'
 import { Spunti } from './collections/Spunti'
+import { Materiali } from './collections/Materiali'
+import { Colori } from './collections/Colori'
 import { Pagine } from './collections/Pagine'
 import { SpaziFoto } from './collections/SpaziFoto'
 import { Articoli } from './collections/Articoli'
@@ -30,6 +32,7 @@ import { PaginaDesigner } from './globals/PaginaDesigner'
 import { PaginaInstallazioni } from './globals/PaginaInstallazioni'
 import { PaginaSpunti } from './globals/PaginaSpunti'
 import { PaginaCatalogo } from './globals/PaginaCatalogo'
+import { PaginaMateriali } from './globals/PaginaMateriali'
 import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -78,6 +81,8 @@ export default buildConfig({
         if (globalConfig?.slug === 'pagina-installazioni') return `${versoSito}/installazioni/`
         if (globalConfig?.slug === 'pagina-spunti') return `${versoSito}/spunti-e-idee/`
         if (globalConfig?.slug === 'pagina-journal') return `${versoSito}/journal/`
+        if (globalConfig?.slug === 'pagina-materiali') return `${versoSito}/materiali/`
+        if (collectionConfig?.slug === 'materiali') return `${versoSito}/materiali/${data?.slug}/`
         if (collectionConfig?.slug === 'articoli') return `${versoSito}/journal/${data?.slug}/`
         if (collectionConfig?.slug === 'spunti') return `${versoSito}/spunti-e-idee/${data?.slug}/`
         if (collectionConfig?.slug === 'prodotti') return `${versoSito}/prodotti/${data?.slug}/`
@@ -87,8 +92,8 @@ export default buildConfig({
         if (collectionConfig?.slug === 'contract') return `${versoSito}${percorsoContract(data?.sezione)}`
         return `${versoSito}/`
       },
-      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'pagine', 'contract'],
-      globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal'],
+      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'materiali', 'pagine', 'contract'],
+      globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal', 'pagina-materiali'],
       breakpoints: [
         { label: 'Telefono', name: 'telefono', width: 390, height: 844 },
         { label: 'Tablet', name: 'tablet', width: 1000, height: 1200 },
@@ -106,8 +111,8 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, Categorie, CaseHistory, Spunti, Articoli, Pagine, Contract, Designer, Media, SpaziFoto, Richieste, Users],
-  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaJournal, Impostazioni, Ai],
+  collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, Designer, Media, SpaziFoto, Richieste, Users],
+  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, Impostazioni, Ai],
   endpoints: endpointAi,
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

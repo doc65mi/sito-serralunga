@@ -7,7 +7,7 @@ import { categorie, conteggi, urlCategoria, urlProdotto } from '../lib/catalogo'
 /** Sitemap con tutte le lingue: ogni indirizzo dichiara le versioni alternative (hreflang). */
 export const GET: APIRoute = async () => {
   const base = SITO
-  const [prodotti, casi, designer, spunti, articoli, pagine, contract] = await Promise.all([
+  const [prodotti, casi, designer, spunti, articoli, pagine, materiali, contract] = await Promise.all([
     elenco('prodotti', { depth: 0, limit: 2000, 'where[schedaPubblicata][equals]': 'true' }),
     elenco('case-history', { depth: 1 }),
     elenco('designer', { depth: 1, 'where[schedaPubblicata][equals]': 'true' }),
@@ -15,6 +15,7 @@ export const GET: APIRoute = async () => {
     elenco('articoli', { depth: 1, sort: '-data', limit: 500 }).catch(() => []),
     elenco('pagine', { depth: 1, sort: 'titolo' }).catch(() => []),
     elenco('contract', { depth: 1 }).catch(() => []),
+    elenco('materiali', { depth: 1 }).catch(() => []),
   ])
   const cats = await categorie()
   const n = await conteggi(cats)
@@ -36,12 +37,14 @@ export const GET: APIRoute = async () => {
     url('/spunti-e-idee/'),
     url('/journal/'),
     url('/catalogo/'),
+    url('/materiali/'),
     ...cats.filter((c) => (n.get(c.id) || 0) > 0).map((c) => url(urlCategoria(c, cats), c.updatedAt, c.immagine)),
     ...prodotti.map((p) => url(urlProdotto(p, cats), p.updatedAt)),
     ...casi.map((c) => url(`/case-history/${c.slug}/`, c.updatedAt, c.immagine)),
     ...designer.map((d) => url(`/designer/${d.slug}/`, d.updatedAt, d.ritratto)),
     ...spunti.map((x) => url(`/spunti-e-idee/${x.slug}/`, x.updatedAt, x.immagine)),
     ...articoli.map((x) => url(`/journal/${x.slug}/`, x.updatedAt, x.immagine)),
+    ...materiali.map((x) => url(`/materiali/${x.slug}/`, x.updatedAt, x.immagine)),
     ...pagine.map((x) => url(`/${x.slug}/`, x.updatedAt, x.immagine)),
     ...contract.map((x) => url(x.sezione === 'principale' ? '/contract/' : `/contract/${x.sezione}/`, x.updatedAt, x.immagine)),
   ]

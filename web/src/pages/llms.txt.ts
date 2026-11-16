@@ -10,7 +10,7 @@ import { categorie, urlCategoria, urlProdotto } from '../lib/catalogo'
  */
 export const GET: APIRoute = async () => {
   const cats = await categorie()
-  const [imp, home, prodotti, designer, casi, spunti, articoli, contract] = await Promise.all([
+  const [imp, home, prodotti, designer, casi, spunti, articoli, materiali, contract] = await Promise.all([
     impostazioni('it'),
     globale('home', 0, 'it').catch(() => ({}) as Doc),
     elenco('prodotti', { depth: 0, 'where[schedaPubblicata][equals]': 'true' }).catch(() => []),
@@ -19,6 +19,7 @@ export const GET: APIRoute = async () => {
     elenco('spunti', { depth: 0 }).catch(() => []),
     elenco('articoli', { depth: 0, sort: '-data', limit: 50 }).catch(() => []),
     elenco('contract', { depth: 0 }).catch(() => []),
+    elenco('materiali', { depth: 0 }).catch(() => []),
   ])
   const a = imp.azienda || {}
   const riga = (titolo: string, url: string, nota?: string) => `- [${piatto(titolo)}](${SITO}${url})${nota ? `: ${piatto(nota).slice(0, 180)}` : ''}`
@@ -39,9 +40,11 @@ export const GET: APIRoute = async () => {
       riga('I designer', '/designer/'),
       riga('Spunti e idee', '/spunti-e-idee/'),
       riga('Journal', '/journal/'),
+      riga('Materiali e colori', '/materiali/'),
     ]),
     sezione('Catalogo', [riga('Catalogo B2B', '/catalogo/'), ...cats.map((c) => riga(c.nome, urlCategoria(c, cats), c.seo?.descrizione))]),
     sezione('Contract (B2B: hotel, ristoranti, architetti, enti pubblici, rivenditori)', contract.map((c) => riga(c.nome, c.sezione === 'principale' ? '/contract/' : `/contract/${c.sezione}/`, c.seo?.descrizione || c.estratto || c.testo))),
+    sezione('Materiali', materiali.map((m) => riga(m.titolo, `/materiali/${m.slug}/`, m.seo?.descrizione || m.sottotitolo))),
     sezione('Prodotti', prodotti.map((p) => riga(p.nome, urlProdotto(p, cats), p.seo?.descrizione))),
     sezione('Designer', designer.map((d) => riga(d.nome, `/designer/${d.slug}/`, d.ruolo))),
     sezione('Case history', casi.map((c) => riga(c.nome, `/case-history/${c.slug}/`, c.seo?.descrizione))),
