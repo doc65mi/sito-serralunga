@@ -19,7 +19,7 @@ import config from '@payload-config'
 import { aquaLounger, caseLoge, designerDati, prodottiCard } from './dati'
 import { creazioniDi, type Creazione } from './creazioni'
 import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
-import { homeDati, impostazioniDati, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
+import { COLONNE, homeDati, impostazioniDati, MENU, MENU_SUPERIORE, PAGINE, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
 import { rigeneraFormati } from './immagini'
 import { completaHeritage } from './heritage'
 import { applicaInglese } from './inglese'
@@ -237,6 +237,20 @@ async function completaPagine() {
     await payload.updateGlobal({ slug: 'impostazioni', data: { menu } as never })
     log('aggiornato il menu: Installazioni e Spunti e idee')
   }
+  // Navigazione 2026-11: menu superiore + menu inferiore con tendine e footer a tre colonne.
+  // Si applica una volta sola, finché il menu superiore è vuoto: dopo si cambia dal pannello.
+  const nav = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { menuSuperiore?: unknown[] }
+  if (!nav.menuSuperiore?.length) {
+    await payload.updateGlobal({ slug: 'impostazioni', data: { menuSuperiore: MENU_SUPERIORE, menu: MENU, colonne: COLONNE } as never })
+    log('navigazione: menu superiore, menu inferiore con tendine e colonne del footer')
+  }
+  // Pagine di servizio (Contatti, Listino, FAQ): si creano solo se mancano.
+  for (const pg of PAGINE) {
+    const c = await payload.find({ collection: 'pagine', where: { slug: { equals: pg.slug } }, limit: 1, depth: 0, draft: true })
+    if (c.docs.length) continue
+    await payload.create({ collection: 'pagine', data: pg as never, draft: pg._status === 'draft' })
+    log(`creata la pagina /${pg.slug}/ (${pg._status === 'draft' ? 'bozza' : 'pubblicata'})`)
+  }
   // Condivisione: senza un'immagine predefinita si usa la foto di apertura della home (si cambia dal pannello).
   const impo = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { immagineCondivisione?: number | null }
   const homeFoto = (await payload.findGlobal({ slug: 'home', depth: 0 })) as unknown as { hero?: { immagine?: number | null } }
@@ -307,7 +321,7 @@ if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer'
   await completaHeritage(payload, media, log)
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
   await payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never })
-  await applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer'] })
+  await applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer', 'pagine'] })
   await rigeneraFormati(payload, log)
   const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
   if (saltate.length) {

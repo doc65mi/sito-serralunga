@@ -3,7 +3,7 @@ import type { GlobalConfig } from 'payload'
 import { pubblico, soloRedazione } from '../access'
 import { area, immagine, link, testo } from '../fields'
 
-/** Header, footer e dati del cliente (fonte: file-md/cliente.md). */
+/** Header, footer e dati del cliente (fonte: file-md/cliente.md). Version: 2.00 */
 export const Impostazioni: GlobalConfig = {
   slug: 'impostazioni',
   label: 'Impostazioni del sito',
@@ -53,25 +53,52 @@ export const Impostazioni: GlobalConfig = {
           label: 'Menu',
           fields: [
             {
-              name: 'barra',
-              type: 'group',
-              label: 'Barra scura sopra il menu (home)',
-              fields: [
-                testo('testo', 'Testo a sinistra'),
-                { type: 'row', fields: [testo('linkEtichetta', 'Link a destra'), link('link', 'Indirizzo')] },
-              ],
-            },
-            {
-              name: 'menu',
+              name: 'menuSuperiore',
               type: 'array',
-              label: 'Voci del menu',
+              label: 'Menu superiore (servizio)',
               labels: { singular: 'Voce', plural: 'Voci' },
+              admin: { description: 'Riga in alto a destra, prima della scelta della lingua: Contatti, Richiedi catalogo, Listino, Account, Faq.' },
               fields: [
                 {
                   type: 'row',
                   fields: [testo('etichetta', 'Etichetta', { required: true }), link('link', 'Link')],
                 },
-                { name: 'evidenza', type: 'checkbox', label: 'In evidenza (pulsante con bordo in home, colore d’accento nelle altre pagine)' },
+              ],
+            },
+            {
+              name: 'menu',
+              type: 'array',
+              label: 'Menu inferiore (principale)',
+              labels: { singular: 'Voce', plural: 'Voci' },
+              admin: { description: 'Riga principale a destra sotto il menu di servizio. Le sottovoci compaiono in una tendina.' },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [testo('etichetta', 'Etichetta', { required: true }), link('link', 'Link')],
+                },
+                {
+                  name: 'voci',
+                  type: 'array',
+                  label: 'Sottovoci (tendina)',
+                  labels: { singular: 'Sottovoce', plural: 'Sottovoci' },
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [testo('etichetta', 'Etichetta', { required: true }), link('link', 'Link')],
+                    },
+                  ],
+                },
+                { name: 'evidenza', type: 'checkbox', label: 'In evidenza (colore d’accento)' },
+              ],
+            },
+            {
+              name: 'barra',
+              type: 'group',
+              label: 'Barra scura (non più usata dalla testata)',
+              admin: { condition: () => false },
+              fields: [
+                testo('testo', 'Testo a sinistra'),
+                { type: 'row', fields: [testo('linkEtichetta', 'Link a destra'), link('link', 'Indirizzo')] },
               ],
             },
           ],
