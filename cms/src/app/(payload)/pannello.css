@@ -1,6 +1,6 @@
 /*
  * Pannello Serralunga
- * Version: 1.02 (testi neri, almeno 14px, barra laterale chiara)
+ * Version: 1.03 (testi neri, almeno 14px, barra laterale chiara, titoli dei gruppi evidenziati)
  * Aspetto del pannello di redazione: stessi caratteri e colori del sito
  * (carta, inchiostro, oro), barra laterale scura, angoli vivi.
  */
@@ -224,3 +224,22 @@ html[data-theme='light'] .table th { letter-spacing: 0.04em; text-transform: non
 html[data-theme='light'] input::placeholder, html[data-theme='light'] textarea::placeholder { color: #555; opacity: 1; }
 html[data-theme='light'] .sl-azione--primaria .sl-azione__testo { color: #e9e5dc; }
 html[data-theme='light'] .tabs-field__tab-button { color: #000; opacity: 1; }
+
+/* Titoli dei gruppi della barra laterale (Version: 1.03): fascia di colore per staccarli dalle voci */
+html[data-theme='light'] .nav .nav-group__toggle,
+html[data-theme='light'] .sl-voce-strumenti__gruppo {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  margin: 0 0 6px; padding: 9px 12px; background: #ddd6c6; border-left: 3px solid var(--sl-oro);
+  color: #000; font-size: 14px !important; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+}
+html[data-theme='light'] .nav .nav-group__toggle:hover { background: #d3cbb8; }
+html[data-theme='light'] .nav .nav-group { margin-bottom: 18px; }
+html[data-theme='light'] .nav .nav__link { padding-left: 15px; }
+/* Frecce di apertura/chiusura dei gruppi e degli elenchi: nere e più grandi */
+html[data-theme='light'] .nav-group__indicator svg { width: 18px; height: 18px; }
+html[data-theme='light'] .nav-group__indicator svg .stroke,
+html[data-theme='light'] .collapsible__indicator svg .stroke,
+html[data-theme='light'] .collapsible__toggle-wrap svg .stroke,
+html[data-theme='light'] .array-field svg .stroke, html[data-theme='light'] .blocks-field svg .stroke { stroke: #000 !important; stroke-width: 1.6px; }
+html[data-theme='light'] .nav-group__indicator svg .fill { fill: #000 !important; }
+html[data-theme='light'] .nav-group__indicator, html[data-theme='light'] .collapsible__indicator { opacity: 1; color: #000; }
