@@ -1,3 +1,4 @@
+import { default as default_5fc540fde5a5ee2475fd33bd51f7dd84 } from '../../../componenti/EtichettaRiga'
 import { CampoModello as CampoModello_c0e2f720d59705c569c2c87c2b2ab6f4 } from '../../../componenti/CampoModello'
 import { default as default_a5c62363df18077b83503d139aa5ffbb } from '../../../componenti/Icona'
 import { default as default_d5ab4196404d6ed38b86f187692de6f8 } from '../../../componenti/Logo'
@@ -10,6 +11,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/componenti/EtichettaRiga#default": default_5fc540fde5a5ee2475fd33bd51f7dd84,
   "/componenti/CampoModello#CampoModello": CampoModello_c0e2f720d59705c569c2c87c2b2ab6f4,
   "/componenti/Icona#default": default_a5c62363df18077b83503d139aa5ffbb,
   "/componenti/Logo#default": default_d5ab4196404d6ed38b86f187692de6f8,

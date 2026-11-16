@@ -1,6 +1,6 @@
 /*
  * Pannello Serralunga
- * Version: 1.01
+ * Version: 1.02 (testi neri, almeno 14px, barra laterale chiara)
  * Aspetto del pannello di redazione: stessi caratteri e colori del sito
  * (carta, inchiostro, oro), barra laterale scura, angoli vivi.
  */
@@ -153,3 +153,71 @@ input:focus-visible, textarea:focus-visible, .rs__control--is-focused { outline:
 .sl-voce-strumenti__link { display: block; padding: 2px 0; color: inherit; text-decoration: none; }
 .sl-voce-strumenti__link:hover { text-decoration: underline; }
 .sl-strumenti { scroll-margin-top: 80px; }
+
+/* ---------- Leggibilità (Version: 1.02, richiesta 2026-11-16) ----------
+   Nel tema chiaro tutti i testi del pannello sono neri e non scendono sotto i 14px;
+   la barra laterale diventa chiara con testo nero. L'oro resta solo come accento (bordi, indicatori). */
+:root { --base-body-size: 14; }
+html[data-theme='light'] {
+  --theme-text: #000;
+  --theme-elevation-400: #1a1a1a;
+  --theme-elevation-500: #000;
+  --theme-elevation-600: #000;
+  --theme-elevation-650: #000;
+  --theme-elevation-700: #000;
+  --theme-elevation-750: #000;
+  --theme-elevation-800: #000;
+  --theme-elevation-850: #000;
+  --theme-elevation-900: #000;
+  --theme-elevation-950: #000;
+  --theme-elevation-1000: #000;
+}
+html[data-theme='light'] body { color: #000; font-size: 14px; }
+
+/* Barra laterale chiara */
+html[data-theme='light'] .nav {
+  background: var(--sl-carta);
+  border-right: 1px solid rgba(22, 21, 15, 0.12);
+  color: #000;
+  --theme-text: #000;
+  --theme-elevation-0: var(--sl-carta);
+  --theme-elevation-50: #e9e5dc;
+  --theme-elevation-100: #e1dcd1;
+  --theme-elevation-150: #d6d0c3;
+  --theme-elevation-400: #000;
+  --theme-elevation-500: #000;
+  --theme-elevation-800: #000;
+  --theme-elevation-1000: #000;
+}
+html[data-theme='light'] .nav a, html[data-theme='light'] .nav button,
+html[data-theme='light'] .nav__controls a, html[data-theme='light'] .nav__controls button { color: #000; }
+html[data-theme='light'] .nav a:hover, html[data-theme='light'] .nav a:focus-visible { color: #000; text-decoration: underline; }
+html[data-theme='light'] .nav .nav__link.active, html[data-theme='light'] .nav .nav__link[aria-current='page'] { color: #000; font-weight: 500; }
+html[data-theme='light'] .nav .nav-group__toggle,
+html[data-theme='light'] .sl-voce-strumenti__gruppo { color: #000; font-weight: 500; }
+html[data-theme='light'] .sl-frontend__pulsante:hover, html[data-theme='light'] .sl-frontend__pulsante:focus-visible { background: var(--sl-inchiostro); color: #f2efe8 !important; }
+html[data-theme='light'] .sl-frontend__nota { color: #000; }
+
+/* Dimensione minima 14px per etichette, descrizioni, tabelle, pillole, schede e strumenti */
+.nav .nav-group__toggle, .sl-voce-strumenti__gruppo, .sl-frontend__pulsante, .sl-frontend__pulsante--testata, .sl-frontend__nota,
+.sl-logo__nota, .sl-cruscotto__kicker, .sl-azione__testo, .dashboard__label,
+.field-label, .field-type > label, label.field-label:not(.unstyled), .localized, .field-description,
+.table th, .table td, .pill, .pill--rounded, .multi-value-label, .relationship--multi-value-label__content, .rs__option,
+.card__title, .section-title__input, .error-pill, .tooltip, .btn--size-small, .btn--size-xsmall, .doc-controls, .doc-controls__meta,
+.list-selection, .per-page, .page-controls, .paginator, .breadcrumbs, .step-nav, .step-nav a, .step-nav span,
+.array-field__header-meta, .row-label, .blocks-field__header-meta, .tabs-field__tab-button, .search-filter__input, .list-controls,
+.sl-modello__stato, .sl-modello__id, .sl-modello__nota, .sl-modello__scansiona,
+.sl-strumenti__nota, .sl-strumenti__errore, .sl-strumento__testo, .sl-strumento__stato, .sl-strumento__pulsante,
+.sl-strumento__registro-pulsante, .sl-strumento__registro, .sl-strumento__elenco {
+  font-size: 14px !important;
+}
+html[data-theme='light'] .field-label, html[data-theme='light'] .field-type > label, html[data-theme='light'] .field-description,
+html[data-theme='light'] .table th, html[data-theme='light'] .table td, html[data-theme='light'] .dashboard__label,
+html[data-theme='light'] .sl-azione__testo, html[data-theme='light'] .sl-modello__stato, html[data-theme='light'] .sl-modello__nota,
+html[data-theme='light'] .sl-strumenti__nota, html[data-theme='light'] .sl-strumento__testo, html[data-theme='light'] .sl-strumento__elenco span,
+html[data-theme='light'] .rs__option, html[data-theme='light'] .step-nav { color: #000; }
+html[data-theme='light'] .field-label, html[data-theme='light'] .field-type > label { letter-spacing: 0.02em; text-transform: none; font-weight: 500; }
+html[data-theme='light'] .table th { letter-spacing: 0.04em; text-transform: none; font-weight: 500; }
+html[data-theme='light'] input::placeholder, html[data-theme='light'] textarea::placeholder { color: #555; opacity: 1; }
+html[data-theme='light'] .sl-azione--primaria .sl-azione__testo { color: #e9e5dc; }
+html[data-theme='light'] .tabs-field__tab-button { color: #000; opacity: 1; }

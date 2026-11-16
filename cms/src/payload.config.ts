@@ -7,6 +7,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { en } from '@payloadcms/translations/languages/en'
 import { it } from '@payloadcms/translations/languages/it'
 import { buildConfig } from 'payload'
+import { conEtichette } from './fields/etichette'
 import sharp from 'sharp'
 
 import { Contract, percorsoContract } from './collections/Contract'
@@ -118,8 +119,9 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, Users],
-  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Ai],
+  // Righe degli elenchi chiuse con il proprio nome (fields/etichette.ts) invece di "Voce 01".
+  collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, Users].map(conEtichette),
+  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Ai].map(conEtichette),
   endpoints: [...endpointAi, ...endpointStrumenti],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
