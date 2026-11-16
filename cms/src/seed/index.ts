@@ -263,8 +263,8 @@ async function completaPagine() {
     await payload.updateGlobal({ slug: 'impostazioni', data: { menuSuperiore: MENU_SUPERIORE, menu: MENU, colonne: COLONNE } as never })
     log('navigazione: menu superiore, menu inferiore con tendine e colonne del footer')
   }
-  // Navigazione 2.01: Installazioni e Spunti e idee sotto Progetti, Designer sotto Heritage (alberatura:
-  // Mondo Serralunga > Designer). Si aggiungono solo le sottovoci mancanti, il resto del menu non cambia.
+  // Navigazione 2.01/2.02: Installazioni e Spunti e idee sotto Progetti, Designer voce a sé dopo Catalogo
+  // (richiesta dell'utente 2026-11-16). Si aggiungono solo le voci mancanti, il resto del menu non cambia.
   {
     type Voce = { id?: string; etichetta?: string; link?: string; voci?: Voce[] }
     const imp2 = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { menu?: Voce[] }
@@ -274,6 +274,17 @@ async function completaPagine() {
     const prima = menu2.length
     menu2 = menu2.filter((v) => !(v.link === '/spunti-e-idee/' && !v.voci?.length))
     if (menu2.length !== prima) aggiunte.push('(tolta Spunti e idee dal primo livello)')
+    // Navigazione 2.02: Designer è una voce a sé (dopo Catalogo), non più una sottovoce di Heritage.
+    const heritage = menu2.find((v) => v.link === '/heritage/')
+    if (heritage?.voci?.some((x) => x.link === '/designer/')) {
+      heritage.voci = heritage.voci.filter((x) => x.link !== '/designer/')
+      aggiunte.push('tolta Heritage > Designer')
+    }
+    if (!menu2.some((v) => v.link === '/designer/')) {
+      const dopo = menu2.findIndex((v) => v.link === '/catalogo/')
+      menu2.splice(dopo >= 0 ? dopo + 1 : menu2.length, 0, { etichetta: 'Designer', link: '/designer/' })
+      aggiunte.push('aggiunta la voce Designer')
+    }
     for (const modello of MENU) {
       const voce = menu2.find((v) => v.link === modello.link)
       if (!voce) continue
