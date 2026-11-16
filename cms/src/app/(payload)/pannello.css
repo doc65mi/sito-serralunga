@@ -153,3 +153,6 @@ input:focus-visible, textarea:focus-visible, .rs__control--is-focused { outline:
 .sl-voce-strumenti__link { display: block; padding: 2px 0; color: inherit; text-decoration: none; }
 .sl-voce-strumenti__link:hover { text-decoration: underline; }
 .sl-strumenti { scroll-margin-top: 80px; }
+
+.sl-strumento__pulsante--ferma { background: transparent; color: var(--theme-error-500); border: 1px solid var(--theme-error-500); }
+.sl-strumento--fermato .sl-strumento__stato { color: var(--sl-oro); }

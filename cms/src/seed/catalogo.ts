@@ -16,6 +16,7 @@
 import type { Payload } from 'payload'
 
 import { catalogo, json, type ProdottoShop } from './creazioni'
+import { fatto, segna } from './punto'
 
 const SITO = 'https://serralunga.com'
 
@@ -453,6 +454,8 @@ export async function importaCatalogo(payload: Payload, media: Media, log: (m: s
   let creati = 0
   let aggiornati = 0
   for (const [handle, cats] of catDi) {
+    // Ripresa dopo un'interruzione: i prodotti già lavorati si saltano.
+    if (fatto(`prodotto:${handle}`)) continue
     const p = perHandle.get(handle)!
     const inCollezione = (h: string) => collezioni.get(h)?.has(handle) ?? false
     const categorie = [...cats]
@@ -580,6 +583,7 @@ export async function importaCatalogo(payload: Payload, media: Media, log: (m: s
         payload.logger.warn(`[seed] ${handle}: testi inglesi non aggiornati (${(err as Error).message.slice(0, 120)})`)
       }
     }
+    segna(`prodotto:${handle}`)
   }
   log(`catalogo: ${creati} schede create, ${aggiornati} completate, ${catDi.size} prodotti in ${Object.keys(fontiCat).length} categorie`)
 }

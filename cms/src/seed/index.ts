@@ -29,6 +29,7 @@ import { applicaInglese } from './inglese'
 import { completaMateriali } from './materiali'
 import { nomeFile } from '../collections/Media'
 import { proteggi } from './prudenza'
+import { completato, fase, fatto, giaFatti, segna } from './punto'
 
 const payload = await getPayload({ config })
 const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
@@ -38,6 +39,7 @@ const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
 // a mano dal pannello (Strumenti) con una copia di sicurezza. Vedi prudenza.ts.
 if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer' || process.env.SEED_SOLO === 'catalogo') {
   proteggi(payload, process.env.SEED_SOLO === 'catalogo' ? 'catalogo' : 'aggiorna', log)
+  if (giaFatti()) log(`ripresa dal punto salvato: ${giaFatti()} passaggi già completati`)
 }
 
 // Primo avvio automatico (npm run seed:primo, lanciato da avvio.sh su Coolify):
@@ -86,6 +88,15 @@ export async function media(sorgente: string, alt: string, opz: OpzioniMedia = {
       nome = decodeURIComponent(path.basename(url.pathname))
       // Dalle foto di serralunga.com si chiede sempre l'originale: il parametro width le rimpicciolisce.
       if (opz.min) url.searchParams.delete('width')
+      // Foto già caricata (esecuzione precedente o interrotta): niente nuovo download.
+      if (/\.(jpe?g|png|webp|avif|tiff?)$/i.test(nome)) {
+        const previsto = `${nome.replace(/\.[^.]+$/, '')}${opz.min ? '-hd' : ''}.webp`.replace(/[^A-Za-z0-9._-]+/g, '-')
+        const gia = await payload.find({ collection: 'media', where: { filename: { in: [previsto, nomeFile(previsto)] } }, limit: 1, depth: 0 })
+        if (gia.docs[0]) {
+          mediaCache.set(chiave, gia.docs[0].id as number)
+          return gia.docs[0].id as number
+        }
+      }
       const res = await fetch(url, { signal: AbortSignal.timeout(60_000) })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       data = Buffer.from(await res.arrayBuffer())
@@ -157,6 +168,7 @@ const radice = (nomeFile?: string | null) =>
  */
 async function completaDesigner() {
   for (const f of designerFonti()) {
+    if (fatto(`designer:${f.slug}`)) continue
     const trovato = await payload.find({ collection: 'designer', where: { slug: { equals: f.slug } }, limit: 1, depth: 1, draft: true })
     const doc = trovato.docs[0] as unknown as
       | { id: number; ritratto?: { id: number; filename?: string } | null; creazioni?: unknown[] | null }
@@ -218,6 +230,7 @@ async function completaDesigner() {
         .catch((err) => payload.logger.warn(`[seed] designer/${f.slug}: nomi inglesi delle creazioni rimandati (${(err as Error).message.slice(0, 80)})`))
     }
     log(`designer/${f.slug}: ${dati.ritratto ? 'ritratto aggiornato' : ''}${dati.ritratto && dati.creazioni ? ', ' : ''}${dati.creazioni ? `${(dati.creazioni as unknown[]).length} creazioni` : ''}`)
+    segna(`designer:${f.slug}`)
   }
 }
 
@@ -368,10 +381,11 @@ async function completaPagine() {
 // Catalogo B2B da serralunga.com (npm run seed:catalogo): categorie, schede prodotto e foto.
 // Separato da seed:aggiorna perché scarica centinaia di foto.
 if (process.env.SEED_SOLO === 'catalogo') {
-  await importaCatalogo(payload, media, log)
-  await rigeneraFormati(payload, log)
+  await fase('prodotti', () => importaCatalogo(payload, media, log), log)
+  await fase('foto-avif', () => rigeneraFormati(payload, log), log)
   const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
   if (saltate.length) log(`${saltate.length} foto non caricate (si possono aggiungere dal pannello Media)`)
+  completato()
   log('fatto (catalogo)')
   process.exit(0)
 }
@@ -392,25 +406,28 @@ async function completaContract() {
 // Aggiornamento di un sito già avviato (npm run seed:aggiorna): aggiunge ciò che manca
 // senza toccare i testi e le foto già modificati dal pannello o dalla pagina.
 if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer') {
-  for (const d of await designerAltri(media)) {
-    const trovato = await payload.find({ collection: 'designer', where: { slug: { equals: d.slug } }, limit: 1, depth: 0, draft: true })
-    const doc = trovato.docs[0] as { id: number; schedaPubblicata?: boolean } | undefined
-    if (!doc?.schedaPubblicata) await salva('designer', d)
-  }
-  await completaDesigner()
-  await completaPagine()
-  await completaHeritage(payload, media, log)
-  await completaContract()
-  await completaMateriali(payload, media, log)
+  await fase('schede-designer', async () => {
+    for (const d of await designerAltri(media)) {
+      const trovato = await payload.find({ collection: 'designer', where: { slug: { equals: d.slug } }, limit: 1, depth: 0, draft: true })
+      const doc = trovato.docs[0] as { id: number; schedaPubblicata?: boolean } | undefined
+      if (!doc?.schedaPubblicata) await salva('designer', d)
+    }
+  }, log)
+  await fase('ritratti-e-creazioni', completaDesigner, log)
+  await fase('pagine-e-menu', completaPagine, log)
+  await fase('heritage', () => completaHeritage(payload, media, log), log)
+  await fase('contract', completaContract, log)
+  await fase('materiali', () => completaMateriali(payload, media, log), log)
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
-  await payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never })
-  await applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer', 'pagine'] })
-  await rigeneraFormati(payload, log)
+  await fase('segnaposto-designer', () => payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never }), log)
+  await fase('testi-inglesi', () => applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer', 'pagine'] }), log)
+  await fase('foto-avif', () => rigeneraFormati(payload, log), log)
   const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
   if (saltate.length) {
     log(`${saltate.length} foto non caricate:`)
     saltate.forEach((m) => log(`  - ${m.split('|')[0]}`))
   }
+  completato()
   log('fatto (aggiornamento)')
   process.exit(0)
 }
