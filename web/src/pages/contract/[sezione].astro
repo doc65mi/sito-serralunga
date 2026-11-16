@@ -1,0 +1,13 @@
+---
+/**
+ * Sottopagine Contract (Version: 1.00): /contract/hospitality/, /residenziale/, /urbano/,
+ * /cataloghi/, /area-riservata/. Una pagina esiste solo se la sua scheda è pubblicata.
+ */
+import PaginaContract from '../../components/PaginaContract.astro'
+import { elenco } from '../../lib/cms'
+
+const sezione = Astro.params.sezione || ''
+const pagine = sezione && sezione !== 'principale' ? await elenco('contract', { depth: 2 }, Astro.locals.lingua) : []
+if (!pagine.some((x) => x.sezione === sezione)) return Astro.rewrite('/404')
+---
+<PaginaContract sezione={sezione} pagine={pagine} />

@@ -1,0 +1,9 @@
+---
+/** Contract (Version: 1.00): pagina principale della sezione B2B. Struttura in components/PaginaContract.astro. */
+import PaginaContract from '../../components/PaginaContract.astro'
+import { elenco } from '../../lib/cms'
+
+const pagine = await elenco('contract', { depth: 2 }, Astro.locals.lingua)
+if (!pagine.some((x) => x.sezione === 'principale')) return Astro.rewrite('/404')
+---
+<PaginaContract sezione="principale" pagine={pagine} />

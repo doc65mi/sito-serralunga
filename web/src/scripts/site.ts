@@ -257,6 +257,13 @@ for (const form of $$<HTMLFormElement>('form[data-richiesta]')) {
       const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } })
       const dati = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(dati.errore || form.dataset.errore || 'Invio non riuscito')
+      // Cataloghi (Contract > Cataloghi): dopo l'invio compaiono i link dei PDF scelti.
+      const scaricamenti = form.querySelector<HTMLElement>('[data-scaricamenti]')
+      if (scaricamenti) {
+        const scelti = new Set($$<HTMLInputElement>('input[data-catalogo]', form).filter((i) => i.checked).map((i) => i.dataset.catalogo))
+        for (const li of $$<HTMLElement>('[data-scarica]', scaricamenti)) li.hidden = !scelti.has(li.dataset.scarica)
+        scaricamenti.hidden = false
+      }
       form.reset()
       if (esito) esito.textContent = form.dataset.grazie || 'Grazie, vi ricontatteremo a breve.'
     } catch (err) {

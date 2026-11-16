@@ -5,7 +5,8 @@ import * as migration_20261115_093539_ai_blocchi_articoli from './20261115_09353
 import * as migration_20261115_115540_home_box_catalogo from './20261115_115540_home_box_catalogo';
 import * as migration_20261116_074854_immagine_condivisione from './20261116_074854_immagine_condivisione';
 import * as migration_20261116_081143_menu_pagine from './20261116_081143_menu_pagine';
-import * as migration_20261116_082241_materiali_colori from './20261116_082241_materiali_colori';
+import * as migration_20261116_082127_sezione_contract from './20261116_082127_sezione_contract';
+import * as migration_20261116_083258_materiali_colori from './20261116_083258_materiali_colori';
 
 export const migrations = [
   {
@@ -44,8 +45,13 @@ export const migrations = [
     name: '20261116_081143_menu_pagine',
   },
   {
-    up: migration_20261116_082241_materiali_colori.up,
-    down: migration_20261116_082241_materiali_colori.down,
-    name: '20261116_082241_materiali_colori'
+    up: migration_20261116_082127_sezione_contract.up,
+    down: migration_20261116_082127_sezione_contract.down,
+    name: '20261116_082127_sezione_contract',
+  },
+  {
+    up: migration_20261116_083258_materiali_colori.up,
+    down: migration_20261116_083258_materiali_colori.down,
+    name: '20261116_083258_materiali_colori'
   },
 ];

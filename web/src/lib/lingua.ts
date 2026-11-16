@@ -157,6 +157,21 @@ const EN: Record<string, string> = {
   Testo: 'Text',
   'Domande frequenti': 'Frequently asked questions',
   'I prodotti citati': 'Products mentioned',
+  // contract
+  'Sezioni Contract': 'Contract sections',
+  'Le sezioni Contract': 'The Contract sections',
+  Cataloghi: 'Catalogues',
+  'Scarica i cataloghi': 'Download the catalogues',
+  Accedi: 'Log in',
+  'Scopri →': 'Discover →',
+  'Perché Serralunga': 'Why Serralunga',
+  'Progetti realizzati': 'Completed projects',
+  'Tutte le installazioni →': 'All installations →',
+  'Ricevi i cataloghi': 'Get the catalogues',
+  'Invia la richiesta': 'Send the request',
+  'Scegliete i cataloghi': 'Choose the catalogues',
+  'Ecco i cataloghi scelti:': 'Here are the catalogues you chose:',
+  'Hotel, ristoranti, studi di architettura, enti pubblici e rivenditori': 'Hotels, restaurants, architecture firms, public bodies and dealers',
 }
 
 const DIZIONARI: Record<Lingua, Record<string, string>> = { it: {}, en: EN }
