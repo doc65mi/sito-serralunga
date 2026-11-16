@@ -93,10 +93,10 @@ const nome = piatto(s.nomeMenu || s.titolo)
             <Testo as="h2" class="titolo titolo--xl" id="punti-titolo" campo="punti.titolo" t={s.punti?.titolo} />
           </div>
         </div>
-        <ul class="voci">
+        <ul class="her-voci">
           {punti.map((v, k) => (
-            <li class="voce">
-              <h3 class="voce__titolo" data-campo={`punti.voci.${k}.titolo`}>{v.titolo}</h3>
+            <li class="her-voce">
+              <h3 class="her-voce__titolo" data-campo={`punti.voci.${k}.titolo`}>{v.titolo}</h3>
               <Testo class="testo testo--s" campo={`punti.voci.${k}.testo`} t={v.testo} />
             </li>
           ))}

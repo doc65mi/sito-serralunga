@@ -121,10 +121,10 @@ const jsonld: Doc[] = tappe.length
             <Testo as="h2" class="titolo titolo--xl" id="primati-titolo" campo="primati.titolo" t={p.primati?.titolo} />
           </div>
         </div>
-        <ol class="voci" style={`--colonne:${Math.min(primati.length, 5)}`}>
+        <ol class="her-voci" style={`--colonne:${Math.min(primati.length, 5)}`}>
           {primati.map((v, k) => (
-            <li class="voce">
-              <h3 class="voce__titolo" data-campo={`primati.voci.${k}.titolo`}>{v.titolo}</h3>
+            <li class="her-voce">
+              <h3 class="her-voce__titolo" data-campo={`primati.voci.${k}.titolo`}>{v.titolo}</h3>
               <Testo class="testo testo--s" campo={`primati.voci.${k}.testo`} t={v.testo} />
             </li>
           ))}
@@ -160,10 +160,10 @@ const jsonld: Doc[] = tappe.length
           <Testo as="h2" class="titolo titolo--l" id="qualita-titolo" campo="qualita.titolo" t={p.qualita?.titolo} />
           <Testo class="testo testo--forte" campo="qualita.testo" t={p.qualita?.testo} />
           {qualita.length > 0 && (
-            <ul class="voci voci--due">
+            <ul class="her-voci her-voci--due">
               {qualita.map((v, k) => (
-                <li class="voce">
-                  <h3 class="voce__titolo" data-campo={`qualita.voci.${k}.titolo`}>{v.titolo}</h3>
+                <li class="her-voce">
+                  <h3 class="her-voce__titolo" data-campo={`qualita.voci.${k}.titolo`}>{v.titolo}</h3>
                   <Testo class="testo testo--s" campo={`qualita.voci.${k}.testo`} t={v.testo} />
                 </li>
               ))}
