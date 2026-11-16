@@ -14,6 +14,7 @@ import { Designer } from './collections/Designer'
 import { Media } from './collections/Media'
 import { Prodotti } from './collections/Prodotti'
 import { Spunti } from './collections/Spunti'
+import { Pagine } from './collections/Pagine'
 import { SpaziFoto } from './collections/SpaziFoto'
 import { Articoli } from './collections/Articoli'
 import { endpointAi } from './ai/endpoints'
@@ -78,10 +79,11 @@ export default buildConfig({
         if (collectionConfig?.slug === 'spunti') return `${versoSito}/spunti-e-idee/${data?.slug}/`
         if (collectionConfig?.slug === 'prodotti') return `${versoSito}/prodotti/${data?.slug}/`
         if (collectionConfig?.slug === 'designer') return `${versoSito}/designer/${data?.slug}/`
+        if (collectionConfig?.slug === 'pagine') return `${versoSito}/${data?.slug}/`
         if (collectionConfig?.slug === 'case-history') return `${versoSito}/case-history/${data?.slug}/`
         return `${versoSito}/`
       },
-      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli'],
+      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'pagine'],
       globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal'],
       breakpoints: [
         { label: 'Telefono', name: 'telefono', width: 390, height: 844 },
@@ -100,7 +102,7 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, CaseHistory, Spunti, Articoli, Designer, Media, SpaziFoto, Richieste, Users],
+  collections: [Prodotti, CaseHistory, Spunti, Articoli, Pagine, Designer, Media, SpaziFoto, Richieste, Users],
   globals: [Home, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaJournal, Impostazioni, Ai],
   endpoints: endpointAi,
   editor: lexicalEditor(),

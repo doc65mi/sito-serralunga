@@ -1,37 +1,81 @@
 ---
-import { isMedia, urlFile } from '../lib/media'
+/**
+ * Testata unica di tutto il sito, home compresa (Version: 2.00).
+ * Logo originale Serralunga a sinistra (versione AVIF), a destra due menu allineati:
+ * sopra il menu di servizio (Contatti, Richiedi catalogo, Listino, Account, Faq) con la lingua,
+ * sotto il menu principale con le sottovoci a tendina. Le voci si cambiano nel pannello:
+ * Impostazioni del sito > Menu.
+ */
+import { isMedia, originale, src, tipoRidotte } from '../lib/media'
 import { esterno } from '../lib/testo'
 import type { Doc } from '../lib/cms'
 import { INFO, LINGUE, percorso, traduttore } from '../lib/lingua'
 interface Props { imp: Doc; corrente?: string }
-const { imp, corrente = '' } = Astro.props
+const { imp, corrente = '/' } = Astro.props
 const logo = isMedia(imp.logo) ? imp.logo : null
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => percorso(L, p)
-const attivo = (link: string) => !!link && !link.includes('#') && link !== '/' && corrente.startsWith(link)
+const pulito = (p: string) => p.replace(/[#?].*$/, '')
+const attivo = (link?: string) => !!link && !link.includes('#') && link !== '/' && corrente.startsWith(pulito(link))
+const fuori = (link?: string) => (esterno(link) ? { target: '_blank', rel: 'noopener' } : {})
+const sopra: Doc[] = (imp.menuSuperiore || []).filter((v: Doc) => v?.etichetta)
+const sotto: Doc[] = (imp.menu || []).filter((v: Doc) => v?.etichetta)
+const nome = imp.nomeSito || 'Serralunga'
+// Logo: versione AVIF ridotta (400 px) con il file caricato come riserva per i browser senza AVIF.
+const logoAvif = logo && tipoRidotte(logo) === 'image/avif' ? src(logo, 400) : ''
+const redazione = Astro.cookies.has('payload-token')
 ---
-<header class="header" data-header>
-  <a href={u('/')} class="logo" aria-label={`${imp.nomeSito || 'Serralunga'}, home`}>
-    {logo ? <img src={urlFile(logo)} alt={imp.nomeSito || 'Serralunga'} width={logo.width} height={logo.height} /> : <span class="logo__testo">{imp.nomeSito || 'Serralunga'}</span>}
-  </a>
-  <button type="button" class="menu-apri" aria-expanded="false" aria-controls="menu-principale" data-menu>{t('Menu')}</button>
-  <nav class="nav" id="menu-principale" aria-label={t('Menu principale')}>
-    {(imp.menu || []).map((v: Doc) => (
-      <a
-        href={u(v.link) || '#'}
-        class:list={[v.evidenza && 'evidenza']}
-        aria-current={attivo(v.link) ? 'page' : undefined}
-        target={esterno(v.link) ? '_blank' : undefined}
-        rel={esterno(v.link) ? 'noopener' : undefined}
-      >{v.etichetta}</a>
-    ))}
-    <span class="lingue" aria-label={t('Cambia lingua')} role="group">
-      {LINGUE.map((l) => (
-        l === L
-          ? <span aria-current="true" lang={INFO[l].html}>{INFO[l].sigla}</span>
-          : <a href={percorso(l, corrente)} hreflang={INFO[l].html} lang={INFO[l].html} title={INFO[l].nome}>{INFO[l].sigla}</a>
-      ))}
-    </span>
-  </nav>
+<header class="testa" data-header>
+  <div class="testa__dentro">
+    <a href={u('/')} class="testa__logo" aria-label={`${nome}, home`}>
+      {logo ? (
+        <picture>
+          {logoAvif && <source srcset={logoAvif} type="image/avif" />}
+          <img src={originale(logo)} alt={nome} width={logo.width} height={logo.height} fetchpriority="high" decoding="async" />
+        </picture>
+      ) : <span class="logo__testo">{nome}</span>}
+    </a>
+    <button type="button" class="menu-apri" aria-expanded="false" aria-controls="menu-sito" data-menu>{t('Menu')}</button>
+    <div class="testa__menu" id="menu-sito">
+      <nav class="testa__sopra" aria-label={t('Menu di servizio')}>
+        <ul>
+          {sopra.map((v) => (
+            <li><a href={u(v.link) || '#'} aria-current={attivo(v.link) ? 'page' : undefined} {...fuori(v.link)}>{v.etichetta}</a></li>
+          ))}
+          <li class="lingue" role="group" aria-label={t('Cambia lingua')}>
+            {LINGUE.map((l) => (
+              l === L
+                ? <span aria-current="true" lang={INFO[l].html}>{INFO[l].sigla}</span>
+                : <a href={percorso(l, corrente)} hreflang={INFO[l].html} lang={INFO[l].html} title={INFO[l].nome}>{INFO[l].sigla}</a>
+            ))}
+          </li>
+        </ul>
+      </nav>
+      <nav class="testa__sotto" aria-label={t('Menu principale')}>
+        <ul>
+          {sotto.map((v, k) => {
+            const voci: Doc[] = (v.voci || []).filter((x: Doc) => x?.etichetta)
+            const qui = attivo(v.link) || voci.some((x) => attivo(x.link))
+            return (
+              <li class:list={[voci.length > 0 && 'ha-tendina']} data-tendina={voci.length > 0 ? '' : undefined}>
+                <a href={u(v.link) || '#'} aria-current={attivo(v.link) ? 'page' : undefined} class:list={[qui && 'attivo', v.evidenza && 'evidenza']} {...fuori(v.link)}>{v.etichetta}</a>
+                {voci.length > 0 && (
+                  <>
+                    <button type="button" class="testa__apri-voci" aria-expanded="false" aria-controls={`tendina-${k}`} aria-label={`${v.etichetta}: ${t('sottomenu')}`} data-tendina-apri><span aria-hidden="true"></span></button>
+                    <ul class="testa__tendina" id={`tendina-${k}`}>
+                      {voci.map((x) => (
+                        <li><a href={u(x.link) || '#'} aria-current={attivo(x.link) ? 'page' : undefined} {...fuori(x.link)}>{x.etichetta}</a></li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+    </div>
+    {redazione && <a class="testa__modifica" href="/admin/globals/impostazioni" target="_blank" rel="noopener nofollow">{t('Modifica menu')}</a>}
+  </div>
 </header>
