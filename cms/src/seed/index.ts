@@ -21,6 +21,7 @@ import { creazioniDi, type Creazione } from './creazioni'
 import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
 import { homeDati, impostazioniDati, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
 import { rigeneraFormati } from './immagini'
+import { completaHeritage } from './heritage'
 import { applicaInglese } from './inglese'
 import { nomeFile } from '../collections/Media'
 
@@ -303,6 +304,7 @@ if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer'
   }
   await completaDesigner()
   await completaPagine()
+  await completaHeritage(payload, media, log)
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
   await payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never })
   await applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer'] })
@@ -359,6 +361,7 @@ log('aggiornata la home')
 await payload.updateGlobal({ slug: 'pagina-designer', data: (await paginaDesignerDati()) as never })
 log('aggiornata la pagina designer')
 await completaPagine()
+await completaHeritage(payload, media, log)
 
 // 5b. Ritratti a risoluzione piena e creazioni dei designer da serralunga.com
 await completaDesigner()

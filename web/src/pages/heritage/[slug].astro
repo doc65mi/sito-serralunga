@@ -1,0 +1,155 @@
+---
+/**
+ * Sottopagina di Heritage (Version: 1.00): La nostra storia, Living different, Produzione, I colori.
+ * Apertura, numeri, capitoli foto + testo alternati, punti, citazione, invito finale.
+ * Su /heritage/i-colori/ sotto i capitoli compare la mappa dei colori (componente della sezione Materiali).
+ */
+import '../../styles/heritage.css'
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import { elenco, perSlug, type Doc } from '../../lib/cms'
+import { piatto } from '../../lib/testo'
+import { percorso } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const u = (p?: string) => percorso(L, p)
+const en = L === 'en'
+const s = await perSlug('pagine-heritage', Astro.params.slug || '', 2, L)
+if (!s) return Astro.rewrite('/404')
+const altre = (await elenco('pagine-heritage', { depth: 1, sort: 'ordine' }, L).catch(() => [] as Doc[])).filter((x) => x.slug !== s.slug)
+const numeri: Doc[] = s.numeri || []
+const capitoli: Doc[] = s.capitoli || []
+const punti: Doc[] = s.punti?.voci || []
+const nome = piatto(s.nomeMenu || s.titolo)
+---
+<Base
+  titolo={s.seo?.titolo || `${nome} | Serralunga`}
+  descrizione={s.seo?.descrizione || s.testo}
+  immagine={s.seo?.immagine || s.immagine}
+  percorso={[{ nome: 'Heritage', url: '/heritage/' }, { nome, url: `/heritage/${s.slug}/` }]}
+  tipoPagina={s.slug === 'la-nostra-storia' ? 'AboutPage' : 'WebPage'}
+  pagina={`heritage-${s.slug}`}
+  doc={`collections/pagine-heritage/${s.id}`}
+  blocchi={s.blocchi ?? []}
+>
+  <section class="intro-pagina" id="heritage-intro">
+    <div class="wrap intro-pagina__griglia">
+      <div>
+        {s.kicker && <span class="kicker" data-campo="kicker">{s.kicker}</span>}
+        <Testo as="h1" class="titolo titolo--display" campo="titolo" t={s.titolo} />
+      </div>
+      <div>
+        <Testo class="testo" campo="testo" t={s.testo} />
+      </div>
+    </div>
+  </section>
+
+  {s.immagine && (
+    <div class="pad"><div class="wrap foto r-219"><Img campo="immagine" media={s.immagine} priorita sizes="100vw" larghezza={2400} /></div></div>
+  )}
+
+  {numeri.length > 0 && (
+    <section class="scuro her-numeri" aria-label={en ? 'Key figures' : 'In numeri'}>
+      <dl class="wrap cifre" style={`--colonne:${Math.min(numeri.length, 5)}`}>
+        {numeri.map((n, k) => (
+          <div>
+            <dt class="cifra__valore" data-campo={`numeri.${k}.valore`}>{n.valore}</dt>
+            <dd class="cifra__etichetta" data-campo={`numeri.${k}.etichetta`}>{n.etichetta}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )}
+
+  {capitoli.length > 0 && (
+    <div class="sez-int">
+      {capitoli.map((c, k) => (
+        <section class:list={['capitolo', k % 2 === 1 && 'capitolo--inverso']} id={`capitolo-${k + 1}`} aria-labelledby={`capitolo-${k + 1}-titolo`}>
+          <div class="foto capitolo__foto"><Img campo={`capitoli.${k}.immagine`} media={c.immagine} sizes="(max-width: 900px) 100vw, 55vw" larghezza={1800} /></div>
+          <div class="capitolo__testi" data-reveal>
+            {c.kicker && <span class="kicker" data-campo={`capitoli.${k}.kicker`}>{c.kicker}</span>}
+            <Testo as="h2" class="titolo titolo--l" id={`capitolo-${k + 1}-titolo`} campo={`capitoli.${k}.titolo`} t={c.titolo} />
+            <Testo class="testo testo--forte" campo={`capitoli.${k}.testo`} t={c.testo} />
+            {c.pulsante && <a href={u(c.link || '/heritage/')} class="btn btn--bordo-pieno" data-campo={`capitoli.${k}.pulsante`} data-campo-link={`capitoli.${k}.link`} data-link={c.link || ''}>{c.pulsante}</a>}
+          </div>
+        </section>
+      ))}
+    </div>
+  )}
+
+  {s.slug === 'i-colori' && (
+    <section class="her-colori pad fondo-paper" id="mappa-colori" aria-label={en ? 'Colour chart' : 'Cartella colori'}>
+      <div class="wrap" data-mappa-colori></div>
+    </section>
+  )}
+
+  {punti.length > 0 && (
+    <section class="sez-int pad fondo-chiaro" id="punti" aria-labelledby="punti-titolo">
+      <div class="wrap">
+        <div class="intesta">
+          <div class="intesta__sx">
+            {s.punti?.kicker && <span class="kicker" data-campo="punti.kicker">{s.punti.kicker}</span>}
+            <Testo as="h2" class="titolo titolo--xl" id="punti-titolo" campo="punti.titolo" t={s.punti?.titolo} />
+          </div>
+        </div>
+        <ul class="voci">
+          {punti.map((v, k) => (
+            <li class="voce">
+              <h3 class="voce__titolo" data-campo={`punti.voci.${k}.titolo`}>{v.titolo}</h3>
+              <Testo class="testo testo--s" campo={`punti.voci.${k}.testo`} t={v.testo} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {s.citazione?.testo && (s.citazione.immagine ? (
+    <figure class="citazione-foto" id="citazione">
+      <Img campo="citazione.immagine" media={s.citazione.immagine} sizes="100vw" larghezza={2400} />
+      <blockquote><Testo campo="citazione.testo" t={s.citazione.testo} /></blockquote>
+      {s.citazione.autore && <figcaption data-campo="citazione.autore">{s.citazione.autore}</figcaption>}
+    </figure>
+  ) : (
+    <figure class="citazione-sola fondo-paper" id="citazione">
+      <blockquote>
+        <Testo campo="citazione.testo" t={s.citazione.testo} />
+        {s.citazione.autore && <figcaption data-campo="citazione.autore">{s.citazione.autore}</figcaption>}
+      </blockquote>
+    </figure>
+  ))}
+
+  {altre.length > 0 && (
+    <nav class="sez-int pad" aria-labelledby="altre-titolo">
+      <div class="wrap">
+        <div class="intesta">
+          <div class="intesta__sx">
+            <span class="kicker">Heritage</span>
+            <h2 class="titolo titolo--l" id="altre-titolo">{en ? 'Continue the story' : 'Continua il racconto'}</h2>
+          </div>
+          <div class="intesta__dx"><a href={u('/heritage/')} class="btn btn--bordo">{en ? '200 years of evolution' : '200 anni in evoluzione'}</a></div>
+        </div>
+        <div class="griglia-3">
+          {altre.map((x) => (
+            <a class="card-her" href={u(`/heritage/${x.slug}/`)}>
+              <div class="foto r-43"><Img media={x.immagine} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 33vw" larghezza={1000} /></div>
+              <span class="card-her__nome">{piatto(x.nomeMenu || x.titolo)}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </nav>
+  )}
+
+  {s.cta?.titolo && (
+    <section id="richiesta" class="sez-int pad scuro">
+      <div class="centro centro--s">
+        {s.cta.kicker && <span class="kicker kicker--largo" data-campo="cta.kicker">{s.cta.kicker}</span>}
+        <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={s.cta.titolo} />
+        <Testo class="testo" campo="cta.testo" t={s.cta.testo} />
+        {s.cta.pulsante && <a href={u(s.cta.link || '/contract/')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={s.cta.link || ''}>{s.cta.pulsante}</a>}
+      </div>
+    </section>
+  )}
+</Base>

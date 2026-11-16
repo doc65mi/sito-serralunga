@@ -26,6 +26,8 @@ import { Impostazioni } from './globals/Impostazioni'
 import { PaginaDesigner } from './globals/PaginaDesigner'
 import { PaginaInstallazioni } from './globals/PaginaInstallazioni'
 import { PaginaSpunti } from './globals/PaginaSpunti'
+import { PaginaHeritage } from './globals/PaginaHeritage'
+import { PagineHeritage } from './collections/PagineHeritage'
 import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -74,6 +76,8 @@ export default buildConfig({
         if (globalConfig?.slug === 'pagina-installazioni') return `${versoSito}/installazioni/`
         if (globalConfig?.slug === 'pagina-spunti') return `${versoSito}/spunti-e-idee/`
         if (globalConfig?.slug === 'pagina-journal') return `${versoSito}/journal/`
+        if (globalConfig?.slug === 'pagina-heritage') return `${versoSito}/heritage/`
+        if (collectionConfig?.slug === 'pagine-heritage') return `${versoSito}/heritage/${data?.slug}/`
         if (collectionConfig?.slug === 'articoli') return `${versoSito}/journal/${data?.slug}/`
         if (collectionConfig?.slug === 'spunti') return `${versoSito}/spunti-e-idee/${data?.slug}/`
         if (collectionConfig?.slug === 'prodotti') return `${versoSito}/prodotti/${data?.slug}/`
@@ -81,8 +85,8 @@ export default buildConfig({
         if (collectionConfig?.slug === 'case-history') return `${versoSito}/case-history/${data?.slug}/`
         return `${versoSito}/`
       },
-      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli'],
-      globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal'],
+      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'pagine-heritage'],
+      globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal', 'pagina-heritage'],
       breakpoints: [
         { label: 'Telefono', name: 'telefono', width: 390, height: 844 },
         { label: 'Tablet', name: 'tablet', width: 1000, height: 1200 },
@@ -100,8 +104,8 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, CaseHistory, Spunti, Articoli, Designer, Media, SpaziFoto, Richieste, Users],
-  globals: [Home, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaJournal, Impostazioni, Ai],
+  collections: [Prodotti, CaseHistory, Spunti, Articoli, Designer, PagineHeritage, Media, SpaziFoto, Richieste, Users],
+  globals: [Home, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaJournal, PaginaHeritage, Impostazioni, Ai],
   endpoints: endpointAi,
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

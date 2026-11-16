@@ -1,0 +1,73 @@
+/*
+ * Heritage (Version: 1.00): stili propri della pagina /heritage/ e delle sottopagine.
+ * Usa i token e i componenti di site.css (banner, capitolo, cifre, tessere, citazione-foto);
+ * qui solo ciò che manca: apertura con pulsanti, timeline, primati, elenco designer, punti.
+ */
+
+/* Apertura a tutto schermo */
+.her-apertura .banner__testi { align-items: flex-end; }
+.her-apertura .banner__sx { max-width: 860px; }
+.her-apertura__sotto { font-family: var(--serif); font-style: italic; font-size: clamp(24px, 2.4vw, 34px); line-height: 1.3; color: var(--on-dark); }
+.her-apertura .banner__dx { display: flex; flex-direction: column; gap: 26px; max-width: 42ch; }
+.her-apertura .banner__dx p { margin: 0; }
+.her-apertura::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(14, 13, 10, .1) 30%, rgba(14, 13, 10, .72) 100%);
+}
+.her-apertura .banner__testi { z-index: 2; }
+
+/* Numeri: cinque in riga */
+.her-numeri { padding: clamp(60px, 7vw, 96px) var(--gut); }
+.her-numeri .cifre { grid-template-columns: repeat(var(--colonne, 4), 1fr); border-top: 0; padding-top: 0; }
+@media (max-width: 1000px) { .her-numeri .cifre { grid-template-columns: 1fr 1fr; row-gap: 36px; } }
+
+/* Timeline: tappe in griglia, una linea sopra ogni anno */
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(40px, 4vw, 64px) clamp(20px, 2.2vw, 34px); }
+.tappa { display: flex; flex-direction: column; gap: 16px; border-top: 1px solid var(--line-strong); padding-top: 20px; }
+.tappa__anno { font-family: var(--serif); font-weight: 300; font-size: clamp(40px, 3.6vw, 56px); line-height: 1; color: var(--accent-testo); }
+.tappa__titolo { font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.2; margin: 0; }
+.tappa .testo { margin: 0; }
+.tappa .foto img { object-fit: contain; }
+.tappa--fine { border-top-style: dashed; }
+@media (max-width: 1100px) { .timeline { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .timeline { grid-template-columns: 1fr; } }
+
+/* Primati e punti: voci in colonna con numero */
+.voci { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--colonne, 3), 1fr); gap: clamp(28px, 3vw, 48px) clamp(20px, 2.4vw, 40px); counter-reset: voce; }
+.voce { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--line-strong); padding-top: 22px; counter-increment: voce; }
+.scuro .voce { border-top-color: var(--line-dark); }
+.voce::before { content: counter(voce, decimal-leading-zero); font-size: 11px; letter-spacing: .24em; color: var(--accent-testo); }
+.voce__titolo { font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.2; margin: 0; }
+.voce .testo { margin: 0; }
+.voci--due { --colonne: 2; }
+@media (max-width: 1000px) { .voci { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .voci { grid-template-columns: 1fr; } }
+
+/* Elenco dei designer: nomi in riga che vanno a capo */
+.her-designer__elenco { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px 30px; font-family: var(--serif); font-size: clamp(22px, 2vw, 30px); line-height: 1.3; }
+.her-designer__elenco a { color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent; }
+.her-designer__elenco a:hover, .her-designer__elenco a:focus-visible { border-bottom-color: currentColor; color: var(--accent-testo); }
+.her-designer .btn { margin-top: clamp(36px, 4vw, 56px); }
+
+/* Capitoli con elenco di punti */
+.her-punti { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.her-punti li { display: flex; gap: 14px; align-items: baseline; font-size: 15px; line-height: 1.7; color: var(--text-strong); }
+.her-punti li::before { content: ''; flex: 0 0 18px; height: 1px; background: var(--accent); transform: translateY(-4px); }
+.capitolo .voci { --colonne: 2; }
+
+/* Card delle sottopagine */
+.card-her { display: flex; flex-direction: column; gap: 18px; color: inherit; text-decoration: none; }
+.card-her__nome { font-family: var(--serif); font-size: 28px; font-weight: 300; }
+.card-her:hover .card-her__nome, .card-her:focus-visible .card-her__nome { color: var(--accent-testo); }
+.card-her .testo { margin: 0; }
+.tessera small { position: absolute; left: 26px; bottom: 64px; z-index: 1; color: var(--on-dark); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; }
+
+/* Citazione a tutto schermo con autore */
+.citazione-foto figcaption { position: absolute; left: var(--gut); bottom: 24px; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--on-dark-label); }
+.citazione-sola { padding: clamp(90px, 11vw, 150px) var(--gut); }
+.citazione-sola blockquote { max-width: 1000px; margin: 0 auto; text-align: center; display: flex; flex-direction: column; gap: 28px; }
+.citazione-sola blockquote p { font-family: var(--serif); font-style: italic; font-size: clamp(28px, 3.2vw, 46px); line-height: 1.32; margin: 0; }
+.citazione-sola figcaption { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+
+/* Spazio per la mappa dei colori */
+.her-colori { padding-top: var(--sec-int); padding-bottom: var(--sec-int); }

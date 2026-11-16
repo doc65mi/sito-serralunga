@@ -1,0 +1,260 @@
+---
+/**
+ * Heritage (Version: 1.00), ex "Mondo Serralunga".
+ * Contenuti dalla landing serralunga.com/pages/loriginale-vaso-italiano-in-polietilene:
+ * apertura, numeri, timeline "200 anni in evoluzione", primati, designer, qualità, citazione,
+ * Made in Italy, sottopagine, collezioni, invito finale. Tutto modificabile dalla pagina.
+ */
+import '../../styles/heritage.css'
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import { elenco, globale, SITO, type Doc } from '../../lib/cms'
+import { piatto } from '../../lib/testo'
+import { percorso } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const u = (p?: string) => percorso(L, p)
+const en = L === 'en'
+const [p, sottopagine, designer] = await Promise.all([
+  globale('pagina-heritage', 2, L),
+  elenco('pagine-heritage', { depth: 1, sort: 'ordine' }, L).catch(() => [] as Doc[]),
+  elenco('designer', { depth: 0, sort: 'nome', limit: 200, 'where[schedaPubblicata][equals]': 'true' }, L).catch(() => [] as Doc[]),
+])
+const numeri: Doc[] = p.numeri || []
+const tappe: Doc[] = p.timeline?.tappe || []
+const primati: Doc[] = p.primati?.voci || []
+const qualita: Doc[] = p.qualita?.voci || []
+const punti: Doc[] = p.produzione?.punti || []
+const collezioni: Doc[] = p.collezioni?.voci || []
+const pulsanti: Doc[] = p.pulsanti || []
+const ctaPulsanti: Doc[] = p.cta?.pulsanti || []
+
+// Dati strutturati: la pagina racconta l'azienda; la timeline è un elenco ordinato di eventi.
+const jsonld: Doc[] = tappe.length
+  ? [{
+      '@type': 'ItemList',
+      '@id': `${SITO}${u('/heritage/')}#timeline`,
+      name: piatto(p.timeline?.titolo || 'Timeline'),
+      itemListOrder: 'https://schema.org/ItemListOrderAscending',
+      numberOfItems: tappe.length,
+      itemListElement: tappe.map((x, k) => ({ '@type': 'ListItem', position: k + 1, name: `${piatto(x.anno)} · ${piatto(x.titolo)}`, description: piatto(x.testo) })),
+    }]
+  : []
+---
+<Base
+  titolo={p.seo?.titolo || `Heritage | Serralunga`}
+  descrizione={p.seo?.descrizione || p.testo}
+  immagine={p.seo?.immagine || p.immagine}
+  percorso={[{ nome: 'Heritage', url: '/heritage/' }]}
+  percorsoNascosto
+  tipoPagina="AboutPage"
+  jsonld={jsonld}
+  pagina="heritage"
+  doc="globals/pagina-heritage"
+  blocchi={p.blocchi ?? []}
+>
+  <section class="banner her-apertura" id="heritage-apertura" aria-labelledby="heritage-titolo">
+    <Img campo="immagine" media={p.immagine} priorita sizes="100vw" larghezza={2400} />
+    <div class="banner__testi">
+      <div class="banner__sx">
+        {p.kicker && <span class="kicker kicker--chiaro" data-campo="kicker">{p.kicker}</span>}
+        <Testo as="h1" class="banner__titolo" id="heritage-titolo" campo="titolo" t={p.titolo || 'Heritage'} />
+        <Testo class="her-apertura__sotto" campo="sottotitolo" t={p.sottotitolo} />
+      </div>
+      <div class="banner__dx">
+        <Testo campo="testo" t={p.testo} />
+        {pulsanti.length > 0 && (
+          <div class="btn-riga">
+            {pulsanti.map((b, k) => (
+              <a href={u(b.link || '#')} class:list={['btn', k === 0 ? 'btn--chiaro' : 'btn--bordo-chiaro']} data-campo={`pulsanti.${k}.testo`} data-campo-link={`pulsanti.${k}.link`} data-link={b.link || ''}>{b.testo}</a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  {numeri.length > 0 && (
+    <section class="scuro her-numeri" aria-label={en ? 'Key figures' : 'Dati chiave'}>
+      <dl class="wrap cifre" style={`--colonne:${Math.min(numeri.length, 5)}`}>
+        {numeri.map((n, k) => (
+          <div>
+            <dt class="cifra__valore" data-campo={`numeri.${k}.valore`}>{n.valore}</dt>
+            <dd class="cifra__etichetta" data-campo={`numeri.${k}.etichetta`}>{n.etichetta}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )}
+
+  {tappe.length > 0 && (
+    <section class="sez-int pad fondo-paper" id="timeline" aria-labelledby="timeline-titolo">
+      <div class="wrap">
+        <div class="intesta">
+          <div class="intesta__sx">
+            {p.timeline?.kicker && <span class="kicker" data-campo="timeline.kicker">{p.timeline.kicker}</span>}
+            <Testo as="h2" class="titolo titolo--xl" id="timeline-titolo" campo="timeline.titolo" t={p.timeline?.titolo} />
+          </div>
+          <div class="intesta__dx"><Testo class="testo" campo="timeline.testo" t={p.timeline?.testo} /></div>
+        </div>
+        <ol class="timeline">
+          {tappe.map((x, k) => (
+            <li class:list={['tappa', !x.immagine && 'tappa--fine']} data-reveal>
+              <span class="tappa__anno" data-campo={`timeline.tappe.${k}.anno`}>{x.anno}</span>
+              {x.immagine && <div class="foto r-43"><Img campo={`timeline.tappe.${k}.immagine`} media={x.immagine} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={900} /></div>}
+              <h3 class="tappa__titolo" data-campo={`timeline.tappe.${k}.titolo`}>{x.titolo}</h3>
+              <Testo class="testo testo--s" campo={`timeline.tappe.${k}.testo`} t={x.testo} />
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {primati.length > 0 && (
+    <section class="sez-int pad scuro" id="primati" aria-labelledby="primati-titolo">
+      <div class="wrap">
+        <div class="intesta">
+          <div class="intesta__sx">
+            {p.primati?.kicker && <span class="kicker" data-campo="primati.kicker">{p.primati.kicker}</span>}
+            <Testo as="h2" class="titolo titolo--xl" id="primati-titolo" campo="primati.titolo" t={p.primati?.titolo} />
+          </div>
+        </div>
+        <ol class="voci" style={`--colonne:${Math.min(primati.length, 5)}`}>
+          {primati.map((v, k) => (
+            <li class="voce">
+              <h3 class="voce__titolo" data-campo={`primati.voci.${k}.titolo`}>{v.titolo}</h3>
+              <Testo class="testo testo--s" campo={`primati.voci.${k}.testo`} t={v.testo} />
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {designer.length > 0 && (
+    <section class="sez-int pad her-designer" id="designer" aria-labelledby="designer-titolo">
+      <div class="wrap">
+        <div class="intesta">
+          <div class="intesta__sx">
+            {p.designer?.kicker && <span class="kicker" data-campo="designer.kicker">{p.designer.kicker}</span>}
+            <Testo as="h2" class="titolo titolo--xl" id="designer-titolo" campo="designer.titolo" t={p.designer?.titolo} />
+          </div>
+          <div class="intesta__dx"><Testo class="testo" campo="designer.testo" t={p.designer?.testo} /></div>
+        </div>
+        <ul class="her-designer__elenco">
+          {designer.map((d) => <li><a href={u(`/designer/${d.slug}/`)}>{d.nome}</a></li>)}
+        </ul>
+        {p.designer?.pulsante && <a href={u('/designer/')} class="btn btn--bordo-pieno" data-campo="designer.pulsante">{p.designer.pulsante}</a>}
+      </div>
+    </section>
+  )}
+
+  {(p.qualita?.titolo || qualita.length > 0) && (
+    <section class="sez-int fondo-paper" id="qualita" aria-labelledby="qualita-titolo">
+      <div class="capitolo">
+        <div class="foto capitolo__foto"><Img campo="qualita.immagine" media={p.qualita?.immagine} sizes="(max-width: 900px) 100vw, 55vw" larghezza={1800} /></div>
+        <div class="capitolo__testi" data-reveal>
+          {p.qualita?.kicker && <span class="kicker" data-campo="qualita.kicker">{p.qualita.kicker}</span>}
+          <Testo as="h2" class="titolo titolo--l" id="qualita-titolo" campo="qualita.titolo" t={p.qualita?.titolo} />
+          <Testo class="testo testo--forte" campo="qualita.testo" t={p.qualita?.testo} />
+          {qualita.length > 0 && (
+            <ul class="voci voci--due">
+              {qualita.map((v, k) => (
+                <li class="voce">
+                  <h3 class="voce__titolo" data-campo={`qualita.voci.${k}.titolo`}>{v.titolo}</h3>
+                  <Testo class="testo testo--s" campo={`qualita.voci.${k}.testo`} t={v.testo} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {p.citazione?.testo && (
+    <figure class="citazione-foto" id="citazione">
+      <Img campo="citazione.immagine" media={p.citazione.immagine} sizes="100vw" larghezza={2400} />
+      <blockquote><Testo campo="citazione.testo" t={p.citazione.testo} /></blockquote>
+      {p.citazione.autore && <figcaption data-campo="citazione.autore">{p.citazione.autore}</figcaption>}
+    </figure>
+  )}
+
+  {p.produzione?.titolo && (
+    <section class="sez-int" id="made-in-italy" aria-labelledby="produzione-titolo">
+      <div class="capitolo capitolo--inverso">
+        <div class="foto capitolo__foto"><Img campo="produzione.immagine" media={p.produzione.immagine} sizes="(max-width: 900px) 100vw, 55vw" larghezza={1800} /></div>
+        <div class="capitolo__testi" data-reveal>
+          {p.produzione.kicker && <span class="kicker" data-campo="produzione.kicker">{p.produzione.kicker}</span>}
+          <Testo as="h2" class="titolo titolo--l" id="produzione-titolo" campo="produzione.titolo" t={p.produzione.titolo} />
+          <Testo class="testo testo--forte" campo="produzione.testo" t={p.produzione.testo} />
+          {punti.length > 0 && <ul class="her-punti">{punti.map((x, k) => <li data-campo={`produzione.punti.${k}.testo`}>{x.testo}</li>)}</ul>}
+          {p.produzione.pulsante && <a href={u(p.produzione.link || '/heritage/produzione/')} class="btn btn--bordo-pieno" data-campo="produzione.pulsante" data-campo-link="produzione.link" data-link={p.produzione.link || ''}>{p.produzione.pulsante}</a>}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {sottopagine.length > 0 && (
+    <section class="sez-int pad fondo-chiaro" id="capitoli" aria-labelledby="capitoli-titolo">
+      <div class="wrap">
+        <div class="intesta">
+          <div class="intesta__sx">
+            {p.sottopagine?.kicker && <span class="kicker" data-campo="sottopagine.kicker">{p.sottopagine.kicker}</span>}
+            <Testo as="h2" class="titolo titolo--xl" id="capitoli-titolo" campo="sottopagine.titolo" t={p.sottopagine?.titolo} />
+          </div>
+        </div>
+        <div class="griglia-4">
+          {sottopagine.map((s) => (
+            <a class="card-her" href={u(`/heritage/${s.slug}/`)}>
+              <div class="foto r-45"><Img media={s.immagine} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={900} /></div>
+              <h3 class="card-her__nome">{piatto(s.nomeMenu || s.titolo)}</h3>
+              {s.testo && <p class="testo testo--card">{piatto(s.testo).slice(0, 160)}{piatto(s.testo).length > 160 ? '…' : ''}</p>}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {collezioni.length > 0 && (
+    <section class="sez-int pad" id="collezioni" aria-labelledby="collezioni-titolo">
+      <div class="wrap">
+        <div class="intesta">
+          <div class="intesta__sx">
+            {p.collezioni?.kicker && <span class="kicker" data-campo="collezioni.kicker">{p.collezioni.kicker}</span>}
+            <Testo as="h2" class="titolo titolo--xl" id="collezioni-titolo" campo="collezioni.titolo" t={p.collezioni?.titolo} />
+          </div>
+        </div>
+        <div class="tessere">
+          {collezioni.map((c, k) => (
+            <a class="tessera" href={u(c.link || '/catalogo/')} data-campo-link={`collezioni.voci.${k}.link`} data-link={c.link || ''}>
+              <Img campo={`collezioni.voci.${k}.immagine`} media={c.immagine} alt={c.titolo} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={1000} />
+              {c.sottotitolo && <small data-campo={`collezioni.voci.${k}.sottotitolo`}>{c.sottotitolo}</small>}
+              <span data-campo={`collezioni.voci.${k}.titolo`}>{c.titolo}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {p.cta?.titolo && (
+    <section id="richiesta" class="sez-int pad scuro">
+      <div class="centro centro--s">
+        {p.cta.kicker && <span class="kicker kicker--largo" data-campo="cta.kicker">{p.cta.kicker}</span>}
+        <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={p.cta.titolo} />
+        <Testo class="testo" campo="cta.testo" t={p.cta.testo} />
+        {ctaPulsanti.length > 0 && (
+          <div class="btn-riga btn-riga--centro">
+            {ctaPulsanti.map((b, k) => (
+              <a href={u(b.link || '/contract/')} class:list={['btn', k === 0 ? 'btn--chiaro' : 'btn--bordo-chiaro']} data-campo={`cta.pulsanti.${k}.testo`} data-campo-link={`cta.pulsanti.${k}.link`} data-link={b.link || ''}>{b.testo}</a>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+</Base>
