@@ -6,12 +6,13 @@ import { isMedia, originale } from '../lib/media'
 /** Sitemap con tutte le lingue: ogni indirizzo dichiara le versioni alternative (hreflang). */
 export const GET: APIRoute = async () => {
   const base = SITO
-  const [prodotti, casi, designer, spunti, articoli] = await Promise.all([
+  const [prodotti, casi, designer, spunti, articoli, contract] = await Promise.all([
     elenco('prodotti', { depth: 1, 'where[schedaPubblicata][equals]': 'true' }),
     elenco('case-history', { depth: 1 }),
     elenco('designer', { depth: 1, 'where[schedaPubblicata][equals]': 'true' }),
     elenco('spunti', { depth: 1 }),
     elenco('articoli', { depth: 1, sort: '-data', limit: 500 }).catch(() => []),
+    elenco('contract', { depth: 1 }).catch(() => []),
   ])
   const alternative = (path: string) =>
     LINGUE.map((l) => `<xhtml:link rel="alternate" hreflang="${INFO[l].html}" href="${base}${percorso(l, path)}"/>`).join('') +
@@ -35,6 +36,7 @@ export const GET: APIRoute = async () => {
     ...designer.map((d) => url(`/designer/${d.slug}/`, d.updatedAt, d.ritratto)),
     ...spunti.map((x) => url(`/spunti-e-idee/${x.slug}/`, x.updatedAt, x.immagine)),
     ...articoli.map((x) => url(`/journal/${x.slug}/`, x.updatedAt, x.immagine)),
+    ...contract.map((x) => url(x.sezione === 'principale' ? '/contract/' : `/contract/${x.sezione}/`, x.updatedAt, x.immagine)),
   ]
   return new Response(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${voci.join('')}</urlset>`,

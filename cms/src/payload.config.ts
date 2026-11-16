@@ -9,6 +9,7 @@ import { it } from '@payloadcms/translations/languages/it'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { Contract, percorsoContract } from './collections/Contract'
 import { CaseHistory } from './collections/CaseHistory'
 import { Designer } from './collections/Designer'
 import { Media } from './collections/Media'
@@ -79,9 +80,10 @@ export default buildConfig({
         if (collectionConfig?.slug === 'prodotti') return `${versoSito}/prodotti/${data?.slug}/`
         if (collectionConfig?.slug === 'designer') return `${versoSito}/designer/${data?.slug}/`
         if (collectionConfig?.slug === 'case-history') return `${versoSito}/case-history/${data?.slug}/`
+        if (collectionConfig?.slug === 'contract') return `${versoSito}${percorsoContract(data?.sezione)}`
         return `${versoSito}/`
       },
-      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli'],
+      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'contract'],
       globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal'],
       breakpoints: [
         { label: 'Telefono', name: 'telefono', width: 390, height: 844 },
@@ -100,7 +102,7 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, CaseHistory, Spunti, Articoli, Designer, Media, SpaziFoto, Richieste, Users],
+  collections: [Prodotti, CaseHistory, Spunti, Articoli, Contract, Designer, Media, SpaziFoto, Richieste, Users],
   globals: [Home, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaJournal, Impostazioni, Ai],
   endpoints: endpointAi,
   editor: lexicalEditor(),

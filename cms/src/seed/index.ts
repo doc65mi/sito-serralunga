@@ -18,6 +18,8 @@ import config from '@payload-config'
 
 import { aquaLounger, caseLoge, designerDati, prodottiCard } from './dati'
 import { creazioniDi, type Creazione } from './creazioni'
+import { contractDati, conIdRighe } from './contract'
+import { SEZIONI_CONTRACT } from '../collections/Contract'
 import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
 import { homeDati, impostazioniDati, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
 import { rigeneraFormati } from './immagini'
@@ -293,6 +295,19 @@ async function completaPagine() {
   if (caso && !caso.categoria) await payload.update({ collection: 'case-history', id: caso.id, data: { categoria: 'risto' } as never })
 }
 
+/** Sezione Contract: crea solo le pagine che mancano (per indirizzo); quelle esistenti non si toccano. */
+async function completaContract() {
+  const esistenti = await payload.find({ collection: 'contract', depth: 0, limit: 50, draft: true })
+  const presenti = new Set((esistenti.docs as unknown as { sezione?: string }[]).map((d) => d.sezione))
+  if (SEZIONI_CONTRACT.every((x) => presenti.has(x.value))) return
+  const dati = await contractDati(media)
+  for (const d of dati.filter((x) => !presenti.has(x.sezione))) {
+    const doc = await payload.create({ collection: 'contract', depth: 0, data: { ...d.it, sezione: d.sezione, ordine: d.ordine, _status: 'published' } as never })
+    await payload.update({ collection: 'contract', id: doc.id, locale: 'en', depth: 0, data: { ...(conIdRighe(d.en, doc) as object), _status: 'published' } as never })
+    log(`creata la pagina Contract: ${d.sezione}`)
+  }
+}
+
 // Aggiornamento di un sito già avviato (npm run seed:aggiorna): aggiunge ciò che manca
 // senza toccare i testi e le foto già modificati dal pannello o dalla pagina.
 if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer') {
@@ -303,6 +318,7 @@ if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer'
   }
   await completaDesigner()
   await completaPagine()
+  await completaContract()
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
   await payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never })
   await applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer'] })
@@ -359,6 +375,7 @@ log('aggiornata la home')
 await payload.updateGlobal({ slug: 'pagina-designer', data: (await paginaDesignerDati()) as never })
 log('aggiornata la pagina designer')
 await completaPagine()
+await completaContract()
 
 // 5b. Ritratti a risoluzione piena e creazioni dei designer da serralunga.com
 await completaDesigner()
