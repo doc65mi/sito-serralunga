@@ -1,5 +1,5 @@
 /**
- * Version: 1.01
+ * Version: 1.02
  * Un solo punto di accesso ai tre fornitori (OpenAI, OpenRouter, Gemini).
  * Le chiavi si leggono dal globale "ai" solo qui, sul server.
  */
@@ -163,6 +163,53 @@ export async function generaImmagine(c: ConfigAi, descrizione: string, orientame
   const p = parti.find((x) => x.inlineData?.data)?.inlineData
   if (!p?.data) throw new ErroreAi('Gemini non ha restituito un\'immagine: il modello scelto potrebbe non generarne.')
   return { dati: Buffer.from(p.data, 'base64'), mime: p.mimeType || 'image/png' }
+}
+
+// --- Ritocco di una foto esistente --------------------------------------------------------
+
+/**
+ * Manda al fornitore una foto e un'istruzione e riceve la foto ritoccata (ingrandita, ripulita).
+ * Serve per migliorare foto piccole: il risultato è una ricostruzione, va sempre rivisto da una persona.
+ */
+export async function ritoccaImmagine(c: ConfigAi, foto: { dati: Buffer; mime: string }, istruzione: string): Promise<{ dati: Buffer; mime: string }> {
+  const f = c.fornitoreImmagini
+  const modello = c.immagini[f]
+  serve(c, f, modello)
+  const b64 = foto.dati.toString('base64')
+  if (f === 'openai') {
+    const modulo = new FormData()
+    modulo.append('model', modello)
+    modulo.append('prompt', istruzione)
+    modulo.append('image', new Blob([new Uint8Array(foto.dati)], { type: foto.mime }), `foto.${foto.mime.split('/')[1] || 'png'}`)
+    const r = await chiama(f, 'https://api.openai.com/v1/images/edits', { method: 'POST', headers: { authorization: `Bearer ${c.chiavi.openai}` }, body: modulo }, 180_000)
+    const esito = (r.data as { b64_json?: string }[] | undefined)?.[0]?.b64_json
+    if (!esito) throw new ErroreAi('OpenAI non ha restituito un\'immagine.')
+    return { dati: Buffer.from(esito, 'base64'), mime: 'image/png' }
+  }
+  if (f === 'openrouter') {
+    const r = await chiama(f, 'https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${c.chiavi.openrouter}` },
+      body: JSON.stringify({
+        model: modello,
+        messages: [{ role: 'user', content: [{ type: 'text', text: istruzione }, { type: 'image_url', image_url: { url: `data:${foto.mime};base64,${b64}` } }] }],
+        modalities: ['image', 'text'],
+      }),
+    }, 180_000)
+    const url = (r.choices as { message?: { images?: { image_url?: { url?: string } }[] } }[] | undefined)?.[0]?.message?.images?.[0]?.image_url?.url
+    const m = /^data:(image\/[a-z+]+);base64,(.+)$/s.exec(url || '')
+    if (!m) throw new ErroreAi('OpenRouter non ha restituito un\'immagine: il modello scelto potrebbe non modificare le foto.')
+    return { dati: Buffer.from(m[2], 'base64'), mime: m[1] }
+  }
+  const r = await chiama(f, `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modello)}:generateContent`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': c.chiavi.gemini },
+    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: istruzione }, { inlineData: { mimeType: foto.mime, data: b64 } }] }], generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } }),
+  }, 180_000)
+  const parti = (r.candidates as { content?: { parts?: { inlineData?: { mimeType?: string; data?: string } }[] } }[] | undefined)?.[0]?.content?.parts || []
+  const e = parti.find((x) => x.inlineData?.data)?.inlineData
+  if (!e?.data) throw new ErroreAi('Gemini non ha restituito un\'immagine: il modello scelto potrebbe non modificare le foto.')
+  return { dati: Buffer.from(e.data, 'base64'), mime: e.mimeType || 'image/png' }
 }
 
 // --- Elenco dei modelli disponibili presso un fornitore ---------------------------------
