@@ -154,6 +154,9 @@ input:focus-visible, textarea:focus-visible, .rs__control--is-focused { outline:
 .sl-voce-strumenti__link:hover { text-decoration: underline; }
 .sl-strumenti { scroll-margin-top: 80px; }
 
+.sl-strumento__pulsante--ferma { background: transparent; color: var(--theme-error-500); border: 1px solid var(--theme-error-500); }
+.sl-strumento--fermato .sl-strumento__stato { color: var(--sl-oro); }
+
 /* ---------- Leggibilità (Version: 1.02, richiesta 2026-11-16) ----------
    Nel tema chiaro tutti i testi del pannello sono neri e non scendono sotto i 14px;
    la barra laterale diventa chiara con testo nero. L'oro resta solo come accento (bordi, indicatori). */

@@ -1,19 +1,22 @@
 'use client'
 
 /**
- * Version: 1.01
+ * Version: 1.02
  * Riquadro "Strumenti" nel cruscotto: aggiorna i contenuti e importa il catalogo da
  * serralunga.com senza terminale. Mostra stato e avanzamento, aggiornati ogni 5 secondi.
  * Aggiunge solo ciò che manca; le modifiche a contenuti già presenti compaiono come
  * "aggiornamenti disponibili" e si applicano solo con un clic esplicito (copia di sicurezza prima).
+ * Ogni compito si può interrompere: il punto raggiunto resta salvato e «Riprendi» riparte da lì.
  */
 import React, { useCallback, useEffect, useState } from 'react'
 
 interface Stato {
   compito: 'aggiorna' | 'catalogo'
-  stato: 'mai' | 'in-corso' | 'ok' | 'errore'
+  stato: 'mai' | 'in-corso' | 'ok' | 'errore' | 'fermato'
   quando: string
   inAttesa: boolean
+  fermando: boolean
+  punto: { prudente: number; applica: number }
   registro: string
   proposte: { dove: string; titolo: string; lingua: string; campi: string[] }[]
 }
@@ -32,9 +35,11 @@ const VOCI = {
 const quando = (iso: string) => (iso ? new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '')
 
 function etichetta(s: Stato) {
+  if (s.stato === 'in-corso' && s.fermando) return 'Interruzione in corso…'
   if (s.stato === 'in-corso') return s.inAttesa ? 'In coda: parte appena finisce l’altro compito' : `In corso dalle ${quando(s.quando)}`
   if (s.stato === 'ok') return `Completato il ${quando(s.quando)}`
-  if (s.stato === 'errore') return `Interrotto il ${quando(s.quando)}: vedi il registro`
+  if (s.stato === 'errore') return `Fermato da un errore il ${quando(s.quando)}: vedi il registro`
+  if (s.stato === 'fermato') return `Interrotto il ${quando(s.quando)}`
   return 'Mai eseguito da questo pannello'
 }
 
@@ -59,25 +64,27 @@ export default function Strumenti() {
     return () => clearInterval(t)
   }, [carica])
 
-  async function avvia(compito: string, applica = false) {
+  async function chiama(azione: 'avvia' | 'ferma', corpo: Record<string, unknown>) {
     setMessaggio('')
     setConferma(null)
-    const r = await fetch('/api/strumenti/avvia', {
+    const r = await fetch(`/api/strumenti/${azione}`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ compito, applica }),
+      body: JSON.stringify(corpo),
     })
     const d = (await r.json().catch(() => ({}))) as { errore?: string }
     if (!r.ok) setMessaggio(d.errore || `Errore ${r.status}`)
-    setAperto(compito)
+    if (azione === 'avvia') setAperto(String(corpo.compito))
     carica()
   }
+  const avvia = (compito: string, applica = false, daCapo = false) => chiama('avvia', { compito, applica, daCapo })
+  const ferma = (compito: string) => chiama('ferma', { compito })
 
   return (
     <section id="strumenti" className="sl-strumenti" aria-label="Strumenti">
       <h2 className="sl-strumenti__titolo">Strumenti</h2>
-      <p className="sl-strumenti__nota">Dopo ogni pubblicazione con contenuti nuovi partono da soli e aggiungono solo ciò che manca: quello che hai modificato sul sito non viene mai sovrascritto. Qui si possono rilanciare; continuano anche chiudendo il pannello.</p>
+      <p className="sl-strumenti__nota">Dopo ogni pubblicazione con contenuti nuovi partono da soli e aggiungono solo ciò che manca: quello che hai modificato sul sito non viene mai sovrascritto. Qui si possono rilanciare o interrompere: il punto raggiunto resta salvato e «Riprendi» riparte da lì. Continuano anche chiudendo il pannello.</p>
       {messaggio && <p className="sl-strumenti__errore" role="alert">{messaggio}</p>}
       <div className="sl-strumenti__griglia">
         {(Object.keys(VOCI) as Array<keyof typeof VOCI>).map((c) => {
@@ -92,9 +99,28 @@ export default function Strumenti() {
                 {s ? etichetta(s) : '…'}
               </span>
               <div className="sl-strumento__azioni">
-                <button type="button" className="sl-strumento__pulsante" disabled={inCorso} onClick={() => avvia(c)}>
-                  {inCorso ? 'In corso…' : 'Avvia'}
-                </button>
+                {inCorso ? (
+                  <button type="button" className="sl-strumento__pulsante sl-strumento__pulsante--ferma" disabled={s?.fermando} onClick={() => ferma(c)}>
+                    {s?.fermando ? 'Interruzione…' : 'Interrompi'}
+                  </button>
+                ) : s?.punto?.applica ? (
+                  <button type="button" className="sl-strumento__pulsante" onClick={() => avvia(c, true)}>
+                    Riprendi l’applicazione degli aggiornamenti
+                  </button>
+                ) : s?.punto?.prudente ? (
+                  <>
+                    <button type="button" className="sl-strumento__pulsante" onClick={() => avvia(c)}>
+                      Riprendi ({s.punto.prudente} {s.punto.prudente === 1 ? 'passaggio fatto' : 'passaggi fatti'})
+                    </button>
+                    <button type="button" className="sl-strumento__registro-pulsante" onClick={() => avvia(c, false, true)}>
+                      Ricomincia da capo
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="sl-strumento__pulsante" onClick={() => avvia(c)}>
+                    Avvia
+                  </button>
+                )}
                 {s?.registro && (
                   <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setAperto(aperto === c ? null : c)}>
                     {aperto === c ? 'Nascondi registro' : 'Mostra registro'}

@@ -21,6 +21,8 @@ import path from 'path'
 
 import type { Payload } from 'payload'
 
+import { giaFatti } from './punto'
+
 export interface Proposta {
   dove: string
   titolo: string
@@ -61,8 +63,15 @@ export function proteggi(payload: Payload, compito: string, log: (m: string) => 
   const fileProposte = path.join(CARTELLA, `${compito}.proposte.json`)
   const copie = path.join(CARTELLA, 'copie', new Date().toISOString().replace(/[:.]/g, '-'))
   fs.mkdirSync(CARTELLA, { recursive: true })
-  // Ogni esecuzione riparte da zero: in modalità applica le proposte vengono applicate.
-  fs.writeFileSync(fileProposte, '[]')
+  // Un'esecuzione nuova riparte da zero (in modalità applica le proposte vengono applicate);
+  // una ripresa dopo un'interruzione tiene quelle raccolte dalle fasi già fatte.
+  if (giaFatti()) {
+    try {
+      proposte.push(...(JSON.parse(fs.readFileSync(fileProposte, 'utf8')) as Proposta[]))
+    } catch {
+      /* nessuna proposta salvata */
+    }
+  } else fs.writeFileSync(fileProposte, '[]')
 
   const proponi = (p: Proposta) => {
     proposte.push(p)

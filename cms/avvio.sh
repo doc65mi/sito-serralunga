@@ -1,5 +1,5 @@
 #!/bin/sh
-# Avvio del CMS — Version: 1.02
+# Avvio del CMS — Version: 1.03
 # 1. Avvia Payload (che applica le migrazioni del database alla prima richiesta).
 # 2. Con SEED_AUTOMATICO=1, quando il CMS risponde, carica i contenuti di partenza
 #    una sola volta: se nel database c'è già un utente non fa nulla.
@@ -14,6 +14,11 @@ DIR="${MEDIA_DIR:-./media}/.compiti"
 mkdir -p "$DIR"
 # Il contenitore è appena partito: un lucchetto rimasto da un avvio precedente è vecchio.
 rmdir "$DIR/lucchetto" 2>/dev/null || true
+rm -f "$DIR"/*.pid "$DIR"/*.ferma
+# Un compito rimasto "in corso" è stato fermato dal riavvio: il punto raggiunto è salvato.
+for f in "$DIR"/*.stato; do
+  if [ -f "$f" ] && grep -q '^in-corso' "$f"; then echo "fermato $(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$f"; fi
+done
 
 npm run start &
 SERVER=$!
@@ -34,7 +39,10 @@ if [ "${SEED_AUTOMATICO:-0}" = "1" ] || [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1"
       for c in aggiorna catalogo; do
         if [ "$(cat "$DIR/$c.versione" 2>/dev/null)" != "$VERSIONE" ]; then
           echo "[avvio] contenuti nuovi in questo deploy: seed:$c in corso (avanzamento nel pannello, Strumenti)"
-          sh ./compito.sh "$c" "$VERSIONE" || true
+          r=0
+          sh ./compito.sh "$c" "$VERSIONE" || r=$?
+          # Interrotto dal pannello: non si passa al compito successivo.
+          [ "$r" -eq 3 ] && break
         fi
       done
     fi
