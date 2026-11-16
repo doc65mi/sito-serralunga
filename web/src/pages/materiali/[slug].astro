@@ -1,0 +1,182 @@
+---
+/**
+ * Pagina di un materiale (Version: 1.00): apertura, dati in evidenza, capitoli con foto,
+ * cartella colori (se attiva), galleria, pezzi in quel materiale e gli altri materiali.
+ * Contenuti dalla collezione "materiali"; i colori dalla collezione "colori".
+ */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import MappaColori from '../../components/MappaColori.astro'
+import { elenco, perSlug, SITO, type Doc } from '../../lib/cms'
+import { isMedia, src } from '../../lib/media'
+import { esterno, piatto } from '../../lib/testo'
+import { percorso } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const u = (p?: string) => percorso(L, p)
+const tt = (it: string, en: string) => (L === 'en' ? en : it)
+const m = await perSlug('materiali', Astro.params.slug || '', 2, L)
+if (!m) return Astro.rewrite('/404')
+const [tutti, colori] = await Promise.all([
+  elenco('materiali', { depth: 1 }, L),
+  m.mostraColori ? elenco('colori', { depth: 1, limit: 200 }, L) : Promise.resolve([] as Doc[]),
+])
+const altri = tutti.filter((x) => x.slug !== m.slug)
+const capitoli: Doc[] = m.capitoli || []
+const pezzi: Doc[] = (m.pezzi || []).filter((p: Doc) => p?.nome)
+const galleria: Doc[] = (m.galleria || []).filter((g: Doc) => isMedia(g.immagine))
+const sezione = tt('Materiali', 'Materials')
+const url = `${SITO}${u(`/materiali/${m.slug}/`)}`
+const jsonld: Doc[] = [{
+  '@type': 'Article',
+  '@id': `${url}#articolo`,
+  headline: piatto(m.titoloPagina || m.titolo),
+  description: piatto(m.seo?.descrizione || m.intro),
+  image: isMedia(m.immagine) ? [src(m.immagine, 1800)] : undefined,
+  author: { '@id': `${SITO}/#organizzazione` },
+  publisher: { '@id': `${SITO}/#organizzazione` },
+  mainEntityOfPage: { '@id': `${url}#pagina` },
+  dateModified: m.updatedAt,
+}]
+if (pezzi.length) {
+  jsonld.push({
+    '@type': 'ItemList',
+    name: piatto(m.pezziTitolo) || piatto(m.titolo),
+    itemListElement: pezzi.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: piatto(p.nome),
+      url: p.link ? (esterno(p.link) ? p.link : `${SITO}${u(p.link)}`) : undefined,
+    })),
+  })
+}
+---
+<Base
+  titolo={m.seo?.titolo || `${piatto(m.titolo)} | Serralunga`}
+  descrizione={m.seo?.descrizione || m.intro}
+  immagine={m.seo?.immagine || m.immagine}
+  percorso={[{ nome: sezione, url: '/materiali/' }, { nome: piatto(m.titolo), url: `/materiali/${m.slug}/` }]}
+  jsonld={jsonld}
+  pagina={`materiale-${m.slug}`}
+  doc={`collections/materiali/${m.id}`}
+  blocchi={m.blocchi ?? []}
+>
+  <article class="materiale">
+    <header class="intro-pagina" id="materiale-intro">
+      <div class="wrap intro-pagina__griglia">
+        <div>
+          {m.kicker && <span class="kicker" data-campo="kicker">{m.kicker}</span>}
+          {m.titoloPagina
+            ? <Testo as="h1" class="titolo titolo--display" campo="titoloPagina" t={m.titoloPagina} />
+            : <h1 class="titolo titolo--display" data-campo="titolo">{m.titolo}</h1>}
+        </div>
+        <div class="materiale__apri">
+          {m.sottotitolo && <p class="etichetta" data-campo="sottotitolo">{m.sottotitolo}</p>}
+          <Testo class="testo" campo="intro" t={m.intro} />
+        </div>
+      </div>
+    </header>
+
+    <div class="pad"><div class="wrap"><div class="foto r-219 materiale__apertura"><Img campo="immagine" media={m.immagine} priorita larghezza={2600} nota={tt('foto da fornire', 'photo to be supplied')} /></div></div></div>
+
+    {(m.cifre || []).length > 0 && (
+      <section class="pad materiale__cifre" aria-label={tt('In sintesi', 'At a glance')}>
+        <dl class="wrap materiale-cifre">
+          {m.cifre.map((c: Doc, k: number) => (
+            <div>
+              <dt class="etichetta" data-campo={`cifre.${k}.etichetta`}>{c.etichetta}</dt>
+              <dd class="materiale-cifre__valore" data-campo={`cifre.${k}.valore`}>{c.valore}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )}
+
+    {capitoli.length > 0 && (
+      <section class="sez materiale__capitoli" aria-label={tt('Il racconto', 'The story')}>
+        {capitoli.map((c, k) => isMedia(c.immagine) ? (
+          <div class:list={['capitolo', k % 2 === 1 && 'capitolo--inverso']}>
+            <div class="foto capitolo__foto"><Img campo={`capitoli.${k}.immagine`} media={c.immagine} sizes="(max-width: 900px) 100vw, 55vw" larghezza={2000} /></div>
+            <div class="capitolo__testi">
+              <span class="numero-capitolo" aria-hidden="true">{String(k + 1).padStart(2, '0')}</span>
+              <h2 class="titolo titolo--l" data-campo={`capitoli.${k}.titolo`}>{c.titolo}</h2>
+              <Testo class="testo" campo={`capitoli.${k}.testo`} t={c.testo} />
+            </div>
+          </div>
+        ) : (
+          <div class="pad"><div class="wrap materiale-nota">
+            <h2 class="titolo titolo--m" data-campo={`capitoli.${k}.titolo`}>{c.titolo}</h2>
+            <Testo class="testo" campo={`capitoli.${k}.testo`} t={c.testo} />
+          </div></div>
+        ))}
+      </section>
+    )}
+
+    {m.mostraColori && (
+      <MappaColori colori={colori} titolo={m.coloriTitolo} nota={m.coloriNota} campoTitolo="coloriTitolo" campoNota="coloriNota" />
+    )}
+
+    {galleria.length > 0 && (
+      <section class="pad ambiente-sez" id="materiale-galleria" aria-label={tt('Galleria', 'Gallery')}>
+        <div class="wrap creazioni">
+          {galleria.map((g, k) => (
+            <figure class="creazione creazione--ambientata">
+              <div class="foto r-43"><Img campo={`galleria.${k}.immagine`} media={g.immagine} sizes="(max-width: 700px) 100vw, 50vw" larghezza={1800} /></div>
+              {g.didascalia && <figcaption><span class="creazione__nome" data-campo={`galleria.${k}.didascalia`}>{g.didascalia}</span></figcaption>}
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {pezzi.length > 0 && (
+      <section class="sez-pezzi fondo-chiaro" id="materiale-pezzi">
+        <div class="wrap pad intesta"><h2 class="titolo titolo--l" data-campo="pezziTitolo">{m.pezziTitolo || tt('I pezzi', 'The pieces')}</h2></div>
+        <div class="rail" tabindex="0" aria-label={piatto(m.pezziTitolo) || tt('I pezzi', 'The pieces')}>
+          {pezzi.map((p, k) => (
+            <a href={p.link ? (esterno(p.link) ? p.link : u(p.link)) : u('/#listino')} class="card">
+              <div class="foto foto--prodotto r-45 zoom"><Img campo={`pezzi.${k}.immagine`} media={p.immagine} alt={p.immagine?.alt || p.nome} sizes="(max-width: 560px) 100vw, 400px" larghezza={1000} /></div>
+              <div class="card__piede">
+                <div>
+                  <div class="card__nome card__nome--s" data-campo={`pezzi.${k}.nome`}>{p.nome}</div>
+                  {p.tipo && <div class="card__sotto" data-campo={`pezzi.${k}.tipo`}>{p.tipo}</div>}
+                </div>
+                <span class="card__azione card__azione--attiva">{tt('Scheda →', 'Details →')}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+
+  {altri.length > 0 && (
+    <nav class="pad sez-int" aria-label={tt('Altri materiali', 'Other materials')}>
+      <div class="wrap">
+        <p class="etichetta-gruppo">{tt('Altri materiali', 'Other materials')}</p>
+        <ul class="materiali-altri">
+          {altri.map((x) => (
+            <li>
+              <a href={u(`/materiali/${x.slug}/`)} class="materiali-altri__voce">
+                <span class="materiali-altri__nome">{x.titolo}</span>
+                {x.sottotitolo && <span class="card__sotto">{x.sottotitolo}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
+  )}
+
+  <section class="sez-int pad scuro" id="materiale-cta">
+    <div class="centro centro--s">
+      <span class="kicker kicker--largo">{tt('Campioni e capitolati', 'Samples and specifications')}</span>
+      <h2 class="titolo titolo--cta">{tt('Materiali e colori per il vostro progetto', 'Materials and colours for your project')}</h2>
+      <div class="btn-riga btn-riga--centro">
+        <a href={u('/#listino')} class="btn btn--chiaro">{tt('Richiedi informazioni', 'Request information')}</a>
+        <a href={u('/materiali/')} class="btn btn--bordo-chiaro">{tt('Tutti i materiali', 'All materials')}</a>
+      </div>
+    </div>
+  </section>
+</Base>

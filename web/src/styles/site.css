@@ -1215,3 +1215,66 @@ a.redazione-ai__vai { text-decoration: none; display: inline-flex; align-items: 
 .hf-box__freccia { color: var(--accent-testo); transition: transform 300ms var(--ease); }
 .hf-box:hover .hf-box__freccia { transform: translateX(6px); }
 @media (max-width: 520px) { .hf-box__titolo { font-size: 19px; } .hf-box { gap: 10px; } }
+
+/* ---------- Materiali (Version: 1.00): /materiali/ e sottopagine, cartella colori ---------- */
+.materiali-griglia { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(28px, 3vw, 52px) clamp(20px, 2.4vw, 40px); }
+.materiale-blocco, .materiale-fascia { display: flex; flex-direction: column; gap: 22px; color: var(--ink); text-decoration: none; }
+.materiale-blocco__testi, .materiale-fascia__testi { display: flex; flex-direction: column; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.materiale-blocco__titolo { font-family: var(--serif); font-weight: 300; font-size: clamp(30px, 3vw, 44px); line-height: 1.08; }
+.materiale-blocco:hover .zoom img, .materiale-fascia:hover .zoom img { transform: scale(1.04); }
+.materiale-fascia { margin-top: clamp(40px, 5vw, 80px); }
+.materiale__apri { display: flex; flex-direction: column; gap: 18px; }
+.materiale__apertura { max-height: 78vh; }
+.materiale__cifre { padding-top: clamp(50px, 6vw, 90px); }
+.materiale-cifre { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin: 0; border-top: 1px solid var(--line); padding-top: 30px; }
+.materiale-cifre > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 12px; }
+.materiale-cifre dd { margin: 0; }
+.materiale-cifre__valore { font-family: var(--serif); font-size: clamp(34px, 3.4vw, 50px); line-height: 1; }
+.numero-capitolo { font-family: var(--serif); font-size: 18px; color: var(--accent-testo); letter-spacing: .1em; }
+.materiale-nota { display: grid; grid-template-columns: 1fr 1.3fr; gap: clamp(24px, 5vw, 90px); padding: clamp(36px, 4vw, 60px) 0; border-top: 1px solid var(--line); }
+.materiale-nota + .materiale-nota, .pad + .pad > .materiale-nota { margin-top: 0; }
+.materiale-nota .testo { max-width: 60ch; }
+.materiali-altri { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 32px; }
+.materiali-altri__voce { display: flex; flex-direction: column; gap: 6px; padding: 18px 0; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+.materiali-altri__nome { font-family: var(--serif); font-size: 24px; font-weight: 300; }
+.materiali-altri__voce:hover .materiali-altri__nome { color: var(--accent-testo); }
+@media (max-width: 900px) {
+  .materiale-cifre { grid-template-columns: 1fr 1fr; row-gap: 32px; }
+  .materiale-nota { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) { .materiali-griglia { grid-template-columns: 1fr; } }
+
+.mappa-colori { padding-top: var(--sec-int); padding-bottom: var(--sec-int); }
+.mappa-colori__testa { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+.mappa-colori__filtri { display: flex; flex-wrap: wrap; gap: 10px; margin: 28px 0 36px; }
+.mappa-colori__filtri[hidden] { display: none; }
+.filtro { border: 1px solid var(--line-strong, rgba(22, 21, 15, .3)); background: transparent; color: var(--ink); padding: 11px 18px; font: 400 12px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+.filtro[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.filtro:focus-visible, .colore:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.mappa-colori__corpo { display: grid; grid-template-columns: 280px 1fr; gap: clamp(28px, 4vw, 64px); align-items: start; }
+.mappa-colori__scheda { position: sticky; top: 110px; display: flex; flex-direction: column; gap: 10px; }
+.mappa-colori__scheda[hidden] { display: none; }
+.mappa-colori__corpo:has(> .mappa-colori__scheda[hidden]) { grid-template-columns: 1fr; }
+.mappa-colori__campione .colore__campione { width: 100%; height: auto; aspect-ratio: 1; }
+.mappa-colori__nome { font-family: var(--serif); font-size: 30px; font-weight: 300; line-height: 1.1; }
+.mappa-colori__finitura { color: var(--muted); }
+.mappa-colori__gruppi { display: flex; flex-direction: column; gap: clamp(36px, 4vw, 56px); }
+.mappa-colori__gruppo[hidden] { display: none; }
+.mappa-colori__elenco { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 24px 18px; }
+.colore { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 0; border: 0; background: none; text-align: left; color: var(--ink); cursor: pointer; font: inherit; }
+.colore__campione { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1; overflow: hidden; background: var(--paper-2); border: 1px solid var(--line); transition: transform 300ms var(--ease); }
+.colore__campione .im, .colore__campione img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.colore__campione--vuoto { background: repeating-linear-gradient(135deg, var(--paper-2) 0 8px, var(--paper) 8px 16px); font-size: 12px; letter-spacing: .14em; color: var(--muted); }
+.colore:hover .colore__campione { transform: translateY(-3px); }
+.colore[aria-current="true"] .colore__campione { border-color: var(--ink); box-shadow: 0 0 0 2px var(--accent); }
+.colore__codice { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent-testo); margin-top: 6px; }
+.colore__nome { font-family: var(--serif); font-size: 18px; line-height: 1.2; }
+.colore__tono { font-size: 12px; color: var(--muted); }
+.mappa-colori__nota { margin-top: 36px; }
+@media (max-width: 900px) {
+  .mappa-colori__corpo { grid-template-columns: 1fr; }
+  .mappa-colori__scheda { position: static; display: grid; grid-template-columns: 110px 1fr; column-gap: 20px; }
+  .mappa-colori__scheda[hidden] { display: none; }
+  .mappa-colori__campione { grid-row: span 4; }
+}
+@media (prefers-reduced-motion: reduce) { .colore__campione { transition: none; } }

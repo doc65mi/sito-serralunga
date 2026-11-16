@@ -8,7 +8,7 @@ import { piatto } from '../lib/testo'
  * contano e dove trovarle, scritto con i contenuti pubblicati nel CMS: niente di inventato.
  */
 export const GET: APIRoute = async () => {
-  const [imp, home, prodotti, designer, casi, spunti, articoli] = await Promise.all([
+  const [imp, home, prodotti, designer, casi, spunti, articoli, materiali] = await Promise.all([
     impostazioni('it'),
     globale('home', 0, 'it').catch(() => ({}) as Doc),
     elenco('prodotti', { depth: 0, 'where[schedaPubblicata][equals]': 'true' }).catch(() => []),
@@ -16,6 +16,7 @@ export const GET: APIRoute = async () => {
     elenco('case-history', { depth: 0 }).catch(() => []),
     elenco('spunti', { depth: 0 }).catch(() => []),
     elenco('articoli', { depth: 0, sort: '-data', limit: 50 }).catch(() => []),
+    elenco('materiali', { depth: 0 }).catch(() => []),
   ])
   const a = imp.azienda || {}
   const riga = (titolo: string, url: string, nota?: string) => `- [${piatto(titolo)}](${SITO}${url})${nota ? `: ${piatto(nota).slice(0, 180)}` : ''}`
@@ -36,7 +37,9 @@ export const GET: APIRoute = async () => {
       riga('I designer', '/designer/'),
       riga('Spunti e idee', '/spunti-e-idee/'),
       riga('Journal', '/journal/'),
+      riga('Materiali e colori', '/materiali/'),
     ]),
+    sezione('Materiali', materiali.map((m) => riga(m.titolo, `/materiali/${m.slug}/`, m.seo?.descrizione || m.sottotitolo))),
     sezione('Prodotti', prodotti.map((p) => riga(p.nome, `/prodotti/${p.slug}/`, p.seo?.descrizione))),
     sezione('Designer', designer.map((d) => riga(d.nome, `/designer/${d.slug}/`, d.ruolo))),
     sezione('Case history', casi.map((c) => riga(c.nome, `/case-history/${c.slug}/`, c.seo?.descrizione))),

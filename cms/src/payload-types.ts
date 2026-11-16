@@ -70,6 +70,8 @@ export interface Config {
     prodotti: Prodotti;
     'case-history': CaseHistory;
     spunti: Spunti;
+    materiali: Materiali;
+    colori: Colori;
     articoli: Articoli;
     designer: Designer;
     media: Media;
@@ -86,6 +88,8 @@ export interface Config {
     prodotti: ProdottiSelect<false> | ProdottiSelect<true>;
     'case-history': CaseHistorySelect<false> | CaseHistorySelect<true>;
     spunti: SpuntiSelect<false> | SpuntiSelect<true>;
+    materiali: MaterialiSelect<false> | MaterialiSelect<true>;
+    colori: ColoriSelect<false> | ColoriSelect<true>;
     articoli: ArticoliSelect<false> | ArticoliSelect<true>;
     designer: DesignerSelect<false> | DesignerSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -106,6 +110,7 @@ export interface Config {
     'pagina-designer': PaginaDesigner;
     'pagina-installazioni': PaginaInstallazioni;
     'pagina-spunti': PaginaSpunti;
+    'pagina-materiali': PaginaMateriali;
     'pagina-journal': PaginaJournal;
     impostazioni: Impostazioni;
     ai: Ai;
@@ -115,6 +120,7 @@ export interface Config {
     'pagina-designer': PaginaDesignerSelect<false> | PaginaDesignerSelect<true>;
     'pagina-installazioni': PaginaInstallazioniSelect<false> | PaginaInstallazioniSelect<true>;
     'pagina-spunti': PaginaSpuntiSelect<false> | PaginaSpuntiSelect<true>;
+    'pagina-materiali': PaginaMaterialiSelect<false> | PaginaMaterialiSelect<true>;
     'pagina-journal': PaginaJournalSelect<false> | PaginaJournalSelect<true>;
     impostazioni: ImpostazioniSelect<false> | ImpostazioniSelect<true>;
     ai: AiSelect<false> | AiSelect<true>;
@@ -1270,6 +1276,271 @@ export interface Spunti {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Pagine della sezione Materiali (/materiali/...).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "materiali".
+ */
+export interface Materiali {
+  id: number;
+  /**
+   * Nome breve: compare nelle card, nel percorso e nel menu.
+   */
+  titolo: string;
+  /**
+   * Se vuoto si usa il nome. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  titoloPagina?: string | null;
+  /**
+   * Parte finale dell’indirizzo, in minuscolo senza accenti. Se vuoto si genera dal nome. Non cambiarlo dopo la pubblicazione: i link esistenti smetterebbero di funzionare.
+   */
+  slug: string;
+  /**
+   * Numeri più bassi compaiono prima.
+   */
+  ordine?: number | null;
+  kicker?: string | null;
+  /**
+   * Una riga: compare sotto il titolo e nella card della pagina Materiali.
+   */
+  sottotitolo?: string | null;
+  immagine?: (number | null) | Media;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  intro?: string | null;
+  /**
+   * Solo dati pubblicati dall’azienda (es. “-35 / +80 °C”).
+   */
+  cifre?:
+    | {
+        valore: string;
+        etichetta: string;
+        id?: string | null;
+      }[]
+    | null;
+  capitoli?:
+    | {
+        titolo: string;
+        /**
+         * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+         */
+        testo?: string | null;
+        immagine?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  galleria?:
+    | {
+        immagine: number | Media;
+        didascalia?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  pezziTitolo?: string | null;
+  /**
+   * Prodotti realizzati con il materiale o la finitura. Link: di norma /prodotti/{handle}/.
+   */
+  pezzi?:
+    | {
+        nome: string;
+        tipo?: string | null;
+        immagine?: (number | null) | Media;
+        /**
+         * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+         */
+        link?: string | null;
+        fonte?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Aggiunge la mappa dei colori (Contenuti → Colori) dopo i capitoli.
+   */
+  mostraColori?: boolean | null;
+  coloriTitolo?: string | null;
+  coloriNota?: string | null;
+  /**
+   * Compaiono in fondo alla pagina, prima dell’invito finale. Si possono aggiungere anche dalla pagina, con il pulsante «Aggiungi blocco».
+   */
+  blocchi?:
+    | (
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            testo?: string | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'testo';
+          }
+        | {
+            immagine?: (number | null) | Media;
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            testo?: string | null;
+            lato?: ('sinistra' | 'destra') | null;
+            pulsante?: string | null;
+            /**
+             * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+             */
+            link?: string | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'immagineTesto';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            immagini?: (number | Media)[] | null;
+            lightbox?: boolean | null;
+            formato?: ('largo' | 'panoramico' | 'classico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'slider';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Un prodotto del sito oppure un indirizzo esterno con nome e foto.
+             */
+            voci?:
+              | {
+                  prodotto?: (number | null) | Prodotti;
+                  /**
+                   * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+                   */
+                  url?: string | null;
+                  nome?: string | null;
+                  tipo?: string | null;
+                  immagine?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'prodotti';
+          }
+        | {
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            testo: string;
+            autore?: string | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'citazione';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Risposte brevi e complete: vengono segnalate ai motori di ricerca e agli assistenti come FAQ.
+             */
+            voci?:
+              | {
+                  domanda: string;
+                  /**
+                   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+                   */
+                  risposta: string;
+                  id?: string | null;
+                }[]
+              | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'domande';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            testo?: string | null;
+            pulsante?: string | null;
+            /**
+             * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+             */
+            link?: string | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'invito';
+          }
+      )[]
+    | null;
+  /**
+   * Regole in file-md/seo.md: title fino a 60 caratteri, description 140–160.
+   */
+  seo?: {
+    titolo?: string | null;
+    descrizione?: string | null;
+    immagine?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Cartella colori mostrata in /materiali/colori/ e in Heritage › I colori.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "colori".
+ */
+export interface Colori {
+  id: number;
+  codice: string;
+  nome: string;
+  /**
+   * Es. “bianco ghiaccio”, “grigio chiaro · design”.
+   */
+  descrizione?: string | null;
+  famiglia: 'standard' | 'laccato';
+  finitura?: ('lucido' | 'opaco') | null;
+  metallizzato?: boolean | null;
+  /**
+   * Foto del campione di colore.
+   */
+  campione?: (number | null) | Media;
+  /**
+   * Numeri più bassi compaiono prima.
+   */
+  ordine?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "articoli".
  */
@@ -1554,6 +1825,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'spunti';
         value: number | Spunti;
+      } | null)
+    | ({
+        relationTo: 'materiali';
+        value: number | Materiali;
+      } | null)
+    | ({
+        relationTo: 'colori';
+        value: number | Colori;
       } | null)
     | ({
         relationTo: 'articoli';
@@ -2186,6 +2465,178 @@ export interface SpuntiSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "materiali_select".
+ */
+export interface MaterialiSelect<T extends boolean = true> {
+  titolo?: T;
+  titoloPagina?: T;
+  slug?: T;
+  ordine?: T;
+  kicker?: T;
+  sottotitolo?: T;
+  immagine?: T;
+  intro?: T;
+  cifre?:
+    | T
+    | {
+        valore?: T;
+        etichetta?: T;
+        id?: T;
+      };
+  capitoli?:
+    | T
+    | {
+        titolo?: T;
+        testo?: T;
+        immagine?: T;
+        id?: T;
+      };
+  galleria?:
+    | T
+    | {
+        immagine?: T;
+        didascalia?: T;
+        id?: T;
+      };
+  pezziTitolo?: T;
+  pezzi?:
+    | T
+    | {
+        nome?: T;
+        tipo?: T;
+        immagine?: T;
+        link?: T;
+        fonte?: T;
+        id?: T;
+      };
+  mostraColori?: T;
+  coloriTitolo?: T;
+  coloriNota?: T;
+  blocchi?:
+    | T
+    | {
+        testo?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              testo?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        immagineTesto?:
+          | T
+          | {
+              immagine?: T;
+              kicker?: T;
+              titolo?: T;
+              testo?: T;
+              lato?: T;
+              pulsante?: T;
+              link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        slider?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              immagini?: T;
+              lightbox?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        prodotti?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              voci?:
+                | T
+                | {
+                    prodotto?: T;
+                    url?: T;
+                    nome?: T;
+                    tipo?: T;
+                    immagine?: T;
+                    id?: T;
+                  };
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        citazione?:
+          | T
+          | {
+              testo?: T;
+              autore?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        domande?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              voci?:
+                | T
+                | {
+                    domanda?: T;
+                    risposta?: T;
+                    id?: T;
+                  };
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        invito?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              testo?: T;
+              pulsante?: T;
+              link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  seo?:
+    | T
+    | {
+        titolo?: T;
+        descrizione?: T;
+        immagine?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "colori_select".
+ */
+export interface ColoriSelect<T extends boolean = true> {
+  codice?: T;
+  nome?: T;
+  descrizione?: T;
+  famiglia?: T;
+  finitura?: T;
+  metallizzato?: T;
+  campione?: T;
+  ordine?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3540,6 +3991,189 @@ export interface PaginaSpunti {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagina-materiali".
+ */
+export interface PaginaMateriali {
+  id: number;
+  kicker?: string | null;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  titolo: string;
+  /**
+   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+   */
+  testo?: string | null;
+  immagine?: (number | null) | Media;
+  cta?: {
+    kicker?: string | null;
+    /**
+     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     */
+    titolo?: string | null;
+    /**
+     * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+     */
+    testo?: string | null;
+    pulsante?: string | null;
+    /**
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+     */
+    link?: string | null;
+  };
+  /**
+   * Compaiono in fondo alla pagina, prima dell’invito finale. Si possono aggiungere anche dalla pagina, con il pulsante «Aggiungi blocco».
+   */
+  blocchi?:
+    | (
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            testo?: string | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'testo';
+          }
+        | {
+            immagine?: (number | null) | Media;
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            testo?: string | null;
+            lato?: ('sinistra' | 'destra') | null;
+            pulsante?: string | null;
+            /**
+             * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+             */
+            link?: string | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'immagineTesto';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            immagini?: (number | Media)[] | null;
+            lightbox?: boolean | null;
+            formato?: ('largo' | 'panoramico' | 'classico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'slider';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Un prodotto del sito oppure un indirizzo esterno con nome e foto.
+             */
+            voci?:
+              | {
+                  prodotto?: (number | null) | Prodotti;
+                  /**
+                   * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+                   */
+                  url?: string | null;
+                  nome?: string | null;
+                  tipo?: string | null;
+                  immagine?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'prodotti';
+          }
+        | {
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            testo: string;
+            autore?: string | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'citazione';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Risposte brevi e complete: vengono segnalate ai motori di ricerca e agli assistenti come FAQ.
+             */
+            voci?:
+              | {
+                  domanda: string;
+                  /**
+                   * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+                   */
+                  risposta: string;
+                  id?: string | null;
+                }[]
+              | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'domande';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            testo?: string | null;
+            pulsante?: string | null;
+            /**
+             * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+             */
+            link?: string | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'invito';
+          }
+      )[]
+    | null;
+  /**
+   * Regole in file-md/seo.md: title fino a 60 caratteri, description 140–160.
+   */
+  seo?: {
+    titolo?: string | null;
+    descrizione?: string | null;
+    immagine?: (number | null) | Media;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pagina-journal".
  */
 export interface PaginaJournal {
@@ -4352,6 +4986,131 @@ export interface PaginaSpuntiSelect<T extends boolean = true> {
   titolo?: T;
   testo?: T;
   notaVuota?: T;
+  cta?:
+    | T
+    | {
+        kicker?: T;
+        titolo?: T;
+        testo?: T;
+        pulsante?: T;
+        link?: T;
+      };
+  blocchi?:
+    | T
+    | {
+        testo?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              testo?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        immagineTesto?:
+          | T
+          | {
+              immagine?: T;
+              kicker?: T;
+              titolo?: T;
+              testo?: T;
+              lato?: T;
+              pulsante?: T;
+              link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        slider?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              immagini?: T;
+              lightbox?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        prodotti?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              voci?:
+                | T
+                | {
+                    prodotto?: T;
+                    url?: T;
+                    nome?: T;
+                    tipo?: T;
+                    immagine?: T;
+                    id?: T;
+                  };
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        citazione?:
+          | T
+          | {
+              testo?: T;
+              autore?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        domande?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              voci?:
+                | T
+                | {
+                    domanda?: T;
+                    risposta?: T;
+                    id?: T;
+                  };
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        invito?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              testo?: T;
+              pulsante?: T;
+              link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  seo?:
+    | T
+    | {
+        titolo?: T;
+        descrizione?: T;
+        immagine?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagina-materiali_select".
+ */
+export interface PaginaMaterialiSelect<T extends boolean = true> {
+  kicker?: T;
+  titolo?: T;
+  testo?: T;
+  immagine?: T;
   cta?:
     | T
     | {
