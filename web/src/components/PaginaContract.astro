@@ -1,0 +1,316 @@
+---
+/**
+ * Sezione Contract (Version: 1.00): una sola struttura per /contract/ e le sottopagine.
+ * Alberatura: progetto/Serralunga_Alberatura_B2C_2026.docx.pdf, "Contract (sezione separata):
+ * layout dedicato con header diverso o sub-brand visivo". Il sub-brand è la fascia scura
+ * "Serralunga Contract" con le sottosezioni, sotto l'header comune del sito.
+ * Ogni parte compare solo se compilata nel pannello (collezione Contract).
+ */
+import Base from '../layouts/Base.astro'
+import Img from './Img.astro'
+import Testo from './Testo.astro'
+import CardCase from './CardCase.astro'
+import ModuloRichiesta from './ModuloRichiesta.astro'
+import { elenco, globale, SITO, type Doc } from '../lib/cms'
+import { isMedia, src } from '../lib/media'
+import { esterno, piatto } from '../lib/testo'
+import { percorso, traduttore } from '../lib/lingua'
+import '../styles/contract.css'
+
+interface Props { sezione: string; pagine: Doc[] }
+const { sezione, pagine } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const indirizzo = (s?: string) => (!s || s === 'principale' ? '/contract/' : `/contract/${s}/`)
+
+const p = pagine.find((x) => x.sezione === sezione) as Doc
+const principale = pagine.find((x) => x.sezione === 'principale')
+const figlie = pagine.filter((x) => x.sezione !== 'principale')
+const eLanding = sezione === 'principale'
+const nomeSezione = principale?.nome || 'Contract'
+
+const categorie: string[] = p.casi?.categorie || []
+const [casi, home] = await Promise.all([
+  categorie.length ? elenco('case-history', { depth: 1 }, L) : Promise.resolve([] as Doc[]),
+  p.cataloghi?.mostra && !(p.cataloghi?.voci || []).length ? globale('home', 1, L) : Promise.resolve(null),
+])
+const casiSezione = casi.filter((c) => categorie.includes(c.categoria))
+
+const galleria: Doc[] = (p.galleria?.voci || []).filter((v: Doc) => isMedia(v.immagine))
+const punti: Doc[] = p.punti?.voci || []
+
+const prodotti = (p.prodotti?.voci || []).map((v: Doc, k: number) => {
+  const pr = v.prodotto && typeof v.prodotto === 'object' ? v.prodotto : null
+  const link = pr ? (pr.schedaPubblicata ? u(`/prodotti/${pr.slug}/`) : undefined) : v.url ? u(v.url) : undefined
+  return { k, link, fuori: !pr && esterno(v.url), nome: v.nome || pr?.nome, tipo: v.tipo || pr?.etichettaCard, immagine: v.immagine || pr?.immagine, proprio: !pr }
+}).filter((v: Doc) => v.nome)
+
+// Cataloghi: quelli della scheda, oppure i quattro box della home (stessa fonte, un solo posto da aggiornare).
+const daHome = !(p.cataloghi?.voci || []).length
+const cataloghi: Doc[] = p.cataloghi?.mostra
+  ? (daHome ? (home?.catalogo?.box || []).map((b: Doc) => ({ titolo: b.titolo, immagine: b.immagine, file: b.link })) : p.cataloghi.voci).filter((c: Doc) => c.titolo && c.file)
+  : []
+
+const numero = (k: number) => String(k + 1).padStart(2, '0')
+const titoloPagina = piatto(p.titolo || p.nome)
+const percorsoBriciole = eLanding
+  ? [{ nome: nomeSezione, url: '/contract/' }]
+  : [{ nome: nomeSezione, url: '/contract/' }, { nome: p.nome, url: indirizzo(sezione) }]
+
+// Dati strutturati: il servizio contract rivolto alle aziende, con le sottosezioni o i prodotti.
+const sito = SITO
+const canonico = `${sito}${u(indirizzo(sezione))}`
+const jsonld: Doc[] = []
+if (['principale', 'hospitality', 'residenziale', 'urbano'].includes(sezione)) {
+  jsonld.push({
+    '@type': 'Service',
+    '@id': `${canonico}#servizio`,
+    name: titoloPagina,
+    description: piatto(p.seo?.descrizione || p.testo) || undefined,
+    serviceType: 'Contract furniture',
+    provider: { '@id': `${sito}/#organizzazione` },
+    audience: { '@type': 'BusinessAudience', name: t('Hotel, ristoranti, studi di architettura, enti pubblici e rivenditori') },
+    areaServed: 'Worldwide',
+    image: isMedia(p.immagine) ? src(p.immagine, 1800) : undefined,
+    url: canonico,
+  })
+}
+if (eLanding && figlie.length) {
+  jsonld.push({
+    '@type': 'ItemList',
+    '@id': `${canonico}#sottosezioni`,
+    name: nomeSezione,
+    itemListElement: figlie.map((f, i) => ({ '@type': 'ListItem', position: i + 1, name: piatto(f.nome), url: `${sito}${u(indirizzo(f.sezione))}` })),
+  })
+}
+if (prodotti.length) {
+  jsonld.push({
+    '@type': 'ItemList',
+    '@id': `${canonico}#prodotti`,
+    name: piatto(p.prodotti?.titolo) || t('Prodotti'),
+    itemListElement: prodotti.map((v: Doc, i: number) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Product',
+        name: v.nome,
+        brand: { '@type': 'Brand', name: 'Serralunga' },
+        image: isMedia(v.immagine) ? src(v.immagine, 1000).replace(/^\//, `${sito}/`) : undefined,
+        url: v.link ? (v.link.startsWith('/') ? `${sito}${v.link}` : v.link) : undefined,
+      },
+    })),
+  })
+}
+if (cataloghi.length) {
+  jsonld.push({
+    '@type': 'ItemList',
+    '@id': `${canonico}#cataloghi`,
+    name: piatto(p.cataloghi?.titolo) || t('Cataloghi'),
+    itemListElement: cataloghi.map((c, i) => ({ '@type': 'ListItem', position: i + 1, item: { '@type': 'DigitalDocument', name: c.titolo, encodingFormat: 'application/pdf', publisher: { '@id': `${sito}/#organizzazione` } } })),
+  })
+}
+---
+<Base
+  titolo={p.seo?.titolo || `${titoloPagina} | Serralunga Contract`}
+  descrizione={p.seo?.descrizione || p.testo}
+  immagine={p.seo?.immagine || p.immagine}
+  percorso={percorsoBriciole}
+  percorsoNascosto
+  tipoPagina={eLanding || sezione === 'cataloghi' ? 'CollectionPage' : 'WebPage'}
+  jsonld={jsonld}
+  pagina={`contract-${sezione}`}
+  doc={`collections/contract/${p.id}`}
+  blocchi={p.blocchi ?? []}
+>
+  <nav class="contract-nav" aria-label={t('Sezioni Contract')}>
+    <div class="contract-nav__riga">
+      <a href={u('/contract/')} class="contract-nav__marchio" aria-current={eLanding ? 'page' : undefined}>
+        <span>Serralunga</span> <strong>Contract</strong>
+      </a>
+      {figlie.length > 0 && (
+        <ul class="contract-nav__voci">
+          {figlie.map((f) => (
+            <li><a href={u(indirizzo(f.sezione))} aria-current={f.sezione === sezione ? 'page' : undefined}>{f.nome}</a></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </nav>
+
+  <section class="contract-apertura" id="contract-apertura" aria-labelledby="contract-titolo">
+    <div class="contract-apertura__griglia">
+      <div class="contract-apertura__testi">
+        {p.kicker && <span class="kicker kicker--chiaro" data-campo="kicker">{p.kicker}</span>}
+        <Testo as="h1" class="titolo titolo--display" id="contract-titolo" campo="titolo" t={p.titolo || p.nome} />
+        <Testo class="testo" campo="testo" t={p.testo} />
+        <div class="btn-riga">
+          {sezione !== 'cataloghi' && sezione !== 'area-riservata' && <a href="#richiesta" class="btn btn--chiaro">{t('Parliamo del progetto')}</a>}
+          {sezione !== 'cataloghi' && <a href={u('/contract/cataloghi/')} class="btn btn--bordo-chiaro">{t('Cataloghi')}</a>}
+          {cataloghi.length > 0 && <a href="#cataloghi" class="btn btn--chiaro">{t('Scarica i cataloghi')}</a>}
+          {p.accesso?.link && <a href={p.accesso.link} class="btn btn--chiaro" rel="noopener" target={esterno(p.accesso.link) ? '_blank' : undefined}>{p.accesso.pulsante || t('Accedi')}</a>}
+        </div>
+      </div>
+      <div class="contract-apertura__foto foto foto--scura">
+        <Img campo="immagine" media={p.immagine} priorita sizes="(max-width: 900px) 100vw, 50vw" larghezza={2000} nota={t('foto da fornire')} />
+      </div>
+    </div>
+  </section>
+
+  {eLanding && figlie.length > 0 && (
+    <section class="contract-figlie sez-int pad" id="contract-ambiti" aria-labelledby="contract-ambiti-titolo">
+      <div class="wrap">
+        <h2 class="sr-only" id="contract-ambiti-titolo">{t('Le sezioni Contract')}</h2>
+        <ul class="contract-figlie__griglia">
+          {figlie.map((f, k) => (
+            <li>
+              <a href={u(indirizzo(f.sezione))} class="contract-card">
+                <div class="foto r-43 zoom"><Img media={f.immagine} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 33vw" larghezza={1100} nota={t('foto da fornire')} /></div>
+                <div class="contract-card__testi">
+                  <span class="contract-card__numero" aria-hidden="true">{numero(k)}</span>
+                  <h3 class="contract-card__nome">{f.nome}</h3>
+                  {f.estratto && <p class="testo testo--card">{piatto(f.estratto)}</p>}
+                  <span class="card__azione card__azione--attiva">{t('Scopri →')}</span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {punti.length > 0 && (
+    <section class="contract-punti sez-int pad" id="contract-punti" aria-labelledby="contract-punti-titolo">
+      <div class="wrap contract-punti__griglia">
+        <header class="contract-punti__testa">
+          {p.punti?.kicker && <span class="kicker" data-campo="punti.kicker">{p.punti.kicker}</span>}
+          <Testo as="h2" class="titolo titolo--l" id="contract-punti-titolo" campo="punti.titolo" t={p.punti?.titolo || t('Perché Serralunga')} />
+        </header>
+        <ol class="contract-punti__voci">
+          {punti.map((v, k) => (
+            <li>
+              <span class="contract-punti__numero" aria-hidden="true">{numero(k)}</span>
+              <div>
+                <h3 data-campo={`punti.voci.${k}.titolo`}>{v.titolo}</h3>
+                <Testo class="testo testo--s" campo={`punti.voci.${k}.testo`} t={v.testo} />
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {galleria.length > 0 && (
+    <section class="contract-galleria sez-int pad" id="contract-galleria" aria-labelledby="contract-galleria-titolo">
+      <div class="wrap">
+        <header class="blocco__testata">
+          {p.galleria?.kicker && <span class="kicker" data-campo="galleria.kicker">{p.galleria.kicker}</span>}
+          <Testo as="h2" class="titolo titolo--l" id="contract-galleria-titolo" campo="galleria.titolo" t={p.galleria?.titolo || t('Progetti realizzati')} />
+        </header>
+        <ul class="contract-galleria__griglia">
+          {galleria.map((v, k) => (
+            <li>
+              <figure>
+                <div class="foto r-43"><Img campo={`galleria.voci.${k}.immagine`} media={v.immagine} lightbox sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 33vw" larghezza={1200} /></div>
+                {v.didascalia && <figcaption data-campo={`galleria.voci.${k}.didascalia`}>{v.didascalia}</figcaption>}
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {casiSezione.length > 0 && (
+    <section class="contract-casi sez-int pad" id="contract-casi" aria-labelledby="contract-casi-titolo">
+      <div class="wrap">
+        <header class="blocco__testata">
+          {p.casi?.kicker && <span class="kicker" data-campo="casi.kicker">{p.casi.kicker}</span>}
+          <Testo as="h2" class="titolo titolo--l" id="contract-casi-titolo" campo="casi.titolo" t={p.casi?.titolo || t('Case history')} />
+        </header>
+        <div class="griglia-3">{casiSezione.map((c) => <CardCase c={c} />)}</div>
+        <p class="contract-casi__tutte"><a href={u('/installazioni/')} class="card__azione card__azione--attiva">{t('Tutte le installazioni →')}</a></p>
+      </div>
+    </section>
+  )}
+
+  {prodotti.length > 0 && (
+    <section class="contract-prodotti sez-int pad" id="contract-prodotti" aria-labelledby="contract-prodotti-titolo">
+      <div class="wrap">
+        <header class="blocco__testata">
+          {p.prodotti?.kicker && <span class="kicker" data-campo="prodotti.kicker">{p.prodotti.kicker}</span>}
+          <Testo as="h2" class="titolo titolo--l" id="contract-prodotti-titolo" campo="prodotti.titolo" t={p.prodotti?.titolo || t('Prodotti')} />
+          <Testo class="testo" campo="prodotti.testo" t={p.prodotti?.testo} />
+        </header>
+        <ul class="blocco__prodotti">
+          {prodotti.map((v: Doc) => {
+            const dentro = (
+              <>
+                <div class="foto r-45 zoom foto--prodotto"><Img campo={v.proprio ? `prodotti.voci.${v.k}.immagine` : undefined} media={v.immagine} alt={v.immagine?.alt || v.nome} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 25vw" larghezza={1000} nota={t('foto da fornire')} /></div>
+                <div class="card__piede">
+                  <div>
+                    <h3 class="card__nome card__nome--s" data-campo={v.proprio ? `prodotti.voci.${v.k}.nome` : undefined}>{v.nome}</h3>
+                    {v.tipo && <div class="card__sotto">{v.tipo}</div>}
+                  </div>
+                  {v.link && <span class="card__azione card__azione--attiva">{t('Scheda →')}</span>}
+                </div>
+              </>
+            )
+            return <li>{v.link ? <a href={v.link} class="card" target={v.fuori ? '_blank' : undefined} rel={v.fuori ? 'noopener' : undefined}>{dentro}</a> : <div class="card">{dentro}</div>}</li>
+          })}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {cataloghi.length > 0 && (
+    <section class="contract-cataloghi sez-int pad scuro" id="cataloghi" aria-labelledby="contract-cataloghi-titolo">
+      <div class="wrap">
+        <header class="blocco__testata">
+          {p.cataloghi?.kicker && <span class="kicker kicker--largo" data-campo="cataloghi.kicker">{p.cataloghi.kicker}</span>}
+          <Testo as="h2" class="titolo titolo--l" id="contract-cataloghi-titolo" campo="cataloghi.titolo" t={p.cataloghi?.titolo || t('Cataloghi')} />
+          <Testo class="testo" campo="cataloghi.testo" t={p.cataloghi?.testo} />
+        </header>
+        <ModuloRichiesta
+          pulsante={p.cta?.pulsante || t('Ricevi i cataloghi')}
+          grazie={p.cta?.grazie}
+          pagina={`Contract: ${p.nome}`}
+          cataloghi={cataloghi}
+          dopoInvio={p.cataloghi?.dopoInvio}
+          campoDopoInvio={daHome ? undefined : 'cataloghi.dopoInvio'}
+        />
+      </div>
+    </section>
+  )}
+
+  {(p.accesso?.titolo || p.accesso?.testo) && (
+    <section class="contract-accesso sez-int pad" id="contract-accesso" aria-labelledby="contract-accesso-titolo">
+      <div class="wrap contract-accesso__griglia">
+        <div>
+          {p.accesso?.kicker && <span class="kicker" data-campo="accesso.kicker">{p.accesso.kicker}</span>}
+          <Testo as="h2" class="titolo titolo--l" id="contract-accesso-titolo" campo="accesso.titolo" t={p.accesso?.titolo} />
+        </div>
+        <div class="contract-accesso__testi">
+          <Testo class="testo testo--forte" campo="accesso.testo" t={p.accesso?.testo} />
+          {p.accesso?.link && (
+            <a href={p.accesso.link} class="btn btn--scuro" data-campo="accesso.pulsante" data-campo-link="accesso.link" data-link={p.accesso.link} rel="noopener" target={esterno(p.accesso.link) ? '_blank' : undefined}>{p.accesso.pulsante || t('Accedi')}</a>
+          )}
+          <Testo class="testo testo--s" campo="accesso.nota" t={p.accesso?.nota} />
+        </div>
+      </div>
+    </section>
+  )}
+
+  {sezione !== 'cataloghi' && (p.cta?.titolo || p.cta?.testo) && (
+    <section id="richiesta" class="sez-int pad scuro" aria-labelledby="contract-cta-titolo">
+      <div class="centro centro--s">
+        {p.cta?.kicker && <span class="kicker kicker--largo" data-campo="cta.kicker">{p.cta.kicker}</span>}
+        <Testo as="h2" class="titolo titolo--cta" id="contract-cta-titolo" campo="cta.titolo" t={p.cta?.titolo} />
+        <Testo class="testo" campo="cta.testo" t={p.cta?.testo} />
+        <ModuloRichiesta pulsante={p.cta?.pulsante || t('Invia la richiesta')} grazie={p.cta?.grazie} pagina={`Contract: ${p.nome}`} />
+      </div>
+    </section>
+  )}
+</Base>
