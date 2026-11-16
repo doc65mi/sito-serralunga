@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Version: 1.00
+ * Version: 1.01
  * Riquadro "Strumenti" nel cruscotto: aggiorna i contenuti e importa il catalogo da
  * serralunga.com senza terminale. Mostra stato e avanzamento, aggiornati ogni 5 secondi.
  * Aggiunge solo ciò che manca; le modifiche a contenuti già presenti compaiono come
@@ -75,7 +75,7 @@ export default function Strumenti() {
   }
 
   return (
-    <section className="sl-strumenti" aria-label="Strumenti">
+    <section id="strumenti" className="sl-strumenti" aria-label="Strumenti">
       <h2 className="sl-strumenti__titolo">Strumenti</h2>
       <p className="sl-strumenti__nota">Dopo ogni pubblicazione con contenuti nuovi partono da soli e aggiungono solo ciò che manca: quello che hai modificato sul sito non viene mai sovrascritto. Qui si possono rilanciare; continuano anche chiudendo il pannello.</p>
       {messaggio && <p className="sl-strumenti__errore" role="alert">{messaggio}</p>}

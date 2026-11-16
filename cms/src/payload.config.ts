@@ -73,6 +73,7 @@ export default buildConfig({
     meta: { titleSuffix: ' · Serralunga Redazione', icons: [{ rel: 'icon', type: 'image/svg+xml', url: '/favicon.svg' }] },
     components: {
       beforeNavLinks: ['/componenti/ModificaFrontend'],
+      afterNavLinks: ['/componenti/VoceStrumenti'],
       actions: ['/componenti/AzioneFrontend'],
       beforeDashboard: ['/componenti/Cruscotto', '/componenti/Strumenti'],
       graphics: { Logo: '/componenti/Logo', Icon: '/componenti/Icona' },
