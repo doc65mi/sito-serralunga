@@ -19,14 +19,15 @@
   --dark-2: #221f1a;       /* fondo foto su fascia scura */
   --dark-3: #1e1b16;       /* strisce segnaposto su scuro */
 
-  --text-strong: #3e3b34;  /* paragrafi principali */
-  --text: #5f5b52;         /* paragrafi */
-  --muted: #6b665c;        /* didascalie, etichette: contrasto 5:1 sul fondo chiaro */
+  /* Regola del cliente (2026-11-16): testi di lettura sempre neri sul chiaro, anche nel catalogo. */
+  --text-strong: #000;     /* paragrafi principali */
+  --text: #000;            /* paragrafi */
+  --muted: #000;           /* didascalie, etichette */
   /* Colore d'accento usato per il testo sul fondo chiaro: più scuro, per restare leggibile (WCAG AA). */
-  --accent-testo: color-mix(in srgb, var(--accent) 70%, #000);
+  --accent-testo: #000;    /* sul chiaro i testi "d'accento" restano neri; sulle fasce scure tornano oro (vedi sotto) */
   --on-dark: #f3f0ea;      /* testo su scuro */
-  --on-dark-muted: #9a9488;/* paragrafi su scuro */
-  --on-dark-label: #8b8578;/* etichette su scuro */
+  --on-dark-muted: #e9e5dd;/* paragrafi su scuro: chiari e pieni per la leggibilità */
+  --on-dark-label: #d9d4ca;/* etichette su scuro */
 
   --line: rgba(22, 21, 15, 0.16);
   --line-soft: rgba(22, 21, 15, 0.12);
@@ -55,7 +56,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 body {
   margin: 0;
   background: var(--night);
-  color: var(--ink);
+  color: #000;
   font-family: var(--sans);
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
@@ -265,7 +266,7 @@ h1, h2, h3 { margin: 0; font-weight: 300; }
   .testa__menu .testa__tendina a { padding: 10px 0; }
 }
 
-.piede { background: var(--ink); color: #b7b1a4; padding: 90px var(--gut) 40px; }
+.piede { background: var(--ink); color: var(--on-dark-muted); padding: 90px var(--gut) 40px; }
 .piede__griglia {
   max-width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1.2fr; gap: 50px;
   padding-bottom: 70px; border-bottom: 1px solid rgba(245, 243, 239, .14);
@@ -276,7 +277,7 @@ h1, h2, h3 { margin: 0; font-weight: 300; }
 .piede__marchio p { margin: 0; font-size: 14px; line-height: 1.8; font-weight: 300; max-width: 340px; }
 .piede__col { display: flex; flex-direction: column; gap: 14px; font-size: 14px; font-weight: 300; font-style: normal; }
 .piede__titolo { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--on-dark); margin-bottom: 8px; }
-.piede a { color: #b7b1a4; }
+.piede a { color: var(--on-dark-muted); }
 .piede a:hover { color: var(--on-dark); }
 .piede__fondo {
   max-width: var(--wrap); margin: 0 auto; padding-top: 28px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
@@ -921,7 +922,7 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
 .hf-numeri__griglia > div { text-align: center; border-right: 1px solid rgba(245, 243, 239, .14); }
 .hf-numeri__griglia > div:last-child { border-right: 0; }
 .hf-numeri__valore { font-family: var(--serif); font-size: 62px; line-height: 1; font-weight: 300; }
-.hf-numeri__etichetta { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: #8f897c; margin-top: 14px; }
+.hf-numeri__etichetta { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--on-dark-label); margin-top: 14px; }
 
 /* Installazioni */
 .hf-inst {
@@ -981,7 +982,7 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
 .hf-servizio { display: grid; grid-template-columns: 56px 1fr; gap: 24px; padding: 26px 0; border-top: 1px solid rgba(245, 243, 239, .14); }
 .hf-servizio > span { font-size: 12px; color: var(--accent-testo); letter-spacing: .2em; }
 .hf-servizio h3 { margin: 0 0 8px; font-size: 17px; font-weight: 400; }
-.hf-servizio p { margin: 0; font-size: 14px; line-height: 1.7; font-weight: 300; color: #96907f; }
+.hf-servizio p { margin: 0; font-size: 14px; line-height: 1.7; font-weight: 300; color: var(--on-dark-muted); }
 
 /* Catalogo e listino */
 .hf-listino { background: var(--hf-paper-2); padding: 120px var(--hf-gut); }
