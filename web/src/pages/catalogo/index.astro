@@ -1,0 +1,126 @@
+---
+/**
+ * Catalogo (ex Shop) — Version: 1.00.
+ * Alberatura B2C 2026, sezione Shop: landing con le macrocategorie visuali e la barra delle categorie.
+ * Taglio B2B: nessun carrello, le schede portano a preventivo e listino riservato.
+ */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import CardProdotto from '../../components/CardProdotto.astro'
+import BarraCatalogo from '../../components/BarraCatalogo.astro'
+import { elenco, globale, SITO, type Doc } from '../../lib/cms'
+import { isMedia } from '../../lib/media'
+import { piatto } from '../../lib/testo'
+import { percorso, traduttore } from '../../lib/lingua'
+import { categorie, conteggi, figlieDi, macro, prodottiDi, urlCategoria } from '../../lib/catalogo'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (x?: string) => percorso(L, x)
+const [pagina, tutte] = await Promise.all([globale('pagina-catalogo', 1, L).catch(() => ({}) as Doc), categorie(L)])
+const n = await conteggi(tutte, L)
+const visibili = macro(tutte).filter((c) => (n.get(c.id) || 0) > 0)
+const riquadri = visibili.filter((c) => c.inEvidenza !== false && c.slug !== 'nuovi-arrivi' && c.slug !== 'selezione')
+const altre = visibili.filter((c) => !riquadri.includes(c))
+
+// Foto del riquadro: quella della categoria, altrimenti la prima scheda con una foto.
+const foto = new Map<number | string, unknown>()
+await Promise.all(
+  riquadri.map(async (c) => {
+    if (isMedia(c.immagine)) return foto.set(c.id, c.immagine)
+    const ids = [c.id, ...figlieDi(c, tutte).map((x) => x.id)].join(',')
+    const [p] = await elenco('prodotti', { 'select[immagine]': 'true', depth: 1, limit: 1, sort: 'nome', 'where[categorie][in]': ids, 'where[immagine][exists]': 'true', 'where[schedaPubblicata][equals]': 'true' }, L).catch(() => [])
+    if (p) foto.set(c.id, p.immagine)
+  }),
+)
+const nuovi = tutte.find((c) => c.slug === 'nuovi-arrivi' && !c.padre)
+const novita = nuovi && (n.get(nuovi.id) || 0) > 0 ? (await prodottiDi(nuovi, tutte, L)).slice(0, 8) : []
+
+const titolo = pagina.titolo || t('Il catalogo\n_Serralunga_')
+const jsonld = [{
+  '@type': 'ItemList',
+  '@id': `${SITO}${u('/catalogo/')}#categorie`,
+  name: piatto(titolo),
+  itemListElement: visibili.map((c, k) => ({ '@type': 'ListItem', position: k + 1, name: c.nome, url: `${SITO}${u(urlCategoria(c, tutte))}` })),
+}]
+---
+<Base
+  titolo={pagina.seo?.titolo || `${t('Catalogo')} | Serralunga`}
+  descrizione={pagina.seo?.descrizione || piatto(pagina.testo)}
+  immagine={pagina.seo?.immagine || foto.get(riquadri[0]?.id)}
+  percorso={[{ nome: t('Catalogo'), url: '/catalogo/' }]}
+  jsonld={jsonld}
+  tipoPagina="CollectionPage"
+  pagina="catalogo"
+  doc="globals/pagina-catalogo"
+  blocchi={pagina.blocchi ?? []}
+>
+  <section class="intro-pagina" id="catalogo-intro">
+    <div class="wrap intro-pagina__griglia">
+      <div>
+        <span class="kicker" data-campo="kicker">{pagina.kicker || t('Catalogo B2B')}</span>
+        <Testo as="h1" class="titolo titolo--display" campo="titolo" t={titolo} />
+      </div>
+      <Testo class="testo" campo="testo" t={pagina.testo} />
+    </div>
+  </section>
+
+  <BarraCatalogo tutte={tutte} conteggi={n} />
+
+  {riquadri.length > 0 ? (
+    <section class="pad sez-int" id="catalogo-categorie" aria-label={t('Categorie del catalogo')}>
+      <ul class="wrap catalogo__riquadri">
+        {riquadri.map((c, k) => (
+          <li>
+            <a href={u(urlCategoria(c, tutte))} class="riquadro-cat">
+              <div class="foto r-45 zoom"><Img media={foto.get(c.id)} alt="" priorita={k < 2} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 33vw" larghezza={1200} /></div>
+              <div class="riquadro-cat__testi">
+                <h2 class="riquadro-cat__nome">{c.nome}</h2>
+                <span class="riquadro-cat__n">{n.get(c.id)} {t(n.get(c.id) === 1 ? 'scheda' : 'schede')}</span>
+              </div>
+              {figlieDi(c, tutte).filter((x) => (n.get(x.id) || 0) > 0).length > 0 && (
+                <span class="riquadro-cat__sotto">{figlieDi(c, tutte).filter((x) => (n.get(x.id) || 0) > 0).map((x) => x.nome).join(' · ')}</span>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+      {altre.length > 0 && (
+        <p class="wrap catalogo__altre">
+          {altre.map((c) => <a href={u(urlCategoria(c, tutte))} class="btn btn--bordo">{c.nome}</a>)}
+        </p>
+      )}
+    </section>
+  ) : (
+    <section class="pad sez-int" id="catalogo-categorie">
+      <p class="wrap testo">{t('Il catalogo è in preparazione: per schede tecniche e listino scriveteci.')}</p>
+    </section>
+  )}
+
+  {novita.length > 0 && nuovi && (
+    <section class="sez-int pad fondo-chiaro" id="catalogo-novita">
+      <div class="wrap">
+        <div class="intesta">
+          <div class="intesta__sx">
+            <span class="kicker">{t('Novità')}</span>
+            <h2 class="titolo titolo--l">{nuovi.nome}</h2>
+          </div>
+          <a href={u(urlCategoria(nuovi, tutte))} class="btn btn--bordo">{t('Tutte le novità')}</a>
+        </div>
+        <div class="griglia-4 catalogo__griglia--4">
+          {novita.slice(0, 4).map((p) => <CardProdotto p={p} tutte={tutte} livello="h3" />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section id="richiesta" class="sez-int pad scuro">
+    <div class="centro centro--s">
+      <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta?.kicker || t('Listino riservato')}</span>
+      <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo || t('Listino B2B\ne condizioni contract')} />
+      <Testo class="testo" campo="cta.testo" t={pagina.cta?.testo} />
+      <a href={u(pagina.cta?.link || '/listino/')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={pagina.cta?.link || ''}>{pagina.cta?.pulsante || t('Richiedi il listino')}</a>
+    </div>
+  </section>
+</Base>

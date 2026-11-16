@@ -1,0 +1,26 @@
+---
+/** Barra delle categorie del Catalogo (Version: 1.00): macrocategorie con il numero di schede. */
+import type { Doc } from '../lib/cms'
+import { percorso, traduttore } from '../lib/lingua'
+import { macro, urlCategoria } from '../lib/catalogo'
+interface Props { tutte: Doc[]; conteggi: Map<number | string, number>; corrente?: number | string | null }
+const { tutte, conteggi, corrente } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (x?: string) => percorso(L, x)
+const voci = macro(tutte).filter((c) => (conteggi.get(c.id) || 0) > 0)
+---
+{voci.length > 0 && (
+  <nav class="barra-catalogo pad" aria-label={t('Categorie del catalogo')}>
+    <ul class="wrap barra-catalogo__elenco">
+      <li><a href={u('/catalogo/')} aria-current={corrente == null ? 'page' : undefined}>{t('Tutto il catalogo')}</a></li>
+      {voci.map((c) => (
+        <li>
+          <a href={u(urlCategoria(c, tutte))} aria-current={corrente === c.id ? 'page' : undefined}>
+            {c.nome} <span class="barra-catalogo__n">{conteggi.get(c.id)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

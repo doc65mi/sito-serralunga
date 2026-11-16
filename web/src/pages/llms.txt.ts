@@ -1,14 +1,16 @@
 import type { APIRoute } from 'astro'
 import { elenco, globale, impostazioni, SITO, type Doc } from '../lib/cms'
 import { piatto } from '../lib/testo'
+import { categorie, urlCategoria, urlProdotto } from '../lib/catalogo'
 
 /**
- * Version: 1.00
+ * Version: 1.01
  * /llms.txt: riassunto del sito per gli assistenti (GEO/AEO). Chi è l'azienda, quali pagine
  * contano e dove trovarle, scritto con i contenuti pubblicati nel CMS: niente di inventato.
  */
 export const GET: APIRoute = async () => {
-  const [imp, home, prodotti, designer, casi, spunti, articoli] = await Promise.all([
+  const cats = await categorie()
+  const [imp, home, prodotti, designer, casi, spunti, articoli, materiali, contract] = await Promise.all([
     impostazioni('it'),
     globale('home', 0, 'it').catch(() => ({}) as Doc),
     elenco('prodotti', { depth: 0, 'where[schedaPubblicata][equals]': 'true' }).catch(() => []),
@@ -16,6 +18,8 @@ export const GET: APIRoute = async () => {
     elenco('case-history', { depth: 0 }).catch(() => []),
     elenco('spunti', { depth: 0 }).catch(() => []),
     elenco('articoli', { depth: 0, sort: '-data', limit: 50 }).catch(() => []),
+    elenco('contract', { depth: 0 }).catch(() => []),
+    elenco('materiali', { depth: 0 }).catch(() => []),
   ])
   const a = imp.azienda || {}
   const riga = (titolo: string, url: string, nota?: string) => `- [${piatto(titolo)}](${SITO}${url})${nota ? `: ${piatto(nota).slice(0, 180)}` : ''}`
@@ -41,8 +45,12 @@ export const GET: APIRoute = async () => {
       riga('Living different', '/heritage/living-different/'),
       riga('Produzione a Biella', '/heritage/produzione/'),
       riga('I colori', '/heritage/i-colori/'),
+      riga('Materiali e colori', '/materiali/'),
     ]),
-    sezione('Prodotti', prodotti.map((p) => riga(p.nome, `/prodotti/${p.slug}/`, p.seo?.descrizione))),
+    sezione('Catalogo', [riga('Catalogo B2B', '/catalogo/'), ...cats.map((c) => riga(c.nome, urlCategoria(c, cats), c.seo?.descrizione))]),
+    sezione('Contract (B2B: hotel, ristoranti, architetti, enti pubblici, rivenditori)', contract.map((c) => riga(c.nome, c.sezione === 'principale' ? '/contract/' : `/contract/${c.sezione}/`, c.seo?.descrizione || c.estratto || c.testo))),
+    sezione('Materiali', materiali.map((m) => riga(m.titolo, `/materiali/${m.slug}/`, m.seo?.descrizione || m.sottotitolo))),
+    sezione('Prodotti', prodotti.map((p) => riga(p.nome, urlProdotto(p, cats), p.seo?.descrizione))),
     sezione('Designer', designer.map((d) => riga(d.nome, `/designer/${d.slug}/`, d.ruolo))),
     sezione('Case history', casi.map((c) => riga(c.nome, `/case-history/${c.slug}/`, c.seo?.descrizione))),
     sezione('Spunti e idee', spunti.map((s) => riga(s.titolo, `/spunti-e-idee/${s.slug}/`, s.estratto))),

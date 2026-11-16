@@ -9,11 +9,15 @@ import { it } from '@payloadcms/translations/languages/it'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { Contract, percorsoContract } from './collections/Contract'
 import { CaseHistory } from './collections/CaseHistory'
 import { Designer } from './collections/Designer'
 import { Media } from './collections/Media'
 import { Prodotti } from './collections/Prodotti'
+import { Categorie } from './collections/Categorie'
 import { Spunti } from './collections/Spunti'
+import { Materiali } from './collections/Materiali'
+import { Colori } from './collections/Colori'
 import { Pagine } from './collections/Pagine'
 import { SpaziFoto } from './collections/SpaziFoto'
 import { Articoli } from './collections/Articoli'
@@ -29,6 +33,8 @@ import { PaginaInstallazioni } from './globals/PaginaInstallazioni'
 import { PaginaSpunti } from './globals/PaginaSpunti'
 import { PaginaHeritage } from './globals/PaginaHeritage'
 import { PagineHeritage } from './collections/PagineHeritage'
+import { PaginaCatalogo } from './globals/PaginaCatalogo'
+import { PaginaMateriali } from './globals/PaginaMateriali'
 import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -79,16 +85,19 @@ export default buildConfig({
         if (globalConfig?.slug === 'pagina-journal') return `${versoSito}/journal/`
         if (globalConfig?.slug === 'pagina-heritage') return `${versoSito}/heritage/`
         if (collectionConfig?.slug === 'pagine-heritage') return `${versoSito}/heritage/${data?.slug}/`
+        if (globalConfig?.slug === 'pagina-materiali') return `${versoSito}/materiali/`
+        if (collectionConfig?.slug === 'materiali') return `${versoSito}/materiali/${data?.slug}/`
         if (collectionConfig?.slug === 'articoli') return `${versoSito}/journal/${data?.slug}/`
         if (collectionConfig?.slug === 'spunti') return `${versoSito}/spunti-e-idee/${data?.slug}/`
         if (collectionConfig?.slug === 'prodotti') return `${versoSito}/prodotti/${data?.slug}/`
         if (collectionConfig?.slug === 'designer') return `${versoSito}/designer/${data?.slug}/`
         if (collectionConfig?.slug === 'pagine') return `${versoSito}/${data?.slug}/`
         if (collectionConfig?.slug === 'case-history') return `${versoSito}/case-history/${data?.slug}/`
+        if (collectionConfig?.slug === 'contract') return `${versoSito}${percorsoContract(data?.sezione)}`
         return `${versoSito}/`
       },
-      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'pagine', 'pagine-heritage'],
-      globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal', 'pagina-heritage'],
+      collections: ['prodotti', 'designer', 'case-history', 'spunti', 'articoli', 'materiali', 'pagine', 'contract', 'pagine-heritage'],
+      globals: ['home', 'pagina-designer', 'pagina-installazioni', 'pagina-spunti', 'pagina-journal', 'pagina-materiali', 'pagina-heritage'],
       breakpoints: [
         { label: 'Telefono', name: 'telefono', width: 390, height: 844 },
         { label: 'Tablet', name: 'tablet', width: 1000, height: 1200 },
@@ -106,8 +115,8 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, CaseHistory, Spunti, Articoli, Pagine, PagineHeritage, Designer, Media, SpaziFoto, Richieste, Users],
-  globals: [Home, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaJournal, PaginaHeritage, Impostazioni, Ai],
+  collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, Users],
+  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Ai],
   endpoints: endpointAi,
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

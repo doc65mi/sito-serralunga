@@ -1,0 +1,94 @@
+---
+/**
+ * Materiali (Version: 1.00): ingresso della sezione. Quattro blocchi grandi (Polietilene,
+ * Moleskin, Corten, Colori) e Sostenibilità a tutta larghezza, come da alberatura.
+ * Contenuti: global "pagina-materiali" e collezione "materiali" (modificabili dalla pagina).
+ */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Testo from '../../components/Testo.astro'
+import { elenco, globale, SITO } from '../../lib/cms'
+import { piatto } from '../../lib/testo'
+import { percorso } from '../../lib/lingua'
+
+const L = Astro.locals.lingua
+const u = (p?: string) => percorso(L, p)
+const tt = (it: string, en: string) => (L === 'en' ? en : it)
+const [pagina, materiali] = await Promise.all([globale('pagina-materiali', 2, L), elenco('materiali', { depth: 1 }, L)])
+const nome = tt('Materiali', 'Materials')
+// I primi quattro sono i blocchi grandi; dal quinto (Sostenibilità) la fascia a tutta larghezza.
+const grandi = materiali.slice(0, 4)
+const fasce = materiali.slice(4)
+const jsonld = materiali.length
+  ? [{
+      '@type': 'ItemList',
+      name: piatto(pagina.titolo) || nome,
+      itemListElement: materiali.map((m, i) => ({ '@type': 'ListItem', position: i + 1, name: piatto(m.titolo), url: `${SITO}${u(`/materiali/${m.slug}/`)}` })),
+    }]
+  : []
+---
+<Base
+  titolo={pagina.seo?.titolo || `${nome} | Serralunga`}
+  descrizione={pagina.seo?.descrizione || pagina.testo}
+  immagine={pagina.seo?.immagine || pagina.immagine}
+  percorso={[{ nome, url: '/materiali/' }]}
+  pagina="materiali"
+  doc="globals/pagina-materiali"
+  blocchi={pagina.blocchi ?? []}
+  tipoPagina="CollectionPage"
+  jsonld={jsonld}
+>
+  <section class="intro-pagina" id="materiali-intro">
+    <div class="wrap intro-pagina__griglia">
+      <div>
+        {pagina.kicker && <span class="kicker" data-campo="kicker">{pagina.kicker}</span>}
+        <Testo as="h1" class="titolo titolo--display" campo="titolo" t={pagina.titolo || nome} />
+      </div>
+      <Testo class="testo" campo="testo" t={pagina.testo} />
+    </div>
+  </section>
+
+  {materiali.length > 0 && (
+    <section class="pad ambiente-sez" id="materiali-elenco" aria-label={tt('I materiali', 'The materials')}>
+      <div class="wrap">
+        <ul class="materiali-griglia">
+          {grandi.map((m) => (
+            <li>
+              <a href={u(`/materiali/${m.slug}/`)} class="materiale-blocco">
+                <div class="foto r-45 zoom"><Img media={m.immagine} sizes="(max-width: 700px) 100vw, 50vw" larghezza={1600} nota={tt('foto da fornire', 'photo to be supplied')} /></div>
+                <div class="materiale-blocco__testi">
+                  {m.kicker && <span class="etichetta">{m.kicker}</span>}
+                  <h2 class="materiale-blocco__titolo">{m.titolo}</h2>
+                  {m.sottotitolo && <p class="testo testo--card">{m.sottotitolo}</p>}
+                  <span class="card__azione card__azione--attiva">{tt('Scopri →', 'Discover →')}</span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+        {fasce.map((m) => (
+          <a href={u(`/materiali/${m.slug}/`)} class="materiale-fascia">
+            <div class="foto r-219 zoom"><Img media={m.immagine} sizes="100vw" larghezza={2400} nota={tt('foto da fornire', 'photo to be supplied')} /></div>
+            <div class="materiale-fascia__testi">
+              {m.kicker && <span class="etichetta">{m.kicker}</span>}
+              <h2 class="materiale-blocco__titolo">{m.titolo}</h2>
+              {m.sottotitolo && <p class="testo testo--card">{m.sottotitolo}</p>}
+              <span class="card__azione card__azione--attiva">{tt('Scopri →', 'Discover →')}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {(pagina.cta?.titolo || pagina.cta?.pulsante) && (
+    <section id="richiesta" class="sez-int pad scuro">
+      <div class="centro centro--s">
+        {pagina.cta?.kicker && <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta.kicker}</span>}
+        <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo} />
+        <Testo class="testo" campo="cta.testo" t={pagina.cta?.testo} />
+        {pagina.cta?.pulsante && <a href={u(pagina.cta.link || '/#listino')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={pagina.cta.link || ''}>{pagina.cta.pulsante}</a>}
+      </div>
+    </section>
+  )}
+</Base>

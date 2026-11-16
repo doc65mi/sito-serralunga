@@ -72,5 +72,3 @@
 .citazione-sola blockquote p { font-family: var(--serif); font-style: italic; font-size: clamp(28px, 3.2vw, 46px); line-height: 1.32; margin: 0; }
 .citazione-sola figcaption { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
 
-/* Spazio per la mappa dei colori */
-.her-colori { padding-top: var(--sec-int); padding-bottom: var(--sec-int); }

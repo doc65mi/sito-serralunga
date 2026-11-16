@@ -1,0 +1,147 @@
+---
+/**
+ * Cartella colori interattiva (Version: 1.00).
+ * Usata da /materiali/colori/ e da Heritage › I colori. Dati: collezione Payload "colori"
+ * (codice, nome, descrizione, famiglia standard|laccato, finitura lucido|opaco, metallizzato, campione).
+ * Filtri per famiglia e scheda del colore scelto; senza JavaScript resta l'elenco completo.
+ *
+ * Props: colori (documenti della collezione, depth 1), titolo, nota, campoTitolo / campoNota
+ * (percorsi dei campi per la modifica dalla pagina), id della sezione, livello del titolo (h2 di norma).
+ */
+import Img from './Img.astro'
+import Testo from './Testo.astro'
+import type { Doc } from '../lib/cms'
+import { isMedia } from '../lib/media'
+
+interface Props {
+  colori: Doc[]
+  titolo?: string | null
+  nota?: string | null
+  campoTitolo?: string
+  campoNota?: string
+  id?: string
+  livello?: 'h2' | 'h3'
+}
+const { colori = [], titolo, nota, campoTitolo, campoNota, id = 'cartella-colori', livello = 'h2' } = Astro.props
+const L = Astro.locals.lingua
+const tt = (it: string, en: string) => (L === 'en' ? en : it)
+
+const gruppo = (c: Doc) =>
+  c.famiglia !== 'laccato' ? 'standard' : c.metallizzato ? 'metallizzato' : c.finitura === 'opaco' ? 'opaco' : 'lucido'
+const GRUPPI = [
+  { k: 'standard', nome: tt('Colori standard', 'Standard colours') },
+  { k: 'lucido', nome: tt('Laccati lucidi', 'Glossy lacquers') },
+  { k: 'opaco', nome: tt('Laccati opachi', 'Matt lacquers') },
+  { k: 'metallizzato', nome: tt('Laccati metallizzati', 'Metallic lacquers') },
+]
+const finitura = (c: Doc) =>
+  c.famiglia !== 'laccato'
+    ? tt('Polietilene, colore standard', 'Polyethylene, standard colour')
+    : [tt('Laccato', 'Lacquered'), c.metallizzato ? tt('metallizzato', 'metallic') : '', c.finitura === 'opaco' ? tt('opaco', 'matt') : tt('lucido', 'glossy')].filter(Boolean).join(' ')
+const presenti = GRUPPI.filter((g) => colori.some((c) => gruppo(c) === g.k))
+const Titolo = livello
+---
+{colori.length > 0 && (
+  <section class="mappa-colori pad" id={id} aria-labelledby={`${id}-titolo`} data-mappa-colori>
+    <div class="wrap">
+      <div class="mappa-colori__testa">
+        <Titolo class="titolo titolo--l" id={`${id}-titolo`} data-campo={campoTitolo}>{titolo || tt('Cartella colori', 'Colour chart')}</Titolo>
+        <p class="etichetta">{colori.length} {tt('colori', 'colours')}</p>
+      </div>
+      <div class="mappa-colori__filtri" role="group" aria-label={tt('Filtra per famiglia', 'Filter by family')} hidden data-filtri>
+        <button type="button" class="filtro" aria-pressed="true" data-filtro="tutti">{tt('Tutti', 'All')}</button>
+        {presenti.map((g) => <button type="button" class="filtro" aria-pressed="false" data-filtro={g.k}>{g.nome}</button>)}
+      </div>
+
+      <div class="mappa-colori__corpo">
+        <div class="mappa-colori__scheda" aria-live="polite" hidden data-scheda>
+          <div class="mappa-colori__campione" data-scheda-campione></div>
+          <p class="etichetta" data-scheda-codice></p>
+          <p class="mappa-colori__nome" data-scheda-nome></p>
+          <p class="testo testo--s" data-scheda-tono></p>
+          <p class="testo testo--s mappa-colori__finitura" data-scheda-finitura></p>
+        </div>
+
+        <div class="mappa-colori__gruppi">
+          {presenti.map((g) => (
+            <div class="mappa-colori__gruppo" data-gruppo={g.k}>
+              <h3 class="etichetta-gruppo">{g.nome}</h3>
+              <ul class="mappa-colori__elenco">
+                {colori.filter((c) => gruppo(c) === g.k).map((c) => (
+                  <li>
+                    <button
+                      type="button"
+                      class="colore"
+                      data-codice={c.codice}
+                      data-nome={c.nome}
+                      data-tono={c.descrizione || ''}
+                      data-finitura={finitura(c)}
+                      aria-label={`${c.nome}, ${c.codice}${c.descrizione ? `, ${c.descrizione}` : ''}`}
+                    >
+                      <span class:list={['colore__campione', !isMedia(c.campione) && 'colore__campione--vuoto']}>
+                        {isMedia(c.campione)
+                          ? <Img media={c.campione} alt="" sizes="160px" larghezza={400} />
+                          : <span aria-hidden="true">{c.codice}</span>}
+                      </span>
+                      <span class="colore__codice">{c.codice}</span>
+                      <span class="colore__nome">{c.nome}</span>
+                      {c.descrizione && <span class="colore__tono">{c.descrizione}</span>}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+      <Testo class="colori__nota mappa-colori__nota" campo={campoNota} t={nota} />
+    </div>
+  </section>
+)}
+
+<script>
+  // Filtri per famiglia e scheda del colore scelto. Senza script si vede l'elenco completo.
+  document.querySelectorAll<HTMLElement>('[data-mappa-colori]').forEach((mappa) => {
+    const filtri = mappa.querySelector<HTMLElement>('[data-filtri]')
+    const scheda = mappa.querySelector<HTMLElement>('[data-scheda]')
+    if (filtri) filtri.hidden = false
+    filtri?.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-filtro]')
+      if (!b) return
+      const f = b.dataset.filtro
+      filtri.querySelectorAll('[data-filtro]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
+      mappa.querySelectorAll<HTMLElement>('[data-gruppo]').forEach((g) => {
+        g.hidden = f !== 'tutti' && g.dataset.gruppo !== f
+      })
+      // La scheda mostra il primo colore visibile del filtro scelto.
+      const visibile = mappa.querySelector<HTMLButtonElement>('[data-gruppo]:not([hidden]) .colore')
+      if (visibile) mostra(visibile)
+    })
+    const mostra = (c: HTMLButtonElement) => {
+      if (!scheda) return
+      mappa.querySelectorAll('.colore[aria-current]').forEach((x) => x.removeAttribute('aria-current'))
+      c.setAttribute('aria-current', 'true')
+      const campione = scheda.querySelector<HTMLElement>('[data-scheda-campione]')
+      const origine = c.querySelector('.colore__campione')
+      if (campione && origine) campione.replaceChildren(origine.cloneNode(true))
+      const testo = (sel: string, v?: string) => {
+        const el = scheda.querySelector<HTMLElement>(sel)
+        if (el) {
+          el.textContent = v || ''
+          el.hidden = !v
+        }
+      }
+      testo('[data-scheda-codice]', c.dataset.codice)
+      testo('[data-scheda-nome]', c.dataset.nome)
+      testo('[data-scheda-tono]', c.dataset.tono)
+      testo('[data-scheda-finitura]', c.dataset.finitura)
+      scheda.hidden = false
+    }
+    mappa.addEventListener('click', (e) => {
+      const c = (e.target as HTMLElement).closest<HTMLButtonElement>('.colore')
+      if (c) mostra(c)
+    })
+    const primo = mappa.querySelector<HTMLButtonElement>('.colore')
+    if (primo) mostra(primo)
+  })
+</script>

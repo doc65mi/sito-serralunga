@@ -28,11 +28,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const vuole = (request.headers.get('accept') || '').includes('application/json')
   let t = traduttore('it')
   let home = '/'
+  let ritorno = ''
   const risposta = (stato: number, corpo: Record<string, unknown>) => {
     if (typeof corpo.errore === 'string') corpo.errore = t(corpo.errore)
     return vuole
       ? new Response(JSON.stringify(corpo), { status: stato, headers: { 'Content-Type': 'application/json' } })
-      : redirect(`${home}?richiesta=${stato < 300 ? 'ok' : 'errore'}#listino`, 303)
+      : redirect(`${ritorno || home}?richiesta=${stato < 300 ? 'ok' : 'errore'}${ritorno && ritorno !== home ? '' : '#listino'}`, 303)
   }
 
   if (!stessoSito(request)) return risposta(403, { errore: 'Invio non consentito' })
@@ -45,6 +46,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const L = lingua(dati.get('lingua'))
   t = traduttore(L)
   home = L === 'en' ? '/en/' : '/'
+  // Senza JavaScript si torna alla pagina del modulo (solo percorsi interni).
+  const r = String(dati.get('ritorno') || '')
+  if (/^\/[a-z0-9/_-]*$/i.test(r) && !r.startsWith('//')) ritorno = r
 
   // Campo trappola per i bot: se è compilato fingiamo che sia andata bene.
   if (String(dati.get('sito_web') || '')) return risposta(200, { ok: true })
@@ -62,7 +66,11 @@ export const POST: APIRoute = async ({ request, redirect }) => {
         referente: campo('referente'),
         email,
         citta: campo('citta'),
-        messaggio: [campo('tipologia') && `Tipologia di struttura: ${campo('tipologia')}`, campo('messaggio')].filter(Boolean).join('\n'),
+        messaggio: [
+          campo('tipologia') && `Tipologia di struttura: ${campo('tipologia')}`,
+          dati.getAll('catalogo').length > 0 && `Cataloghi richiesti: ${dati.getAll('catalogo').map((c) => String(c).trim().slice(0, 120)).slice(0, 12).join(', ')}`,
+          campo('messaggio'),
+        ].filter(Boolean).join('\n'),
         pagina: campo('pagina'),
       }),
     })

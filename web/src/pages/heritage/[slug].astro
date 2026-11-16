@@ -8,6 +8,7 @@ import '../../styles/heritage.css'
 import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
 import Testo from '../../components/Testo.astro'
+import MappaColori from '../../components/MappaColori.astro'
 import { elenco, perSlug, type Doc } from '../../lib/cms'
 import { piatto } from '../../lib/testo'
 import { percorso } from '../../lib/lingua'
@@ -22,6 +23,8 @@ const numeri: Doc[] = s.numeri || []
 const capitoli: Doc[] = s.capitoli || []
 const punti: Doc[] = s.punti?.voci || []
 const nome = piatto(s.nomeMenu || s.titolo)
+// Sulla pagina I colori la cartella colori arriva dalla collezione condivisa con Materiali.
+const colori: Doc[] = s.slug === 'i-colori' ? await elenco('colori', { depth: 1, limit: 200 }, L).catch(() => [] as Doc[]) : []
 ---
 <Base
   titolo={s.seo?.titolo || `${nome} | Serralunga`}
@@ -78,11 +81,7 @@ const nome = piatto(s.nomeMenu || s.titolo)
     </div>
   )}
 
-  {s.slug === 'i-colori' && (
-    <section class="her-colori pad fondo-paper" id="mappa-colori" aria-label={en ? 'Colour chart' : 'Cartella colori'}>
-      <div class="wrap" data-mappa-colori></div>
-    </section>
-  )}
+  {colori.length > 0 && <MappaColori colori={colori} id="mappa-colori" titolo={en ? 'The colour chart' : 'La cartella colori'} />}
 
   {punti.length > 0 && (
     <section class="sez-int pad fondo-chiaro" id="punti" aria-labelledby="punti-titolo">

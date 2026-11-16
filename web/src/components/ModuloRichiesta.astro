@@ -1,15 +1,39 @@
 ---
-/** Modulo "Richiedi il volume" (template: Home v2 #listino). Invia a /api/richiesta, che salva in Payload. */
-import { impostazioni } from '../lib/cms'
-import { traduttore } from '../lib/lingua'
-interface Props { pulsante?: string; grazie?: string; pagina?: string }
+/**
+ * Version: 1.01
+ * Modulo "Richiedi il volume" (template: Home v2 #listino). Invia a /api/richiesta, che salva in Payload.
+ * Con `cataloghi` (pagina Contract > Cataloghi) chi compila sceglie i PDF: la richiesta li registra
+ * e, dopo l'invio, la pagina mostra i link per scaricarli (raccolta contatti, alberatura B2C).
+ */
+import Img from './Img.astro'
+import { impostazioni, type Doc } from '../lib/cms'
+import { percorso, traduttore } from '../lib/lingua'
+import { fmt } from '../lib/testo'
+interface Props { pulsante?: string; grazie?: string; pagina?: string; cataloghi?: Doc[]; dopoInvio?: string; campoDopoInvio?: string }
 const L = Astro.locals.lingua
 const t = traduttore(L)
-const { pulsante = t('Richiedi il volume'), grazie, pagina = '' } = Astro.props
+const { pulsante = t('Richiedi il volume'), grazie, pagina = '', cataloghi = [], dopoInvio, campoDopoInvio } = Astro.props
 const imp = await impostazioni(L)
 const email = imp.azienda?.email || 'info@serralunga.com'
 ---
 <form class="modulo" method="post" action="/api/richiesta" data-richiesta data-grazie={grazie || t('Grazie, vi ricontatteremo a breve.')} data-email={email} data-invio={t('Invio in corso…')} data-errore={t('Invio non riuscito')} data-anche={t('Potete scriverci anche a')}>
+  {cataloghi.length > 0 && (
+    <fieldset class="modulo__cataloghi">
+      <legend>{t('Scegliete i cataloghi')}</legend>
+      <ul>
+        {cataloghi.map((c, k) => (
+          <li>
+            <label class="scelta-catalogo">
+              <input type="checkbox" name="catalogo" value={c.titolo} data-catalogo={k} checked />
+              <span class="foto r-34 scelta-catalogo__foto"><Img media={c.immagine} alt="" sizes="(max-width: 560px) 50vw, 22vw" larghezza={700} /></span>
+              <span class="scelta-catalogo__nome">{c.titolo}</span>
+              <span class="scelta-catalogo__tipo">PDF</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </fieldset>
+  )}
   <div class="modulo__campi">
     <label><span class="sr-only">{t('Struttura o studio')}</span><input type="text" name="struttura" placeholder={t('Struttura o studio')} autocomplete="organization" maxlength="200" /></label>
     <label><span class="sr-only">{t('Referente')}</span><input type="text" name="referente" placeholder={t('Referente')} autocomplete="name" maxlength="200" /></label>
@@ -19,7 +43,18 @@ const email = imp.azienda?.email || 'info@serralunga.com'
   <label class="modulo__trappola" aria-hidden="true">{t('Non compilare')}<input type="text" name="sito_web" tabindex="-1" autocomplete="off" /></label>
   <input type="hidden" name="pagina" value={L === 'it' ? pagina : `${pagina} (${L.toUpperCase()})`} />
   <input type="hidden" name="lingua" value={L} />
+  <input type="hidden" name="ritorno" value={percorso(L, Astro.url.pathname)} />
   <button type="submit" class="btn btn--chiaro">{pulsante}</button>
   <p class="modulo__esito" data-esito role="status" aria-live="polite"></p>
+  {cataloghi.length > 0 && (
+    <div class="modulo__scaricamenti" data-scaricamenti hidden>
+      {dopoInvio ? <p class="testo" data-campo={campoDopoInvio} set:html={fmt(dopoInvio)} /> : <p class="testo">{t('Ecco i cataloghi scelti:')}</p>}
+      <ul>
+        {cataloghi.map((c, k) => (
+          <li data-scarica={k}><a href={c.file} target="_blank" rel="noopener" download>{c.titolo} <span>PDF ↓</span></a></li>
+        ))}
+      </ul>
+    </div>
+  )}
   <p class="modulo__privacy">{t('Usiamo questi dati solo per rispondere alla richiesta. Scrivici a')} <a href={`mailto:${email}`}>{email}</a> {t('per cancellarli.')}</p>
 </form>

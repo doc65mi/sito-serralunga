@@ -1,6 +1,6 @@
 # Sito Serralunga
 
-Version: 1.05
+Version: 1.06
 
 Sito istituzionale Serralunga (1825 S.R.L.) costruito dai template in `template/`.
 
@@ -48,6 +48,16 @@ Ogni foto caricata (dal pannello, dalla pagina o dall'importazione) viene servit
 - `/installazioni/`: macro sezioni per ambito (hotel, ristorazione, spa e piscine, residenze, spazi urbani) con le case history della stessa categoria. Testi in Pagine > Installazioni; la categoria si sceglie in ogni case history.
 - `/spunti-e-idee/`: elenco e scheda degli spunti (collezione Spunti e idee), con galleria e prodotti collegati.
 - Scheda designer: sezione "Le creazioni per Serralunga" con foto di prodotto e ambientate dal catalogo Serralunga.
+
+## Sezione Contract
+
+`/contract/` (IT) e `/en/contract/` (EN), con le sottopagine dell'alberatura: `hospitality`, `residenziale`, `urbano`, `cataloghi`, `area-riservata`. Nel pannello: Pagine > Contract, una scheda per pagina; l'indirizzo si sceglie nella barra laterale.
+
+- Sub-brand: sotto l'header comune c'è la fascia scura «Serralunga Contract» con le sottosezioni (ordine e nomi dal pannello).
+- Ogni scheda ha apertura, punti di forza numerati, galleria (lightbox), case history collegate per categoria, prodotti, cataloghi, accesso all'area riservata, invito finale con modulo, blocchi aggiuntivi e SEO. Una parte compare solo se compilata.
+- Cataloghi: chi compila sceglie i PDF, la richiesta finisce in Richieste con l'elenco dei cataloghi e i link compaiono dopo l'invio. Senza cataloghi propri la pagina usa i quattro box della home.
+- Area riservata: il pulsante porta all'accesso di reservedarea.serralunga.com; sotto, il modulo per chiedere le credenziali.
+- Testi e foto di partenza da serralunga.com/pages/contract e dalla collezione Arredo urbano (`cms/src/seed/contract.ts`): `npm run seed:aggiorna` crea solo le pagine che mancano.
 
 ## Modifica dalla pagina, versione 3
 

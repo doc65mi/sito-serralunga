@@ -1,0 +1,220 @@
+---
+/**
+ * Catalogo: categorie, sottocategorie e schede prodotto — Version: 1.00.
+ *   /catalogo/vasi/                 macrocategoria (collection page con filtri)
+ *   /catalogo/vasi/classici/        sottocategoria
+ *   /catalogo/vasi/{slug}/          scheda prodotto (indirizzo canonico)
+ * Una scheda raggiunta da un'altra categoria va con un 301 al suo indirizzo canonico.
+ */
+import Base from '../../layouts/Base.astro'
+import Testo from '../../components/Testo.astro'
+import CardProdotto from '../../components/CardProdotto.astro'
+import BarraCatalogo from '../../components/BarraCatalogo.astro'
+import SchedaProdotto from '../../components/SchedaProdotto.astro'
+import { perSlug, SITO, type Doc } from '../../lib/cms'
+import { isMedia } from '../../lib/media'
+import { piatto } from '../../lib/testo'
+import { percorso, traduttore } from '../../lib/lingua'
+import { categorie, conteggi, figlieDi, macro, padreDi, prodottiDi, urlCategoria, urlProdotto } from '../../lib/catalogo'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (x?: string) => percorso(L, x)
+const parti = (Astro.params.percorso || '').split('/').filter(Boolean)
+if (!parti.length || parti.length > 2) return Astro.rewrite('/404')
+
+const tutte = await categorie(L)
+const radice = macro(tutte).find((c) => c.slug === parti[0])
+if (!radice) return Astro.rewrite('/404')
+
+let cat: Doc | null = parti.length === 1 ? radice : figlieDi(radice, tutte).find((c) => c.slug === parti[1]) || null
+let prodotto: Doc | null = null
+if (!cat) {
+  prodotto = await perSlug('prodotti', parti[1], 3, L)
+  if (!prodotto || !prodotto.schedaPubblicata) return Astro.rewrite('/404')
+  const canonico = urlProdotto(prodotto, tutte)
+  if (canonico !== `/catalogo/${radice.slug}/${prodotto.slug}/`) return Astro.redirect(u(canonico), 301)
+}
+
+const briciole = [{ nome: t('Catalogo'), url: '/catalogo/' }, { nome: radice.nome, url: urlCategoria(radice, tutte) }]
+
+// ——— Scheda prodotto ———
+let stessaCategoria: Doc[] = []
+if (prodotto) {
+  stessaCategoria = (await prodottiDi(radice, tutte, L)).filter((x) => x.id !== prodotto!.id).slice(0, 4)
+}
+
+// ——— Pagina di categoria ———
+const n = cat ? await conteggi(tutte, L) : new Map()
+const lista: Doc[] = cat ? await prodottiDi(cat, tutte, L) : []
+const padre = cat ? padreDi(cat, tutte) : null
+const sorelle = cat ? figlieDi(padre || cat, tutte).filter((x) => (n.get(x.id) || 0) > 0) : []
+if (cat && padre) briciole.push({ nome: cat.nome, url: urlCategoria(cat, tutte) })
+
+// Valori dei filtri: solo quelli presenti tra le schede della pagina.
+const MATERIALI: Record<string, string> = { polietilene: t('Polietilene'), moleskin: 'Moleskin', corten: 'Corten', laccato: t('Laccato'), vellutato: t('Vellutato'), decorato: t('Decorato') }
+const filtri: string[] = cat?.filtri?.length ? cat.filtri : ['tipologia', 'designer', 'materiale']
+const valori = (f: (p: Doc) => string[]) => [...new Set(lista.flatMap(f).filter(Boolean))].sort((a, b) => a.localeCompare(b, L))
+const opzioni = {
+  tipologia: valori((p) => [p.tipologia]),
+  designer: valori((p) => [p.designer && typeof p.designer === 'object' ? p.designer.nome : '']),
+  materiale: valori((p) => p.materiali || []),
+  luce: lista.some((p) => p.luce) && lista.some((p) => !p.luce) ? ['1', '0'] : [],
+}
+const mostra = (f: keyof typeof opzioni) => filtri.includes(f) && opzioni[f].length > 1
+
+const titoloCat = cat ? cat.seo?.titolo || `${cat.nome} | ${t('Catalogo')} Serralunga` : ''
+const descrCat = cat ? cat.seo?.descrizione || piatto(cat.intro) || undefined : undefined
+const jsonld = cat
+  ? [{
+      '@type': 'ItemList',
+      '@id': `${SITO}${u(urlCategoria(cat, tutte))}#prodotti`,
+      name: cat.nome,
+      numberOfItems: lista.length,
+      itemListElement: lista.slice(0, 100).map((p, k) => ({ '@type': 'ListItem', position: k + 1, name: p.nome, url: `${SITO}${u(urlProdotto(p, tutte))}` })),
+    }]
+  : []
+---
+{prodotto ? (
+  <SchedaProdotto p={prodotto} briciole={briciole} stessaCategoria={stessaCategoria} tutte={tutte} />
+) : cat && (
+  <Base
+    titolo={titoloCat}
+    descrizione={descrCat}
+    immagine={cat.seo?.immagine || (isMedia(cat.immagine) ? cat.immagine : lista[0]?.immagine)}
+    percorso={briciole}
+    jsonld={jsonld}
+    tipoPagina="CollectionPage"
+    pagina={`catalogo-${cat.slug}`}
+    doc={`collections/categorie/${cat.id}`}
+    blocchi={cat.blocchi ?? []}
+    noindex={lista.length === 0}
+  >
+    <section class="intro-pagina intro-pagina--catalogo" id="categoria-intro">
+      <div class="wrap intro-pagina__griglia">
+        <div>
+          <span class="kicker" data-campo="kicker">{cat.kicker || (padre ? `${t('Catalogo')} · ${padre.nome}` : t('Catalogo'))}</span>
+          <h1 class="titolo titolo--display" data-campo="nome">{cat.nome}</h1>
+        </div>
+        <Testo class="testo" campo="intro" t={cat.intro} />
+      </div>
+    </section>
+
+    <BarraCatalogo tutte={tutte} conteggi={n} corrente={(padre || cat).id} />
+
+    {sorelle.length > 0 && (
+      <nav class="pad sottocategorie" aria-label={t('Sottocategorie')}>
+        <ul class="wrap sottocategorie__elenco">
+          <li><a href={u(urlCategoria(padre || cat, tutte))} aria-current={!padre ? 'page' : undefined}>{t('Tutti')}</a></li>
+          {sorelle.map((s) => <li><a href={u(urlCategoria(s, tutte))} aria-current={s.id === cat!.id ? 'page' : undefined}>{s.nome}</a></li>)}
+        </ul>
+      </nav>
+    )}
+
+    <section class="pad catalogo" id="categoria-prodotti" aria-label={t('Prodotti')}>
+      <div class="wrap">
+        {lista.length > 1 && (
+          <form class="filtri" data-filtri role="search" aria-label={t('Filtra i prodotti')}>
+            <label class="filtri__campo filtri__campo--cerca">
+              <span class="etichetta">{t('Cerca')}</span>
+              <input type="search" name="q" placeholder={t('Nome del prodotto')} autocomplete="off" />
+            </label>
+            {mostra('tipologia') && (
+              <label class="filtri__campo"><span class="etichetta">{t('Tipologia')}</span>
+                <select name="tipologia"><option value="">{t('Tutte')}</option>{opzioni.tipologia.map((v) => <option value={v}>{v}</option>)}</select>
+              </label>
+            )}
+            {mostra('designer') && (
+              <label class="filtri__campo"><span class="etichetta">{t('Designer')}</span>
+                <select name="designer"><option value="">{t('Tutti')}</option>{opzioni.designer.map((v) => <option value={v}>{v}</option>)}</select>
+              </label>
+            )}
+            {mostra('materiale') && (
+              <label class="filtri__campo"><span class="etichetta">{t('Materiale e finitura')}</span>
+                <select name="materiale"><option value="">{t('Tutti')}</option>{opzioni.materiale.map((v) => <option value={v}>{MATERIALI[v] || v}</option>)}</select>
+              </label>
+            )}
+            {mostra('luce') && (
+              <label class="filtri__campo"><span class="etichetta">{t('Luce')}</span>
+                <select name="luce"><option value="">{t('Con e senza luce')}</option><option value="1">{t('Con luce')}</option><option value="0">{t('Senza luce')}</option></select>
+              </label>
+            )}
+            <label class="filtri__campo"><span class="etichetta">{t('Ordina')}</span>
+              <select name="ordine">
+                <option value="">{t(cat.slug === 'nuovi-arrivi' ? 'Più recenti' : 'Nome A–Z')}</option>
+                <option value={cat.slug === 'nuovi-arrivi' ? 'nome' : 'recenti'}>{t(cat.slug === 'nuovi-arrivi' ? 'Nome A–Z' : 'Più recenti')}</option>
+              </select>
+            </label>
+            <p class="filtri__esito" aria-live="polite"><span data-conta>{lista.length}</span> {t('schede')}</p>
+          </form>
+        )}
+
+        {lista.length > 0 ? (
+          <ul class="griglia-3 catalogo__griglia" data-griglia>
+            {lista.map((p) => <li><CardProdotto p={p} tutte={tutte} filtrabile livello="h2" /></li>)}
+          </ul>
+        ) : (
+          <p class="testo catalogo__vuoto">{t('Le schede di questa categoria sono in preparazione: per disponibilità e listino scriveteci.')}</p>
+        )}
+        <p class="testo catalogo__vuoto" data-nessuno hidden>{t('Nessuna scheda con questi filtri.')} <button type="button" class="link-azzera" data-azzera>{t('Azzera i filtri')}</button></p>
+      </div>
+    </section>
+
+    <section id="richiesta" class="sez-int pad scuro">
+      <div class="centro centro--s">
+        <span class="kicker kicker--largo">{t('Listino riservato')}</span>
+        <Testo as="h2" class="titolo titolo--cta" t={t('Listino B2B\ne condizioni contract')} />
+        <p class="testo">{t('Raccontateci il progetto o la vostra attività: vi inviamo listino riservato, schede tecniche e disponibilità.')}</p>
+        <a href={u('/listino/')} class="btn btn--chiaro">{t('Richiedi il listino')}</a>
+      </div>
+    </section>
+  </Base>
+)}
+
+<script>
+  // Filtri del catalogo: tutto resta visibile senza JavaScript; i filtri si leggono e si scrivono nell'indirizzo.
+  const form = document.querySelector<HTMLFormElement>('[data-filtri]')
+  const griglia = document.querySelector<HTMLElement>('[data-griglia]')
+  if (form && griglia) {
+    const voci = [...griglia.querySelectorAll<HTMLElement>(':scope > li')]
+    const conta = form.querySelector('[data-conta]')
+    const nessuno = document.querySelector<HTMLElement>('[data-nessuno]')
+    const ordineIniziale = voci.slice()
+    const qs = new URLSearchParams(location.search)
+    for (const el of [...form.elements] as HTMLInputElement[]) if (el.name && qs.has(el.name)) el.value = qs.get(el.name) || ''
+    const applica = (scrivi = true) => {
+      const v = Object.fromEntries(new FormData(form)) as Record<string, string>
+      const q = (v.q || '').trim().toLowerCase()
+      let visibili = 0
+      for (const li of voci) {
+        const c = li.querySelector<HTMLElement>('[data-prodotto]')!
+        const ok =
+          (!q || (c.dataset.nome || '').includes(q)) &&
+          (!v.tipologia || c.dataset.tipologia === v.tipologia) &&
+          (!v.designer || c.dataset.designer === v.designer) &&
+          (!v.materiale || (c.dataset.materiale || '').split(' ').includes(v.materiale)) &&
+          (!v.luce || c.dataset.luce === v.luce)
+        li.hidden = !ok
+        if (ok) visibili++
+      }
+      const ordinati = !v.ordine
+        ? ordineIniziale
+        : voci.slice().sort((a, b) => {
+            const x = a.querySelector<HTMLElement>('[data-prodotto]')!.dataset
+            const y = b.querySelector<HTMLElement>('[data-prodotto]')!.dataset
+            return v.ordine === 'recenti' ? (y.data || '').localeCompare(x.data || '') : (x.nome || '').localeCompare(y.nome || '')
+          })
+      griglia.append(...ordinati)
+      if (conta) conta.textContent = String(visibili)
+      if (nessuno) nessuno.hidden = visibili > 0
+      if (scrivi) {
+        const s = new URLSearchParams(Object.entries(v).filter(([, x]) => x))
+        history.replaceState(null, '', `${location.pathname}${s.toString() ? `?${s}` : ''}`)
+      }
+    }
+    form.addEventListener('input', () => applica())
+    form.addEventListener('submit', (e) => { e.preventDefault(); applica() })
+    document.querySelector('[data-azzera]')?.addEventListener('click', () => { form.reset(); applica() })
+    if ([...qs.keys()].length) applica(false)
+  }
+</script>

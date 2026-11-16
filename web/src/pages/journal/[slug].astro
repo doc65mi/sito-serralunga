@@ -13,10 +13,12 @@ import { corpoArticolo, parole } from '../../lib/articolo'
 import { isMedia, originale } from '../../lib/media'
 import { piatto } from '../../lib/testo'
 import { INFO, percorso, traduttore } from '../../lib/lingua'
+import { categorie, urlProdotto } from '../../lib/catalogo'
 
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => percorso(L, p)
+const tutteCat = await categorie(L)
 const a = await perSlug('articoli', Astro.params.slug || '', 2, L)
 if (!a) return Astro.rewrite('/404')
 const html = corpoArticolo(a.corpo)
@@ -40,7 +42,7 @@ const jsonld: Doc[] = [{
   articleSection: CATEGORIE[a.categoria],
   wordCount: parole(html) || undefined,
   about: designer.map((d) => ({ '@type': 'Person', name: d.nome, url: d.schedaPubblicata ? `${SITO}${u(`/designer/${d.slug}/`)}` : undefined })),
-  mentions: prodotti.map((p) => ({ '@type': 'Product', name: p.nome, url: p.schedaPubblicata ? `${SITO}${u(`/prodotti/${p.slug}/`)}` : undefined })),
+  mentions: prodotti.map((p) => ({ '@type': 'Product', name: p.nome, url: p.schedaPubblicata ? `${SITO}${u(urlProdotto(p, tutteCat))}` : undefined })),
 }]
 if (domande.length) jsonld.push({
   '@type': 'FAQPage',
