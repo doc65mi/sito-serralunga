@@ -28,9 +28,17 @@ import { completaHeritage } from './heritage'
 import { applicaInglese } from './inglese'
 import { completaMateriali } from './materiali'
 import { nomeFile } from '../collections/Media'
+import { proteggi } from './prudenza'
 
 const payload = await getPayload({ config })
 const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
+
+// seed:aggiorna e seed:catalogo non modificano mai contenuti già presenti (le modifiche fatte
+// dal pannello o dalla pagina non sono in GitHub): propongono le modifiche, che si applicano
+// a mano dal pannello (Strumenti) con una copia di sicurezza. Vedi prudenza.ts.
+if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer' || process.env.SEED_SOLO === 'catalogo') {
+  proteggi(payload, process.env.SEED_SOLO === 'catalogo' ? 'catalogo' : 'aggiorna', log)
+}
 
 // Primo avvio automatico (npm run seed:primo, lanciato da avvio.sh su Coolify):
 // se esiste già un utente il sito è stato avviato e non si tocca nulla.

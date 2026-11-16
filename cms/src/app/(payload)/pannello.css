@@ -120,3 +120,29 @@ input:focus-visible, textarea:focus-visible, .rs__control--is-focused { outline:
 .sl-modello__voce--scelta { box-shadow: inset 3px 0 0 var(--sl-oro); background: var(--theme-elevation-50); }
 .sl-modello__id { font-family: var(--font-mono); font-size: 13px; }
 .sl-modello__nota { font-size: 12px; color: var(--theme-elevation-500); }
+
+/* Strumenti (Version: 1.00): aggiornamento contenuti e import catalogo dal pannello */
+.sl-strumenti { margin: -16px 0 48px; }
+.sl-strumenti__titolo { margin: 0 0 6px; font-size: 24px; }
+.sl-strumenti__nota { margin: 0 0 18px; font-size: 13px; color: var(--theme-elevation-600); }
+.sl-strumenti__errore { margin: 0 0 14px; color: var(--theme-error-500); font-size: 13px; }
+.sl-strumenti__griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.sl-strumento { display: flex; flex-direction: column; gap: 10px; padding: 20px 22px; border: 1px solid var(--theme-elevation-150); background: var(--theme-elevation-0); }
+.sl-strumento__titolo { font-family: var(--font-serif); font-size: 21px; line-height: 1.2; }
+.sl-strumento__testo { font-size: 13px; line-height: 1.5; color: var(--theme-elevation-600); }
+.sl-strumento__stato { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.04em; }
+.sl-strumento--ok .sl-strumento__stato { color: var(--theme-success-600, #2e7d32); }
+.sl-strumento--errore .sl-strumento__stato { color: var(--theme-error-500); }
+.sl-strumento__spia { width: 8px; height: 8px; border-radius: 50%; background: var(--sl-oro); animation: sl-pulsa 1.2s ease-in-out infinite; }
+@keyframes sl-pulsa { 50% { opacity: 0.25; } }
+.sl-strumento__azioni { display: flex; gap: 10px; flex-wrap: wrap; }
+.sl-strumento__pulsante { padding: 9px 20px; border: 0; background: var(--sl-inchiostro); color: #f2efe8; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+.sl-strumento__pulsante:disabled { opacity: 0.5; cursor: default; }
+.sl-strumento__registro-pulsante { padding: 9px 14px; border: 1px solid var(--theme-elevation-250); background: transparent; color: inherit; font-size: 12px; cursor: pointer; }
+.sl-strumento__registro { max-height: 280px; overflow: auto; margin: 0; padding: 12px; background: var(--theme-elevation-50); font-size: 11px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+
+.sl-strumento__proposte { margin-top: 6px; padding: 14px 16px; border-left: 3px solid var(--sl-oro); background: var(--theme-elevation-50); display: flex; flex-direction: column; gap: 8px; }
+.sl-strumento__proposte-titolo { margin: 0; font-weight: 600; font-size: 14px; }
+.sl-strumento__elenco { margin: 0; padding-left: 18px; max-height: 220px; overflow: auto; font-size: 12px; line-height: 1.6; }
+.sl-strumento__elenco span { color: var(--theme-elevation-600); }
+.sl-strumento__pulsante--rischio { background: var(--theme-error-500); }

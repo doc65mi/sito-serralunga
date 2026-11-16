@@ -105,7 +105,7 @@ In **Environment Variables** → **Developer view** incollare il contenuto di `c
 3. Con `SEED_AUTOMATICO=1` e il database vuoto partono da soli i contenuti di partenza: utente del pannello, testi in italiano e inglese, foto scaricate da serralunga.com e convertite in AVIF. Servono 10–20 minuti; il sito è già raggiungibile e si riempie man mano. L'avanzamento si legge nei log del servizio `cms` (righe `[seed]`, fino a `[seed] fatto`). Agli avvii successivi non succede nulla: se esiste già un utente i contenuti non si toccano.
 4. Entrare in `SITO_URL/admin` con `SEED_EMAIL` e `SEED_PASSWORD` e cambiare la password. Per l'AI: Impostazioni > Intelligenza artificiale, inserire la chiave del fornitore e spuntare «Abilita i pulsanti AI».
 
-Se il caricamento automatico si interrompe (per esempio il server non raggiunge serralunga.com), si rilancia da **Terminal**, servizio `cms`: `npm run seed:primo` se l'utente non è stato creato, altrimenti `npm run seed:aggiorna`.
+Se il caricamento automatico si interrompe (per esempio il server non raggiunge serralunga.com), si rilancia dal pannello, cruscotto → **Strumenti** → «Aggiorna contenuti». Solo se l'utente del pannello non è stato creato serve il **Terminal** del servizio `cms`: `npm run seed:primo`.
 
 ### E. Dati e backup
 
@@ -124,6 +124,10 @@ docker exec $(docker ps -qf name=db-) pg_dump -U serralunga serralunga | gzip > 
 ### Aggiornamenti
 
 A ogni invio su GitHub nel ramo scelto Coolify ricompila e ripubblica da solo (se è attivo l'Auto Deploy), altrimenti si preme **Redeploy**. I dati restano nei volumi. Le modifiche allo schema del CMS arrivano come migrazioni e si applicano all'avvio.
+
+**Contenuti nuovi senza terminale.** Con `AGGIORNAMENTO_AUTOMATICO=1` (predefinito su Coolify), dopo un deploy che porta contenuti nuovi il CMS lancia da solo `seed:aggiorna` e poi `seed:catalogo`, in background. Avanzamento e registro si leggono nel pannello, cruscotto → **Strumenti**, dove i due compiti si possono anche rilanciare a mano («Aggiorna contenuti», «Importa catalogo da serralunga.com»).
+
+**Le modifiche fatte sul sito non si perdono mai.** Testi, foto e menu cambiati dal pannello o dalla pagina stanno solo nel database, non in GitHub. Per questo i due compiti, di norma, *aggiungono soltanto* ciò che manca (designer, pagine, prodotti, foto, versioni AVIF) e **non modificano nessun contenuto già presente**. Se il codice nuovo vorrebbe cambiare qualcosa che esiste già (per esempio una voce di menu), la modifica non viene fatta: compare in Strumenti come «aggiornamenti disponibili», con l'elenco di pagine e campi. Si applica solo premendo «Applica questi aggiornamenti…» e confermando: prima di ogni modifica viene salvata una copia completa (italiano e inglese) del contenuto in `media/.compiti/copie/<data>/`, e le pagine con le versioni si possono ripristinare anche dalla scheda **Versioni**. Dal terminale lo stesso si ottiene con `SEED_APPLICA=1 npm run seed:aggiorna`.
 Il seed **non** va rilanciato dopo aver modificato i testi: riporta quelli italiani ai valori di partenza.
 Per aggiornare un sito già avviato senza toccare i testi modificati c'è `npm run seed:aggiorna` (dal terminale del servizio `cms`, in locale `docker compose exec cms npm run seed:aggiorna`). Aggiunge le schede dei designer mancanti, scarica da serralunga.com i ritratti a risoluzione piena e le foto delle creazioni di ogni designer (solo se la scheda non ne ha già), crea le pagine Installazioni e Spunti e idee con le loro voci di menu, rigenera in AVIF le versioni ridotte di tutte le foto e scrive nel registro l'elenco delle foto più strette di 1200 px. Si può rilanciare quando si vuole.
 
@@ -135,6 +139,8 @@ Cambiare il dominio del servizio `proxy`, mettere lo stesso indirizzo in `SITO_U
 
 - **Il servizio `cms` si riavvia di continuo e nei log c'è un errore di connessione al database**: manca la spunta "Connect To Predefined Network", oppure `DATABASE_URL` non è l'indirizzo *internal*, oppure database e applicazione sono su server diversi.
 - **"No Available Server" o 502**: un servizio non è ancora "healthy". Guardare i log di `cms` (di solito sta ancora applicando le migrazioni o manca una variabile).
+- **Il pannello si apre ma «Modifica frontend» non porta al sito**: il dominio è sul servizio `cms` invece che sul `proxy`. Domains vuoto su `cms` e `web`, dominio solo sul `proxy` (porta 80).
+- **Salvando appare "You are not allowed to perform this action"** (pannello o pagina): succedeva quando `SITO_URL` era diverso dal dominio. Dalla versione 1.04 i salvataggi dallo stesso dominio sono sempre accettati; `SITO_URL` va comunque messo uguale al dominio (serve a canonical, sitemap e condivisioni).
 - **Il modulo risponde "Invio non consentito"** o **non si riesce a entrare nel pannello**: `SITO_URL` non coincide con il dominio usato nel browser.
 - **La compilazione si ferma senza errore**: memoria del server insufficiente; aggiungere swap o RAM.
 
@@ -147,7 +153,7 @@ Con l'estensione **Docker** di Plesk si può usare `docker-compose.yml` (quello 
 ## Dopo l'aggiornamento alla versione con AI, blocchi e Journal
 
 1. Le migrazioni partono da sole all'avvio del servizio `cms`.
-2. Lanciare una volta `npm run seed:aggiorna` dal terminale del servizio `cms`: porta le foto in AVIF e crea ciò che manca, senza toccare i testi.
+2. `seed:aggiorna` parte da solo dopo il deploy (vedi «Aggiornamenti»); si può rilanciare dal pannello, Strumenti.
 3. Entrare nel pannello, Impostazioni > Intelligenza artificiale, inserire la chiave API del fornitore scelto e spuntare «Abilita i pulsanti AI».
 4. Quando il sito va in linea, impostare `BLOCCA_INDICIZZAZIONE=0`: finché vale 1 il file robots.txt chiude il sito a motori di ricerca e assistenti.
 

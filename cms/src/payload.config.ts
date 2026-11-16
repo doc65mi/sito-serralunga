@@ -22,6 +22,7 @@ import { Pagine } from './collections/Pagine'
 import { SpaziFoto } from './collections/SpaziFoto'
 import { Articoli } from './collections/Articoli'
 import { endpointAi } from './ai/endpoints'
+import { endpointStrumenti } from './strumenti/endpoints'
 import { Ai } from './globals/Ai'
 import { PaginaJournal } from './globals/PaginaJournal'
 import { Richieste } from './collections/Richieste'
@@ -40,7 +41,8 @@ import { migrations } from './migrations'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const sitoPubblico = process.env.SITO_URL || 'http://localhost:4321'
+// Senza barra finale: "https://dominio/" e "https://dominio" devono valere uguale.
+const sitoPubblico = (process.env.SITO_URL || 'http://localhost:4321').trim().replace(/\/+$/, '')
 // Sito e pannello sullo stesso indirizzo (CMS_URL vuoto): i link verso il sito sono relativi,
 // così valgono da qualunque nome si apra il pannello (localhost, 127.0.0.1, dominio).
 const versoSito = process.env.CMS_URL ? sitoPubblico : ''
@@ -72,7 +74,7 @@ export default buildConfig({
     components: {
       beforeNavLinks: ['/componenti/ModificaFrontend'],
       actions: ['/componenti/AzioneFrontend'],
-      beforeDashboard: ['/componenti/Cruscotto'],
+      beforeDashboard: ['/componenti/Cruscotto', '/componenti/Strumenti'],
       graphics: { Logo: '/componenti/Logo', Icon: '/componenti/Icona' },
     },
     importMap: { baseDir: path.resolve(dirname) },
@@ -117,7 +119,7 @@ export default buildConfig({
   },
   collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, Users],
   globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Ai],
-  endpoints: endpointAi,
+  endpoints: [...endpointAi, ...endpointStrumenti],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
