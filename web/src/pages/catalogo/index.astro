@@ -120,7 +120,7 @@ const jsonld = [{
       <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta?.kicker || t('Listino riservato')}</span>
       <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo || t('Listino B2B\ne condizioni contract')} />
       <Testo class="testo" campo="cta.testo" t={pagina.cta?.testo} />
-      <a href={u(pagina.cta?.link || '/#listino')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={pagina.cta?.link || ''}>{pagina.cta?.pulsante || t('Richiedi il listino')}</a>
+      <a href={u(pagina.cta?.link || '/listino/')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={pagina.cta?.link || ''}>{pagina.cta?.pulsante || t('Richiedi il listino')}</a>
     </div>
   </section>
 </Base>

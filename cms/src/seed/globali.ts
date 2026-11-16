@@ -3,6 +3,138 @@ type Media = (sorgente: string, alt: string) => Promise<number | null>
 
 const S = 'https://serralunga.com/cdn/shop'
 
+/**
+ * Navigazione (Version: 2.00, alberatura del 2026-11-16): menu superiore di servizio e menu
+ * inferiore principale, entrambi allineati a destra; footer con tre colonne.
+ */
+export const MENU_SUPERIORE = [
+  { etichetta: 'Contatti', link: '/contatti/' },
+  { etichetta: 'Richiedi catalogo', link: '/contract/cataloghi/' },
+  { etichetta: 'Listino', link: '/listino/' },
+  { etichetta: 'Account', link: '/contract/area-riservata/' },
+  { etichetta: 'Faq', link: '/faq/' },
+]
+
+export const MENU = [
+  { etichetta: 'Progetti', link: '/installazioni/' },
+  {
+    etichetta: 'Materiali',
+    link: '/materiali/',
+    voci: [
+      { etichetta: 'Polietilene e Clean Fighter', link: '/materiali/polietilene/' },
+      { etichetta: 'Moleskin', link: '/materiali/moleskin/' },
+      { etichetta: 'Corten', link: '/materiali/corten/' },
+      { etichetta: 'Colori', link: '/materiali/colori/' },
+      { etichetta: 'Sostenibilità', link: '/materiali/sostenibilita/' },
+    ],
+  },
+  {
+    etichetta: 'Catalogo',
+    link: '/catalogo/',
+    voci: [
+      { etichetta: 'Vasi e fioriere', link: '/catalogo/vasi/' },
+      { etichetta: 'Sedute', link: '/catalogo/sedute/' },
+      { etichetta: 'Tavoli', link: '/catalogo/tavoli/' },
+      { etichetta: 'Pool & lettini', link: '/catalogo/pool/' },
+      { etichetta: 'Illuminazione', link: '/catalogo/illuminazione/' },
+      { etichetta: 'Accessori', link: '/catalogo/accessori/' },
+    ],
+  },
+  {
+    etichetta: 'Heritage',
+    link: '/heritage/',
+    voci: [
+      { etichetta: 'La nostra storia', link: '/heritage/la-nostra-storia/' },
+      { etichetta: 'Living different', link: '/heritage/living-different/' },
+      { etichetta: 'Produzione', link: '/heritage/produzione/' },
+      { etichetta: 'I colori', link: '/heritage/i-colori/' },
+    ],
+  },
+  {
+    etichetta: 'Contract',
+    link: '/contract/',
+    voci: [
+      { etichetta: 'Hospitality', link: '/contract/hospitality/' },
+      { etichetta: 'Residenziale', link: '/contract/residenziale/' },
+      { etichetta: 'Urbano', link: '/contract/urbano/' },
+      { etichetta: 'Cataloghi', link: '/contract/cataloghi/' },
+      { etichetta: 'Area riservata', link: '/contract/area-riservata/' },
+    ],
+  },
+]
+
+export const COLONNE = [
+  {
+    titolo: 'Catalogo',
+    link: [
+      { etichetta: 'Vasi e fioriere', link: '/catalogo/vasi/' },
+      { etichetta: 'Sedute', link: '/catalogo/sedute/' },
+      { etichetta: 'Tavoli', link: '/catalogo/tavoli/' },
+      { etichetta: 'Pool & lettini', link: '/catalogo/pool/' },
+      { etichetta: 'Illuminazione', link: '/catalogo/illuminazione/' },
+      { etichetta: 'Accessori', link: '/catalogo/accessori/' },
+    ],
+  },
+  {
+    titolo: 'Professionisti',
+    link: [
+      { etichetta: 'Contract', link: '/contract/' },
+      { etichetta: 'Progetti', link: '/installazioni/' },
+      { etichetta: 'Spunti e idee', link: '/spunti-e-idee/' },
+      { etichetta: 'Listino riservato', link: '/listino/' },
+      { etichetta: 'Cataloghi', link: '/contract/cataloghi/' },
+      { etichetta: 'Area riservata', link: '/contract/area-riservata/' },
+    ],
+  },
+  {
+    titolo: 'Serralunga',
+    link: [
+      { etichetta: 'Heritage', link: '/heritage/' },
+      { etichetta: 'Designer', link: '/designer/' },
+      { etichetta: 'Materiali', link: '/materiali/' },
+      { etichetta: 'Journal', link: '/journal/' },
+      { etichetta: 'Contatti', link: '/contatti/' },
+      { etichetta: 'Faq', link: '/faq/' },
+    ],
+  },
+]
+
+/** Pagine di servizio (collezione "pagine"): si creano solo se mancano. La FAQ resta in bozza finché non ha domande. */
+export const PAGINE = [
+  {
+    titolo: 'Contatti',
+    slug: 'contatti',
+    kicker: 'Serralunga, Biella dal 1825',
+    intro: 'Per progetti contract, forniture e informazioni sui prodotti scriveteci o chiamateci: il nostro ufficio contract vi ricontatterà.',
+    modulo: { mostra: true, titolo: 'Raccontateci il vostro progetto', pulsante: 'Invia la richiesta', grazie: 'Grazie: il nostro ufficio contract vi ricontatterà a breve.' },
+    mostraContatti: true,
+    seo: {
+      titolo: 'Contatti | Serralunga Contract',
+      descrizione: 'Contatti di Serralunga, Biella: ufficio contract per hotel, ristoranti, architetti e rivenditori. Scriveteci per forniture, campioni colore e progetti.',
+    },
+    _status: 'published',
+  },
+  {
+    titolo: 'Listino riservato',
+    slug: 'listino',
+    kicker: 'Contract e rivenditori',
+    intro: 'Riservato ad alberghi, ristoranti, studi di architettura e rivenditori. Riceverai catalogo, cartella colori e listino dedicato entro 24 ore lavorative.',
+    modulo: { mostra: true, titolo: 'Richiedi il listino', pulsante: 'Richiedi il listino', grazie: 'Grazie: riceverete catalogo, cartella colori e listino entro 24 ore lavorative.' },
+    mostraContatti: false,
+    seo: {
+      titolo: 'Listino riservato B2B | Serralunga Contract',
+      descrizione: 'Listino Serralunga riservato a hotel, ristoranti, studi di architettura e rivenditori: richiedete catalogo, cartella colori e condizioni dedicate.',
+    },
+    _status: 'published',
+  },
+  {
+    titolo: 'Domande frequenti',
+    slug: 'faq',
+    seo: { titolo: 'Domande frequenti | Serralunga' },
+    _status: 'draft',
+  },
+]
+
 export const impostazioniDati = async (m: Media) => ({
   logo: await m(`${S}/files/Serralunga_logo_200_2.png?v=1750251076&width=500`, 'Serralunga'),
   nomeSito: 'Serralunga',
@@ -14,39 +146,11 @@ export const impostazioniDati = async (m: Media) => ({
     linkEtichetta: 'Area riservata rivenditori',
     link: '/#listino',
   },
-  menu: [
-    { etichetta: 'Progetti', link: '/#progetti' },
-    { etichetta: 'Installazioni', link: '/installazioni/' },
-    { etichetta: 'Contract', link: '/#contract' },
-    { etichetta: 'Materiali', link: '/#materiali' },
-    { etichetta: 'Designer', link: '/designer/' },
-    { etichetta: 'Spunti e idee', link: '/spunti-e-idee/' },
-    { etichetta: 'Listino B2B', link: '/#listino' },
-    { etichetta: 'Richiedi il catalogo', link: '/#listino', evidenza: true },
-  ],
+  menuSuperiore: MENU_SUPERIORE,
+  menu: MENU,
   descrizione:
     'Mobili, illuminazione, fioriere e oggetti di design 100% made in Italy per interni ed esterni, hospitality e contract.',
-  colonne: [
-    {
-      titolo: 'Prodotti',
-      link: [
-        { etichetta: 'Vasi e fioriere', link: '/#collezioni' },
-        { etichetta: 'Arredo', link: '/#collezioni' },
-        { etichetta: 'Illuminazione', link: '/#collezioni' },
-        { etichetta: 'Accessori', link: '/#collezioni' },
-        { etichetta: 'Cartella colori', link: '/#collezioni' },
-      ],
-    },
-    {
-      titolo: 'Professionisti',
-      link: [
-        { etichetta: 'Serralunga Contract', link: '/#contract' },
-        { etichetta: 'I designer', link: '/designer/' },
-        { etichetta: 'Listino riservato', link: '/#listino' },
-        { etichetta: 'Condizioni di vendita', link: '/#listino' },
-      ],
-    },
-  ],
+  colonne: COLONNE,
   copyright: '© {anno} Serralunga — 1825 S.R.L.',
   // Le pagine legali non esistono ancora: voci senza link finché non vengono create.
   legali: [{ etichetta: 'Privacy' }, { etichetta: 'Cookie' }, { etichetta: 'Termini' }],

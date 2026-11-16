@@ -20,7 +20,7 @@ import { aquaLounger, caseLoge, designerDati, prodottiCard } from './dati'
 import { creazioniDi, type Creazione } from './creazioni'
 import { importaCatalogo } from './catalogo'
 import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
-import { homeDati, impostazioniDati, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
+import { COLONNE, homeDati, impostazioniDati, MENU, MENU_SUPERIORE, PAGINE, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
 import { rigeneraFormati } from './immagini'
 import { applicaInglese } from './inglese'
 import { nomeFile } from '../collections/Media'
@@ -185,7 +185,10 @@ async function completaDesigner() {
     // Nomi e tipologie in inglese, sulle stesse righe.
     if (dati.creazioni && salvato.creazioni?.length) {
       const perFonte = new Map(lista.map((c) => [c.fonte, c]))
-      await payload.update({
+      // Al primo avvio i campi inglesi obbligatori del designer sono ancora vuoti (li riempie applicaInglese
+      // più avanti): un errore qui non deve fermare il resto del seed.
+      await payload
+        .update({
         collection: 'designer',
         id: doc.id,
         locale: 'en',
@@ -200,6 +203,7 @@ async function completaDesigner() {
           })),
         } as never,
       })
+        .catch((err) => payload.logger.warn(`[seed] designer/${f.slug}: nomi inglesi delle creazioni rimandati (${(err as Error).message.slice(0, 80)})`))
     }
     log(`designer/${f.slug}: ${dati.ritratto ? 'ritratto aggiornato' : ''}${dati.ritratto && dati.creazioni ? ', ' : ''}${dati.creazioni ? `${(dati.creazioni as unknown[]).length} creazioni` : ''}`)
   }
@@ -236,6 +240,20 @@ async function completaPagine() {
   if (cambiato) {
     await payload.updateGlobal({ slug: 'impostazioni', data: { menu } as never })
     log('aggiornato il menu: Installazioni e Spunti e idee')
+  }
+  // Navigazione 2026-11: menu superiore + menu inferiore con tendine e footer a tre colonne.
+  // Si applica una volta sola, finché il menu superiore è vuoto: dopo si cambia dal pannello.
+  const nav = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { menuSuperiore?: unknown[] }
+  if (!nav.menuSuperiore?.length) {
+    await payload.updateGlobal({ slug: 'impostazioni', data: { menuSuperiore: MENU_SUPERIORE, menu: MENU, colonne: COLONNE } as never })
+    log('navigazione: menu superiore, menu inferiore con tendine e colonne del footer')
+  }
+  // Pagine di servizio (Contatti, Listino, FAQ): si creano solo se mancano.
+  for (const pg of PAGINE) {
+    const c = await payload.find({ collection: 'pagine', where: { slug: { equals: pg.slug } }, limit: 1, depth: 0, draft: true })
+    if (c.docs.length) continue
+    await payload.create({ collection: 'pagine', data: pg as never, draft: pg._status === 'draft' })
+    log(`creata la pagina /${pg.slug}/ (${pg._status === 'draft' ? 'bozza' : 'pubblicata'})`)
   }
   // Condivisione: senza un'immagine predefinita si usa la foto di apertura della home (si cambia dal pannello).
   const impo = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { immagineCondivisione?: number | null }
@@ -317,7 +335,7 @@ if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer'
   await completaPagine()
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
   await payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never })
-  await applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer'] })
+  await applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer', 'pagine'] })
   await rigeneraFormati(payload, log)
   const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
   if (saltate.length) {

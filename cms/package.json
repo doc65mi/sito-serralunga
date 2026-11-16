@@ -16,7 +16,8 @@
     "seed:catalogo": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=catalogo payload run src/seed/index.ts",
     "seed:designer": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=aggiorna payload run src/seed/index.ts",
     "ai:prova": "cross-env NODE_OPTIONS=--no-deprecation payload run src/ai/prova.ts",
-    "ai:prova:immagine": "cross-env NODE_OPTIONS=--no-deprecation AI_PROVA=immagine payload run src/ai/prova.ts"
+    "ai:prova:immagine": "cross-env NODE_OPTIONS=--no-deprecation AI_PROVA=immagine payload run src/ai/prova.ts",
+    "ai:ritratti": "cross-env NODE_OPTIONS=--no-deprecation payload run src/ai/ritratti.ts"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",

@@ -240,7 +240,7 @@ const PAGINA = {
       titolo: 'Listino B2B\ne condizioni contract',
       testo: 'Raccontateci il progetto o la vostra attività: vi inviamo listino riservato, schede tecniche e disponibilità.',
       pulsante: 'Richiedi il listino',
-      link: '/#listino',
+      link: '/listino/',
     },
     seo: {
       titolo: 'Catalogo B2B: arredi, vasi e luci di design | Serralunga',
@@ -256,7 +256,7 @@ const PAGINA = {
       titolo: 'B2B price list\nand contract terms',
       testo: 'Tell us about your project or business: we will send the trade price list, technical sheets and availability.',
       pulsante: 'Request the price list',
-      link: '/#listino',
+      link: '/listino/',
     },
     seo: {
       titolo: 'B2B catalogue: design furniture and planters | Serralunga',
