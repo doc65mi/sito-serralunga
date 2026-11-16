@@ -1,5 +1,5 @@
 #!/bin/sh
-# Avvio del CMS — Version: 1.01
+# Avvio del CMS — Version: 1.02
 # 1. Avvia Payload (che applica le migrazioni del database alla prima richiesta).
 # 2. Con SEED_AUTOMATICO=1, quando il CMS risponde, carica i contenuti di partenza
 #    una sola volta: se nel database c'è già un utente non fa nulla.
@@ -27,7 +27,7 @@ if [ "${SEED_AUTOMATICO:-0}" = "1" ] || [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1"
       sleep 5
     done
     if [ "${SEED_AUTOMATICO:-0}" = "1" ]; then
-      npm run seed:primo || echo "[avvio] contenuti di partenza non completati: si rilanciano dal pannello, Strumenti"
+      nice -n 19 env VIPS_CONCURRENCY=1 UV_THREADPOOL_SIZE=2 npm run seed:primo || echo "[avvio] contenuti di partenza non completati: si rilanciano dal pannello, Strumenti"
     fi
     if [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1" ]; then
       VERSIONE="$(cat .versione-seed 2>/dev/null || echo sconosciuta)"
