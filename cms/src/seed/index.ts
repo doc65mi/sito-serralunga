@@ -18,6 +18,7 @@ import config from '@payload-config'
 
 import { aquaLounger, caseLoge, designerDati, prodottiCard } from './dati'
 import { creazioniDi, type Creazione } from './creazioni'
+import { importaCatalogo } from './catalogo'
 import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
 import { homeDati, impostazioniDati, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
 import { rigeneraFormati } from './immagini'
@@ -293,6 +294,17 @@ async function completaPagine() {
   if (caso && !caso.categoria) await payload.update({ collection: 'case-history', id: caso.id, data: { categoria: 'risto' } as never })
 }
 
+// Catalogo B2B da serralunga.com (npm run seed:catalogo): categorie, schede prodotto e foto.
+// Separato da seed:aggiorna perché scarica centinaia di foto.
+if (process.env.SEED_SOLO === 'catalogo') {
+  await importaCatalogo(payload, media, log)
+  await rigeneraFormati(payload, log)
+  const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
+  if (saltate.length) log(`${saltate.length} foto non caricate (si possono aggiungere dal pannello Media)`)
+  log('fatto (catalogo)')
+  process.exit(0)
+}
+
 // Aggiornamento di un sito già avviato (npm run seed:aggiorna): aggiunge ciò che manca
 // senza toccare i testi e le foto già modificati dal pannello o dalla pagina.
 if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer') {
@@ -362,6 +374,9 @@ await completaPagine()
 
 // 5b. Ritratti a risoluzione piena e creazioni dei designer da serralunga.com
 await completaDesigner()
+
+// 5c. Catalogo B2B (categorie e schede prodotto da serralunga.com)
+await importaCatalogo(payload, media, log)
 
 // 6. Inglese: riempie i campi ancora vuoti con le traduzioni di partenza
 await applicaInglese(payload, log)

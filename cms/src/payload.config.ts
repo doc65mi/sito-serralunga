@@ -13,6 +13,7 @@ import { CaseHistory } from './collections/CaseHistory'
 import { Designer } from './collections/Designer'
 import { Media } from './collections/Media'
 import { Prodotti } from './collections/Prodotti'
+import { Categorie } from './collections/Categorie'
 import { Spunti } from './collections/Spunti'
 import { SpaziFoto } from './collections/SpaziFoto'
 import { Articoli } from './collections/Articoli'
@@ -26,6 +27,7 @@ import { Impostazioni } from './globals/Impostazioni'
 import { PaginaDesigner } from './globals/PaginaDesigner'
 import { PaginaInstallazioni } from './globals/PaginaInstallazioni'
 import { PaginaSpunti } from './globals/PaginaSpunti'
+import { PaginaCatalogo } from './globals/PaginaCatalogo'
 import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -100,8 +102,8 @@ export default buildConfig({
     defaultLocale: 'it',
     fallback: true,
   },
-  collections: [Prodotti, CaseHistory, Spunti, Articoli, Designer, Media, SpaziFoto, Richieste, Users],
-  globals: [Home, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaJournal, Impostazioni, Ai],
+  collections: [Prodotti, Categorie, CaseHistory, Spunti, Articoli, Designer, Media, SpaziFoto, Richieste, Users],
+  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaJournal, Impostazioni, Ai],
   endpoints: endpointAi,
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

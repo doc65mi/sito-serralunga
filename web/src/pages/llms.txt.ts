@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
 import { elenco, globale, impostazioni, SITO, type Doc } from '../lib/cms'
 import { piatto } from '../lib/testo'
+import { categorie, urlCategoria, urlProdotto } from '../lib/catalogo'
 
 /**
  * Version: 1.00
@@ -8,6 +9,7 @@ import { piatto } from '../lib/testo'
  * contano e dove trovarle, scritto con i contenuti pubblicati nel CMS: niente di inventato.
  */
 export const GET: APIRoute = async () => {
+  const cats = await categorie()
   const [imp, home, prodotti, designer, casi, spunti, articoli] = await Promise.all([
     impostazioni('it'),
     globale('home', 0, 'it').catch(() => ({}) as Doc),
@@ -37,7 +39,8 @@ export const GET: APIRoute = async () => {
       riga('Spunti e idee', '/spunti-e-idee/'),
       riga('Journal', '/journal/'),
     ]),
-    sezione('Prodotti', prodotti.map((p) => riga(p.nome, `/prodotti/${p.slug}/`, p.seo?.descrizione))),
+    sezione('Catalogo', [riga('Catalogo B2B', '/catalogo/'), ...cats.map((c) => riga(c.nome, urlCategoria(c, cats), c.seo?.descrizione))]),
+    sezione('Prodotti', prodotti.map((p) => riga(p.nome, urlProdotto(p, cats), p.seo?.descrizione))),
     sezione('Designer', designer.map((d) => riga(d.nome, `/designer/${d.slug}/`, d.ruolo))),
     sezione('Case history', casi.map((c) => riga(c.nome, `/case-history/${c.slug}/`, c.seo?.descrizione))),
     sezione('Spunti e idee', spunti.map((s) => riga(s.titolo, `/spunti-e-idee/${s.slug}/`, s.estratto))),

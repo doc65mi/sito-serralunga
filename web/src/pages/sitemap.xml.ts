@@ -2,17 +2,20 @@ import type { APIRoute } from 'astro'
 import { elenco, SITO } from '../lib/cms'
 import { INFO, LINGUE, percorso } from '../lib/lingua'
 import { isMedia, originale } from '../lib/media'
+import { categorie, conteggi, urlCategoria, urlProdotto } from '../lib/catalogo'
 
 /** Sitemap con tutte le lingue: ogni indirizzo dichiara le versioni alternative (hreflang). */
 export const GET: APIRoute = async () => {
   const base = SITO
   const [prodotti, casi, designer, spunti, articoli] = await Promise.all([
-    elenco('prodotti', { depth: 1, 'where[schedaPubblicata][equals]': 'true' }),
+    elenco('prodotti', { depth: 0, limit: 2000, 'where[schedaPubblicata][equals]': 'true' }),
     elenco('case-history', { depth: 1 }),
     elenco('designer', { depth: 1, 'where[schedaPubblicata][equals]': 'true' }),
     elenco('spunti', { depth: 1 }),
     elenco('articoli', { depth: 1, sort: '-data', limit: 500 }).catch(() => []),
   ])
+  const cats = await categorie()
+  const n = await conteggi(cats)
   const alternative = (path: string) =>
     LINGUE.map((l) => `<xhtml:link rel="alternate" hreflang="${INFO[l].html}" href="${base}${percorso(l, path)}"/>`).join('') +
     `<xhtml:link rel="alternate" hreflang="x-default" href="${base}${percorso(LINGUE[0], path)}"/>`
@@ -30,7 +33,9 @@ export const GET: APIRoute = async () => {
     url('/installazioni/'),
     url('/spunti-e-idee/'),
     url('/journal/'),
-    ...prodotti.map((p) => url(`/prodotti/${p.slug}/`, p.updatedAt, p.immagine)),
+    url('/catalogo/'),
+    ...cats.filter((c) => (n.get(c.id) || 0) > 0).map((c) => url(urlCategoria(c, cats), c.updatedAt, c.immagine)),
+    ...prodotti.map((p) => url(urlProdotto(p, cats), p.updatedAt)),
     ...casi.map((c) => url(`/case-history/${c.slug}/`, c.updatedAt, c.immagine)),
     ...designer.map((d) => url(`/designer/${d.slug}/`, d.updatedAt, d.ritratto)),
     ...spunti.map((x) => url(`/spunti-e-idee/${x.slug}/`, x.updatedAt, x.immagine)),

@@ -7,10 +7,12 @@ import { perSlug, SITO, type Doc } from '../../lib/cms'
 import { isMedia, src } from '../../lib/media'
 import { piatto } from '../../lib/testo'
 import { percorso, traduttore } from '../../lib/lingua'
+import { categorie, urlProdotto } from '../../lib/catalogo'
 
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => percorso(L, p)
+const tutteCat = await categorie(L)
 const c = await perSlug('case-history', Astro.params.slug || '', 2, L)
 if (!c) return Astro.rewrite('/404')
 
@@ -147,7 +149,7 @@ const pos = (a?: string) => (a === 'alto' ? 'pos-alto' : a === 'basso' ? 'pos-ba
             const rel = typeof v.prodotto === 'object' ? v.prodotto : null
             const Tag = rel?.schedaPubblicata ? 'a' : 'div'
             return (
-              <Tag href={rel?.schedaPubblicata ? u(`/prodotti/${rel.slug}/`) : undefined} class="voce">
+              <Tag href={rel?.schedaPubblicata ? u(urlProdotto(rel, tutteCat)) : undefined} class="voce">
                 <div class="foto r-43 zoom"><Img media={v.immagine || rel?.immagine} sizes="(max-width: 800px) 100vw, 50vw" larghezza={1000} nota={v.segnapostoImmagine} /></div>
                 <div class="voce__testi">
                   <div class="card__nome card__nome--l">{v.nome}</div>

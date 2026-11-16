@@ -11,12 +11,14 @@ import type { Doc } from '../lib/cms'
 import { isMedia } from '../lib/media'
 import { percorso, traduttore } from '../lib/lingua'
 import { esterno } from '../lib/testo'
+import { categorie, urlProdotto } from '../lib/catalogo'
 
 interface Props { blocchi?: Doc[] | null }
 const blocchi = (Astro.props.blocchi || []).filter((b) => b && b.blockType)
 const L = Astro.locals.lingua
 const t = traduttore(L)
 const u = (p?: string) => percorso(L, p)
+const tutteCat = await categorie(Astro.locals.lingua)
 const fondo = (b: Doc) => (b.sfondo === 'scuro' ? 'scuro' : b.sfondo === 'carta' ? 'blocco--carta' : 'blocco--chiaro')
 const RAPPORTI: Record<string, string> = { largo: 'r-169', panoramico: 'r-219', classico: 'r-43' }
 ---
@@ -65,7 +67,7 @@ const RAPPORTI: Record<string, string> = { largo: 'r-169', panoramico: 'r-219', 
   if (b.blockType === 'prodotti') {
     const voci = (b.voci || []).map((v: Doc, k: number) => {
       const p = v.prodotto && typeof v.prodotto === 'object' ? v.prodotto : null
-      const link = p ? (p.schedaPubblicata ? u(`/prodotti/${p.slug}/`) : undefined) : v.url ? u(v.url) : undefined
+      const link = p ? (p.schedaPubblicata ? u(urlProdotto(p, tutteCat)) : undefined) : v.url ? u(v.url) : undefined
       return { k, link, fuori: !p && esterno(v.url), nome: v.nome || p?.nome, tipo: v.tipo || p?.etichettaCard, immagine: v.immagine || p?.immagine, proprio: !p }
     }).filter((v: Doc) => v.nome)
     return (

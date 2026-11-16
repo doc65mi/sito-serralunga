@@ -11,6 +11,16 @@ export const FAMIGLIE = [
   { label: 'Accessori', value: 'accessori' },
 ]
 
+/** Materiali e finiture usati dai filtri del Catalogo e dalle pagine Materiali. */
+export const MATERIALI = [
+  { label: 'Polietilene', value: 'polietilene' },
+  { label: 'Moleskin', value: 'moleskin' },
+  { label: 'Corten', value: 'corten' },
+  { label: 'Laccato', value: 'laccato' },
+  { label: 'Vellutato', value: 'vellutato' },
+  { label: 'Decorato', value: 'decorato' },
+]
+
 /** Template: template/Aqua Lounger - Scheda tecnica.dc.html */
 export const Prodotti: CollectionConfig = {
   slug: 'prodotti',
@@ -57,6 +67,25 @@ export const Prodotti: CollectionConfig = {
       admin: { position: 'sidebar' },
     },
     {
+      name: 'categoriaPrincipale',
+      type: 'relationship',
+      relationTo: 'categorie',
+      label: 'Categoria principale (indirizzo)',
+      filterOptions: { padre: { exists: false } },
+      admin: {
+        position: 'sidebar',
+        description: 'Dà l’indirizzo della scheda: /catalogo/{categoria}/{slug}/. Vuoto = la scheda resta su /prodotti/{slug}/.',
+      },
+    },
+    {
+      name: 'categorie',
+      type: 'relationship',
+      relationTo: 'categorie',
+      hasMany: true,
+      label: 'Categorie del catalogo',
+      admin: { position: 'sidebar', description: 'Tutte le categorie e sottocategorie in cui il prodotto compare.' },
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -66,6 +95,57 @@ export const Prodotti: CollectionConfig = {
             testo('etichettaCard', 'Sottotitolo della card', {
               admin: { description: 'Es. Piscina — Marc Sadler' },
             }),
+          ],
+        },
+        {
+          label: 'Catalogo',
+          description: 'Dati del catalogo B2B. L’importazione da serralunga.com (npm run seed:catalogo) li aggiorna; i testi scritti a mano non vengono toccati.',
+          fields: [
+            testo('tipologia', 'Tipologia', { admin: { description: 'Es. Poltrona, Vaso, Lampada da terra. Serve al filtro "Tipologia".' } }),
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'materiali',
+                  type: 'select',
+                  hasMany: true,
+                  label: 'Materiale e finitura',
+                  options: MATERIALI,
+                },
+                { name: 'luce', type: 'checkbox', label: 'Con luce', defaultValue: false },
+              ],
+            },
+            {
+              name: 'finiture',
+              type: 'array',
+              label: 'Colori e varianti (codici articolo)',
+              labels: { singular: 'Variante', plural: 'Varianti' },
+              admin: { description: 'Varianti a listino: nome della finitura o della misura e codice articolo.' },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [testo('nome', 'Variante', { required: true }), { name: 'codice', type: 'text', label: 'Codice articolo' }],
+                },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'fonteShopify',
+                  type: 'text',
+                  label: 'Handle su serralunga.com',
+                  index: true,
+                  admin: { description: 'Scheda di origine: serralunga.com/products/{handle}.', readOnly: true },
+                },
+                {
+                  name: 'dataCatalogo',
+                  type: 'date',
+                  label: 'In catalogo dal',
+                  admin: { description: 'Ordina i "Nuovi arrivi".' },
+                },
+              ],
+            },
           ],
         },
         {

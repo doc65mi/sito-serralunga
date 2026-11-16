@@ -1,23 +1,47 @@
 ---
-/** Card prodotto (home "Portfolio", designer "I pezzi"). Template: Home v2 #collezioni. */
+/** Card prodotto (home "Portfolio", designer "I pezzi", Catalogo). Template: Home v2 #collezioni. Version: 1.01 */
 import Img from './Img.astro'
 import type { Doc } from '../lib/cms'
 import { percorso, traduttore } from '../lib/lingua'
-interface Props { p: Doc; ancoraRichiesta?: string; mostraSotto?: boolean; sotto?: string }
-const { p, ancoraRichiesta = '/#listino', mostraSotto = true, sotto } = Astro.props
+import { categorie, urlProdotto } from '../lib/catalogo'
+interface Props {
+  p: Doc
+  ancoraRichiesta?: string
+  mostraSotto?: boolean
+  sotto?: string
+  tutte?: Doc[]
+  /** Nel Catalogo la card porta i dati per i filtri (tipologia, designer, materiale, luce). */
+  filtrabile?: boolean
+  /** Titolo della card: h2 nelle pagine dove le card sono il contenuto principale. */
+  livello?: 'h2' | 'h3' | 'div'
+}
+const { p, ancoraRichiesta = '/#listino', mostraSotto = true, sotto, tutte, filtrabile = false, livello = 'div' } = Astro.props
 const L = Astro.locals.lingua
 const t = traduttore(L)
-const u = (p?: string) => percorso(L, p)
+const u = (x?: string) => percorso(L, x)
 const scheda = p.schedaPubblicata
-const link = scheda ? u(`/prodotti/${p.slug}/`) : u(ancoraRichiesta)
+const link = scheda ? u(urlProdotto(p, tutte ?? (await categorie(L)))) : u(ancoraRichiesta)
+const d = p.designer && typeof p.designer === 'object' ? p.designer : null
+const Nome = livello
+const dati = filtrabile
+  ? {
+      'data-prodotto': '',
+      'data-nome': String(p.nome || '').toLowerCase(),
+      'data-tipologia': p.tipologia || '',
+      'data-designer': d?.nome || '',
+      'data-materiale': (p.materiali || []).join(' '),
+      'data-luce': p.luce ? '1' : '0',
+      'data-data': p.dataCatalogo || '',
+    }
+  : {}
 ---
-<a href={link} class="card">
+<a href={link} class="card" {...dati}>
   <div class="foto r-45 zoom">
     <Img media={p.immagine} alt={p.immagine?.alt || p.nome} sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 33vw" larghezza={1000} />
   </div>
   <div class="card__piede">
     <div>
-      <div class="card__nome">{p.nome}</div>
+      <Nome class="card__nome">{p.nome}</Nome>
       {mostraSotto && (sotto || p.etichettaCard) && <div class="card__sotto" data-didascalia>{sotto || p.etichettaCard}</div>}
     </div>
     <span class:list={['card__azione', scheda && 'card__azione--attiva']}>{t(scheda ? 'Scheda →' : 'In arrivo')}</span>

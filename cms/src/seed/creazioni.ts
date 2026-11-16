@@ -15,8 +15,15 @@ export interface ProdottoShop {
   product_type: string
   tags: string[]
   images: { src: string; width: number; height: number }[]
+  body_html?: string
+  published_at?: string
+  options?: { name: string; position: number; values: string[] }[]
+  variants?: { id: number; title: string; sku?: string | null; option1?: string | null; option2?: string | null; option3?: string | null }[]
   titoloEn?: string
   tipoEn?: string
+  bodyEn?: string
+  variantiEn?: ProdottoShop['variants']
+  opzioniEn?: ProdottoShop['options']
 }
 
 export interface Creazione {
@@ -37,7 +44,7 @@ const norm = (s: string) =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim()
 
-async function json(url: string): Promise<{ products?: ProdottoShop[] }> {
+export async function json(url: string): Promise<{ products?: ProdottoShop[] }> {
   const res = await fetch(url, { signal: AbortSignal.timeout(40_000), headers: { Accept: 'application/json' } })
   if (!res.ok) throw new Error(`HTTP ${res.status} su ${url}`)
   return (await res.json()) as { products?: ProdottoShop[] }
@@ -71,6 +78,9 @@ export async function catalogo(): Promise<ProdottoShop[]> {
     tags: Array.isArray(p.tags) ? p.tags : String(p.tags || '').split(',').map((x) => x.trim()),
     titoloEn: perHandle.get(p.handle)?.title,
     tipoEn: perHandle.get(p.handle)?.product_type,
+    bodyEn: perHandle.get(p.handle)?.body_html,
+    variantiEn: perHandle.get(p.handle)?.variants,
+    opzioniEn: perHandle.get(p.handle)?.options,
   }))
   return catalogoCache
 }

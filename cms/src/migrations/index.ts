@@ -4,6 +4,7 @@ import * as migration_20261115_091656_installazioni_spunti_creazioni from './202
 import * as migration_20261115_093539_ai_blocchi_articoli from './20261115_093539_ai_blocchi_articoli';
 import * as migration_20261115_115540_home_box_catalogo from './20261115_115540_home_box_catalogo';
 import * as migration_20261116_074854_immagine_condivisione from './20261116_074854_immagine_condivisione';
+import * as migration_20261116_081442_catalogo_categorie from './20261116_081442_catalogo_categorie';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261116_074854_immagine_condivisione.up,
     down: migration_20261116_074854_immagine_condivisione.down,
-    name: '20261116_074854_immagine_condivisione'
+    name: '20261116_074854_immagine_condivisione',
+  },
+  {
+    up: migration_20261116_081442_catalogo_categorie.up,
+    down: migration_20261116_081442_catalogo_categorie.down,
+    name: '20261116_081442_catalogo_categorie'
   },
 ];
