@@ -6,7 +6,7 @@ Astro.response.status = 404
 const L = Astro.locals.lingua
 const t = traduttore(L)
 ---
-<Base titolo={t('Pagina non trovata | Serralunga')} descrizione={t('La pagina cercata non esiste o è stata spostata.')}>
+<Base titolo={t('Pagina non trovata | Serralunga')} descrizione={t('La pagina cercata non esiste o è stata spostata.')} noindex>
   <section class="sez pad fondo-paper vuoto">
     <div class="centro centro--s">
       <span class="kicker">{t('Errore 404')}</span>

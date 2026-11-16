@@ -3720,6 +3720,10 @@ export interface Impostazioni {
    */
   logo?: (number | null) | Media;
   nomeSito?: string | null;
+  /**
+   * Compare quando una pagina senza foto propria viene condivisa (LinkedIn, WhatsApp, motori di ricerca). Formato orizzontale, almeno 1200 × 630 px.
+   */
+  immagineCondivisione?: (number | null) | Media;
   accento?: ('#A08A5F' | '#8C8B7A' | '#7C6A4E' | '#B4553B') | null;
   rivelaAlloScorrimento?: boolean | null;
   mostraDidascalie?: boolean | null;
@@ -3812,11 +3816,11 @@ export interface Ai {
    */
   chiaveOpenai?: string | null;
   /**
-   * Identificativo esatto del modello, come compare nell’elenco del fornitore. Se un modello viene ritirato basta cambiarlo qui.
+   * «Scansiona modelli disponibili» legge l’elenco dal fornitore; in alternativa si scrive a mano l’identificativo esatto. Se un modello viene ritirato basta cambiarlo qui.
    */
   modelloOpenai?: string | null;
   /**
-   * Identificativo esatto del modello, come compare nell’elenco del fornitore. Se un modello viene ritirato basta cambiarlo qui.
+   * «Scansiona modelli disponibili» legge l’elenco dal fornitore; in alternativa si scrive a mano l’identificativo esatto. Se un modello viene ritirato basta cambiarlo qui.
    */
   modelloImmaginiOpenai?: string | null;
   /**
@@ -3824,11 +3828,11 @@ export interface Ai {
    */
   chiaveOpenrouter?: string | null;
   /**
-   * Identificativo esatto del modello, come compare nell’elenco del fornitore. Se un modello viene ritirato basta cambiarlo qui.
+   * «Scansiona modelli disponibili» legge l’elenco dal fornitore; in alternativa si scrive a mano l’identificativo esatto. Se un modello viene ritirato basta cambiarlo qui.
    */
   modelloOpenrouter?: string | null;
   /**
-   * Identificativo esatto del modello, come compare nell’elenco del fornitore. Se un modello viene ritirato basta cambiarlo qui.
+   * «Scansiona modelli disponibili» legge l’elenco dal fornitore; in alternativa si scrive a mano l’identificativo esatto. Se un modello viene ritirato basta cambiarlo qui.
    */
   modelloImmaginiOpenrouter?: string | null;
   /**
@@ -3836,11 +3840,11 @@ export interface Ai {
    */
   chiaveGemini?: string | null;
   /**
-   * Identificativo esatto del modello, come compare nell’elenco del fornitore. Se un modello viene ritirato basta cambiarlo qui.
+   * «Scansiona modelli disponibili» legge l’elenco dal fornitore; in alternativa si scrive a mano l’identificativo esatto. Se un modello viene ritirato basta cambiarlo qui.
    */
   modelloGemini?: string | null;
   /**
-   * Identificativo esatto del modello, come compare nell’elenco del fornitore. Se un modello viene ritirato basta cambiarlo qui.
+   * «Scansiona modelli disponibili» legge l’elenco dal fornitore; in alternativa si scrive a mano l’identificativo esatto. Se un modello viene ritirato basta cambiarlo qui.
    */
   modelloImmaginiGemini?: string | null;
   articoliAttivi?: boolean | null;
@@ -4588,6 +4592,7 @@ export interface PaginaJournalSelect<T extends boolean = true> {
 export interface ImpostazioniSelect<T extends boolean = true> {
   logo?: T;
   nomeSito?: T;
+  immagineCondivisione?: T;
   accento?: T;
   rivelaAlloScorrimento?: T;
   mostraDidascalie?: T;

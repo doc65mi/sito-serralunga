@@ -20,6 +20,9 @@ export const Impostazioni: GlobalConfig = {
               admin: { description: 'PNG o SVG su fondo trasparente. Il sito lo rende nero o bianco in automatico.' },
             }),
             testo('nomeSito', 'Nome del sito', { defaultValue: 'Serralunga' }),
+            immagine('immagineCondivisione', 'Immagine di condivisione predefinita', {
+              admin: { description: 'Compare quando una pagina senza foto propria viene condivisa (LinkedIn, WhatsApp, motori di ricerca). Formato orizzontale, almeno 1200 × 630 px.' },
+            }),
             {
               name: 'accento',
               type: 'select',

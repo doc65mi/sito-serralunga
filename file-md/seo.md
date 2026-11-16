@@ -99,3 +99,10 @@ I rich result delle FAQ su Google sono limitati: il markup resta utile per altri
 - JSON-LD generato dal sito: Organization (dati da Impostazioni → Azienda), BreadcrumbList, Product, Person, Article.
 - `sitemap.xml` automatica (solo schede pubblicate); `robots.txt` blocca tutto finché `BLOCCA_INDICIZZAZIONE=1`.
 - Tono e fatti: `cliente.md`.
+
+## Controllo automatico (aggiunto il 2026-11-16)
+
+- `node tools/controllo-seo.mjs http://127.0.0.1:8091` legge la sitemap e controlla ogni pagina: title, description, H1 e gerarchia dei titoli, canonical, hreflang, Open Graph, dati strutturati, alt, link senza testo. Va eseguito prima di ogni pubblicazione: deve dare zero problemi.
+- Pagine senza foto propria: per la condivisione usano l'immagine predefinita di Impostazioni > Marchio.
+- Finché `BLOCCA_INDICIZZAZIONE=1` ogni pagina dichiara `noindex`; la pagina 404 è sempre `noindex`.
+- Testi piccoli sul fondo chiaro: si usa `--accent-testo` e `--muted` (contrasto almeno 4,5:1), non `--accent`.

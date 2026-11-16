@@ -12,11 +12,14 @@ import '@fontsource/cormorant-garamond/latin-400.css'
 import '@fontsource/cormorant-garamond/latin-300-italic.css'
 import '@fontsource/cormorant-garamond/latin-400-italic.css'
 import '../styles/site.css'
+// I due caratteri del primo schermo si precaricano: il titolo e il testo compaiono senza salti.
+import fontTesto from '@fontsource/jost/files/jost-latin-300-normal.woff2?url'
+import fontTitoli from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-normal.woff2?url'
 
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
 import Blocchi from '../components/Blocchi.astro'
-import { impostazioni, SITO, spaziDi, type Doc } from '../lib/cms'
+import { env, impostazioni, SITO, spaziDi, type Doc } from '../lib/cms'
 import { isMedia, originale } from '../lib/media'
 import { piatto } from '../lib/testo'
 import { INFO, LINGUE, percorso as inLingua, senzaLingua, traduttore } from '../lib/lingua'
@@ -37,8 +40,14 @@ interface Props {
   blocchi?: Doc[] | null
   /** Tipo di pagina per i dati strutturati (WebPage se non indicato). */
   tipoPagina?: string
+  /** Il percorso entra solo nei dati strutturati, senza la riga visibile (pagine con apertura a tutto schermo). */
+  percorsoNascosto?: boolean
+  /** Pagina da tenere fuori dai motori di ricerca (errore 404). */
+  noindex?: boolean
+  /** Tipo Open Graph: 'article' per articoli e case history. */
+  tipoOg?: 'website' | 'article'
 }
-const { titolo, descrizione, immagine, percorso = [], jsonld = [], footerBreve = false, pagina, doc, nudo = false, blocchi, tipoPagina = 'WebPage' } = Astro.props
+const { titolo, descrizione, immagine, percorso = [], jsonld = [], footerBreve = false, pagina, doc, nudo = false, blocchi, tipoPagina = 'WebPage', percorsoNascosto = false, noindex = false, tipoOg = 'website' } = Astro.props
 // Chi ha fatto l'accesso al pannello (stesso indirizzo) riceve anche lo strumento di modifica.
 const redazione = Astro.cookies.has('payload-token')
 const L = Astro.locals.lingua
@@ -55,7 +64,11 @@ const alternative = LINGUE.map((l) => ({ l, href: `${sito}${inLingua(l, base)}` 
 const canonico = `${sito}${u(base)}`
 // Per la condivisione si usa il file caricato: le reti sociali non leggono ancora l'AVIF.
 const assoluto = (u: string) => (u.startsWith('/') ? `${sito}${u}` : u)
-const og = isMedia(immagine) ? assoluto(originale(immagine)) : undefined
+// Senza una foto propria la pagina usa l'immagine di condivisione delle impostazioni.
+const fotoOg = isMedia(immagine) ? immagine : isMedia(imp.immagineCondivisione) ? imp.immagineCondivisione : null
+const og = fotoOg ? assoluto(originale(fotoOg)) : undefined
+// Finché il sito è in prova (BLOCCA_INDICIZZAZIONE=1) anche le pagine dichiarano noindex.
+const inProva = env('BLOCCA_INDICIZZAZIONE') === '1'
 
 const organizzazione = {
   '@type': 'Organization',
@@ -105,7 +118,7 @@ const paginaWeb = {
   description: descrizione ? piatto(descrizione) : undefined,
   isPartOf: { '@id': `${sito}/#sito` },
   about: { '@id': `${sito}/#organizzazione` },
-  primaryImageOfPage: og ? { '@type': 'ImageObject', url: og, caption: isMedia(immagine) ? immagine.alt : undefined } : undefined,
+  primaryImageOfPage: og && isMedia(immagine) ? { '@type': 'ImageObject', url: og, caption: immagine.alt || undefined, width: immagine.width || undefined, height: immagine.height || undefined } : undefined,
 }
 // Domande e risposte dei blocchi: una sola FAQPage per pagina.
 const domande = (blocchi || []).filter((b) => b?.blockType === 'domande').flatMap((b) => b.voci || []).filter((v: Doc) => v?.domanda && v?.risposta)
@@ -128,7 +141,7 @@ const accento = imp.accento || '#A08A5F'
     <link rel="canonical" href={canonico} />
     {alternative.map((a) => <link rel="alternate" hreflang={INFO[a.l].html} href={a.href} />)}
     <link rel="alternate" hreflang="x-default" href={alternative[0].href} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={tipoOg} />
     <meta property="og:locale" content={INFO[L].og} />
     <meta property="og:site_name" content={imp.nomeSito || 'Serralunga'} />
     <meta property="og:title" content={piatto(titolo)} />
@@ -136,11 +149,20 @@ const accento = imp.accento || '#A08A5F'
     <meta property="og:url" content={canonico} />
     {og && <meta property="og:image" content={og} />}
     {LINGUE.filter((l) => l !== L).map((l) => <meta property="og:locale:alternate" content={INFO[l].og} />)}
-    {og && isMedia(immagine) && immagine.alt && <meta property="og:image:alt" content={immagine.alt} />}
+    {og && fotoOg?.width && <meta property="og:image:width" content={String(fotoOg.width)} />}
+    {og && fotoOg?.height && <meta property="og:image:height" content={String(fotoOg.height)} />}
+    {og && fotoOg?.alt && <meta property="og:image:alt" content={fotoOg.alt} />}
     <meta name="twitter:card" content={og ? 'summary_large_image' : 'summary'} />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="twitter:title" content={piatto(titolo)} />
+    {descrizione && <meta name="twitter:description" content={piatto(descrizione)} />}
+    {og && <meta name="twitter:image" content={og} />}
+    <meta name="robots" content={noindex || inProva ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
     <meta name="theme-color" content="#16150F" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preload" as="font" type="font/woff2" href={fontTesto} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={fontTitoli} crossorigin />
     <script type="application/ld+json" set:html={grafo} />
     <script is:inline>document.documentElement.classList.contains('rivela')&&document.documentElement.classList.add('js-rivela')</script>
   </head>
@@ -148,7 +170,7 @@ const accento = imp.accento || '#A08A5F'
     <a class="salta" href="#contenuto">{t('Vai al contenuto')}</a>
     <div class:list={['pagina', nudo && 'pagina--home', imp.mostraDidascalie === false && 'senza-didascalie']}>
       {nudo ? <slot name="testata" /> : <Header imp={imp} corrente={base} />}
-      {percorso.length > 0 && (
+      {percorso.length > 0 && !percorsoNascosto && (
         <nav aria-label={t('Percorso')}>
           <ol class="percorso">
             <li><a href={u('/')}>Serralunga</a></li>
@@ -163,9 +185,9 @@ const accento = imp.accento || '#A08A5F'
       </main>
       {nudo ? <slot name="piede" /> : <Footer imp={imp} breve={footerBreve} />}
       {!redazione && (
-        <div class="accesso-redazione">
+        <aside class="accesso-redazione" aria-label={t('Redazione')}>
           <a href={`/admin/login?redirect=${encodeURIComponent(u(base))}`} rel="nofollow">{t('Accesso redazione')}</a>
-        </div>
+        </aside>
       )}
     </div>
     <script src="../scripts/site.ts"></script>

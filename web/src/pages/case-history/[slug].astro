@@ -30,6 +30,9 @@ const pos = (a?: string) => (a === 'alto' ? 'pos-alto' : a === 'basso' ? 'pos-ba
   titolo={c.seo?.titolo || `${c.nome} | Serralunga`}
   descrizione={c.seo?.descrizione || c.introduzione}
   immagine={c.seo?.immagine || c.immagine}
+  percorso={[{ nome: t('Installazioni'), url: '/installazioni/' }, { nome: c.nome, url: `/case-history/${c.slug}/` }]}
+  percorsoNascosto
+  tipoOg="article"
   jsonld={jsonld}
   footerBreve
   pagina={`case-${c.slug}`}

@@ -14,6 +14,12 @@ export const INFO: Record<Lingua, { nome: string; sigla: string; og: string; htm
 const EN: Record<string, string> = {
   // struttura
   'Vai al contenuto': 'Skip to content',
+  'Ambiti di progetto': 'Project areas',
+  'Avvisi e lingua': 'Notices and language',
+  Redazione: 'Editorial staff',
+  'storie e guide di design outdoor': 'outdoor design stories and guides',
+  'Storie, guide e progetti dal mondo Serralunga: arredo outdoor di design per hôtellerie, ristorazione e contract, made in Italy dal 1825.':
+    'Stories, guides and projects from the world of Serralunga: outdoor design furniture for hospitality, restaurants and contract, made in Italy since 1825.',
   Percorso: 'Breadcrumb',
   'Accesso redazione': 'Editor login',
   Installazioni: 'Installations',

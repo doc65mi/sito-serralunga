@@ -236,6 +236,19 @@ async function completaPagine() {
     await payload.updateGlobal({ slug: 'impostazioni', data: { menu } as never })
     log('aggiornato il menu: Installazioni e Spunti e idee')
   }
+  // Condivisione: senza un'immagine predefinita si usa la foto di apertura della home (si cambia dal pannello).
+  const impo = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { immagineCondivisione?: number | null }
+  const homeFoto = (await payload.findGlobal({ slug: 'home', depth: 0 })) as unknown as { hero?: { immagine?: number | null } }
+  if (!impo.immagineCondivisione && homeFoto.hero?.immagine) {
+    await payload.updateGlobal({ slug: 'impostazioni', data: { immagineCondivisione: homeFoto.hero.immagine } as never })
+    log('impostazioni: immagine di condivisione predefinita = foto di apertura della home')
+  }
+  // Title inglese di "Spunti e idee": quello di partenza era troppo corto per i motori di ricerca.
+  const spuntiEn = (await payload.findGlobal({ slug: 'pagina-spunti', locale: 'en', fallbackLocale: false, depth: 0 })) as unknown as { seo?: { titolo?: string } }
+  if (spuntiEn.seo?.titolo === 'Ideas | Serralunga') {
+    await payload.updateGlobal({ slug: 'pagina-spunti', locale: 'en', data: { seo: { ...spuntiEn.seo, titolo: 'Ideas and inspiration | Serralunga Contract' } } as never })
+    log('spunti e idee: title inglese più descrittivo')
+  }
   // Sezione catalogo della home: i quattro cataloghi pubblicati su serralunga.com/pages/serralunga-catalogs
   // (titolo, copertina e PDF sono quelli della pagina). Si scrivono solo se i box mancano o sono ancora
   // quelli provvisori senza foto: ciò che la redazione ha già cambiato resta com'è.

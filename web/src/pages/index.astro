@@ -49,7 +49,7 @@ const tel = (a.telefono || '').replace(/[^+\d]/g, '')
   nudo
 >
   <Fragment slot="testata">
-    <div class="hf-barra">
+    <aside class="hf-barra" aria-label={t('Avvisi e lingua')}>
       <span>{imp.barra?.testo}</span>
       <div class="hf-barra__dx">
         {imp.barra?.linkEtichetta && <a href={qui(imp.barra.link)}>{imp.barra.linkEtichetta}</a>}
@@ -64,7 +64,7 @@ const tel = (a.telefono || '').replace(/[^+\d]/g, '')
           ))}
         </span>
       </div>
-    </div>
+    </aside>
     <header class="hf-testa" data-header>
       <div class="hf-testa__dentro">
         <a href={u('/')} class="hf-logo" aria-label={`${imp.nomeSito || 'Serralunga'}, home`}>
@@ -109,7 +109,8 @@ const tel = (a.telefono || '').replace(/[^+\d]/g, '')
   </section>
 
   {(h.progetti || []).length > 0 && (
-    <section id="progetti" class="hf-progetti">
+    <section id="progetti" class="hf-progetti" aria-labelledby="progetti-titolo">
+      <h2 class="sr-only" id="progetti-titolo">{t('Ambiti di progetto')}</h2>
       <div class="hf-progetti__griglia">
         {h.progetti.map((p: Doc, k: number) => (
           <div class="hf-ambito">

@@ -320,7 +320,7 @@ Object.assign(EN, {
   'Avete in mente\nuno spazio preciso?': 'Do you have a specific\nspace in mind?',
   'Partiamo dal luogo e costruiamo insieme la selezione di pezzi, colori e finiture.':
     'We start from the place and build the selection of pieces, colours and finishes together.',
-  'Spunti e idee | Serralunga': 'Ideas | Serralunga',
+  'Spunti e idee | Serralunga': 'Ideas and inspiration | Serralunga Contract',
   'Spunti e idee per arredare terrazze, giardini, dehors e bordi piscina con vasi, sedute e luci Serralunga.':
     'Ideas for furnishing terraces, gardens, outdoor dining areas and poolsides with Serralunga pots, seating and lighting.',
 })

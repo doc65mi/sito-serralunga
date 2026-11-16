@@ -3,6 +3,7 @@ import * as migration_20261114_112936_inglese_home_fullscreen from './20261114_1
 import * as migration_20261115_091656_installazioni_spunti_creazioni from './20261115_091656_installazioni_spunti_creazioni';
 import * as migration_20261115_093539_ai_blocchi_articoli from './20261115_093539_ai_blocchi_articoli';
 import * as migration_20261115_115540_home_box_catalogo from './20261115_115540_home_box_catalogo';
+import * as migration_20261116_074854_immagine_condivisione from './20261116_074854_immagine_condivisione';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20261115_115540_home_box_catalogo.up,
     down: migration_20261115_115540_home_box_catalogo.down,
-    name: '20261115_115540_home_box_catalogo'
+    name: '20261115_115540_home_box_catalogo',
+  },
+  {
+    up: migration_20261116_074854_immagine_condivisione.up,
+    down: migration_20261116_074854_immagine_condivisione.down,
+    name: '20261116_074854_immagine_condivisione'
   },
 ];

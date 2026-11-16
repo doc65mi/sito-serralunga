@@ -21,8 +21,8 @@ const jsonld = articoli.length
   : []
 ---
 <Base
-  titolo={pagina.seo?.titolo || `${piatto(pagina.titolo || 'Journal')} | Serralunga`}
-  descrizione={pagina.seo?.descrizione || pagina.testo}
+  titolo={pagina.seo?.titolo || `${piatto(pagina.titolo || 'Journal')}: ${t('storie e guide di design outdoor')} | Serralunga`}
+  descrizione={pagina.seo?.descrizione || pagina.testo || t('Storie, guide e progetti dal mondo Serralunga: arredo outdoor di design per hôtellerie, ristorazione e contract, made in Italy dal 1825.')}
   immagine={pagina.seo?.immagine}
   percorso={[{ nome: 'Journal', url: '/journal/' }]}
   jsonld={jsonld}
