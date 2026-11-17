@@ -25,7 +25,8 @@ import Ricerca from '../components/Ricerca.astro'
 import BarraSocial from '../components/BarraSocial.astro'
 import BarraMobile from '../components/BarraMobile.astro'
 import { socialAttivi } from '../lib/social'
-import { env, impostazioni, SITO, spaziDi, type Doc } from '../lib/cms'
+import { impostazioni, SITO, spaziDi, type Doc } from '../lib/cms'
+import { regolaPer } from '../lib/indicizzazione'
 import { isMedia, originale } from '../lib/media'
 import { piatto } from '../lib/testo'
 import { INFO, LINGUE, percorso as inLingua, senzaLingua, traduttore } from '../lib/lingua'
@@ -72,8 +73,9 @@ const assoluto = (u: string) => (u.startsWith('/') ? `${sito}${u}` : u)
 // Senza una foto propria la pagina usa l'immagine di condivisione delle impostazioni.
 const fotoOg = isMedia(immagine) ? immagine : isMedia(imp.immagineCondivisione) ? imp.immagineCondivisione : null
 const og = fotoOg ? assoluto(originale(fotoOg)) : undefined
-// Finché il sito è in prova (BLOCCA_INDICIZZAZIONE=1) anche le pagine dichiarano noindex.
-const inProva = env('BLOCCA_INDICIZZAZIONE') === '1'
+// Indicizzazione 1.00: noindex se il sito è in prova (BLOCCA_INDICIZZAZIONE=1, prevale), per l'area riservata
+// e l'Account, per gli indirizzi scelti in Impostazioni > Indicizzazione e per i contenuti con l'opzione nel gruppo SEO.
+const fuoriDaiMotori = noindex || (await regolaPer(base)).noindex
 
 const organizzazione = {
   '@type': 'Organization',
@@ -162,7 +164,7 @@ const accento = imp.accento || '#A08A5F'
     <meta name="twitter:title" content={piatto(titolo)} />
     {descrizione && <meta name="twitter:description" content={piatto(descrizione)} />}
     {og && <meta name="twitter:image" content={og} />}
-    <meta name="robots" content={noindex || inProva ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+    <meta name="robots" content={fuoriDaiMotori ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
     <meta name="theme-color" content="#16150F" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

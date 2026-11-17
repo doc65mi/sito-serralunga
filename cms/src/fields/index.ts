@@ -61,6 +61,36 @@ export const seoField: Field = {
       maxLength: 170,
     },
     { name: 'immagine', type: 'upload', relationTo: 'media', label: 'Immagine per la condivisione' },
+    // Indicizzazione 1.00: vale per italiano e inglese. BLOCCA_INDICIZZAZIONE=1 del server prevale sempre.
+    {
+      type: 'collapsible',
+      label: 'Motori di ricerca, sitemap e ricerca interna',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'motori',
+          type: 'select',
+          label: 'Motori di ricerca',
+          defaultValue: 'indicizza',
+          options: [
+            { label: 'Indicizza (predefinito)', value: 'indicizza' },
+            { label: 'Non indicizzare (noindex, fuori dalla sitemap)', value: 'noindex' },
+            { label: 'Non indicizzare e blocca in robots.txt', value: 'blocca' },
+          ],
+          admin: {
+            description:
+              'Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.',
+          },
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'fuoriSitemap', type: 'checkbox', label: 'Escludi dalla sitemap', defaultValue: false, admin: { description: 'La pagina resta indicizzabile ma non è segnalata nella sitemap.' } },
+            { name: 'fuoriRicerca', type: 'checkbox', label: 'Escludi dalla ricerca interna del sito', defaultValue: false },
+          ],
+        },
+      ],
+    },
   ],
 }
 

@@ -2,15 +2,20 @@ import type { APIRoute } from 'astro'
 import { elenco, globale, impostazioni, SITO, type Doc } from '../lib/cms'
 import { piatto } from '../lib/testo'
 import { categorie, urlCategoria, urlProdotto } from '../lib/catalogo'
+import { inProva, regolaDa, regole } from '../lib/indicizzazione'
 
 /**
- * Version: 1.01
+ * Version: 1.02
+ * 1.02: corretto lo scambio tra Contract e Materiali (le pagine Contract finivano tra i materiali con /materiali/undefined/).
  * /llms.txt: riassunto del sito per gli assistenti (GEO/AEO). Chi è l'azienda, quali pagine
  * contano e dove trovarle, scritto con i contenuti pubblicati nel CMS: niente di inventato.
+ * Indicizzazione 1.00: fuori le pagine noindex, l'area riservata e l'Account; con BLOCCA_INDICIZZAZIONE=1 solo il nome.
  */
 export const GET: APIRoute = async () => {
+  const reg = await regole()
   const cats = await categorie()
-  const [imp, home, prodotti, designer, casi, spunti, articoli, materiali, contract] = await Promise.all([
+  // Stesso ordine delle letture qui sotto (contract prima di materiali).
+  const [imp, home, prodotti, designer, casi, spunti, articoli, contract, materiali] = await Promise.all([
     impostazioni('it'),
     globale('home', 0, 'it').catch(() => ({}) as Doc),
     elenco('prodotti', { depth: 0, 'where[schedaPubblicata][equals]': 'true' }).catch(() => []),
@@ -22,8 +27,8 @@ export const GET: APIRoute = async () => {
     elenco('materiali', { depth: 0 }).catch(() => []),
   ])
   const a = imp.azienda || {}
-  const riga = (titolo: string, url: string, nota?: string) => `- [${piatto(titolo)}](${SITO}${url})${nota ? `: ${piatto(nota).slice(0, 180)}` : ''}`
-  const sezione = (titolo: string, righe: string[]) => (righe.length ? `## ${titolo}\n\n${righe.join('\n')}` : '')
+  const riga = (titolo: string, url: string, nota?: string) => !regolaDa(reg, url).sitemap ? '' : `- [${piatto(titolo)}](${SITO}${url})${nota ? `: ${piatto(nota).slice(0, 180)}` : ''}`
+  const sezione = (titolo: string, righe: string[]) => ((righe = righe.filter(Boolean)).length ? `## ${titolo}\n\n${righe.join('\n')}` : '')
   const corpo = [
     `# ${imp.nomeSito || 'Serralunga'}`,
     `> ${piatto(home.seo?.descrizione || home.hero?.testo || 'Arredi, vasi e illuminazione di design per esterni e interni, per progetti contract e hospitality.')}`,
@@ -56,5 +61,6 @@ export const GET: APIRoute = async () => {
     sezione('Spunti e idee', spunti.map((s) => riga(s.titolo, `/spunti-e-idee/${s.slug}/`, s.estratto))),
     sezione('Journal', articoli.map((x) => riga(x.titolo, `/journal/${x.slug}/`, x.estratto))),
   ].filter(Boolean).join('\n\n')
+  if (inProva()) return new Response(`# ${imp.nomeSito || 'Serralunga'}\n`, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Robots-Tag': 'noindex' } })
   return new Response(`${corpo}\n`, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=900' } })
 }

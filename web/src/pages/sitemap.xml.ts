@@ -3,10 +3,17 @@ import { elenco, SITO } from '../lib/cms'
 import { INFO, LINGUE, percorso } from '../lib/lingua'
 import { isMedia, originale } from '../lib/media'
 import { categorie, conteggi, urlCategoria, urlProdotto } from '../lib/catalogo'
+import { regolaDa, regole, SEZIONI } from '../lib/indicizzazione'
 
-/** Sitemap con tutte le lingue: ogni indirizzo dichiara le versioni alternative (hreflang). */
+/**
+ * Sitemap con tutte le lingue: ogni indirizzo dichiara le versioni alternative (hreflang).
+ * Indicizzazione 1.00: restano fuori le pagine noindex o bloccate, l'area riservata e l'Account,
+ * i contenuti con «Escludi dalla sitemap» e i tipi scelti in Impostazioni > Indicizzazione.
+ * Con BLOCCA_INDICIZZAZIONE=1 la sitemap resta completa (robots.txt chiude tutto) per il controllo SEO.
+ */
 export const GET: APIRoute = async () => {
   const base = SITO
+  const reg = await regole()
   const [prodotti, casi, designer, spunti, articoli, pagine, contract, materiali, heritage] = await Promise.all([
     elenco('prodotti', { depth: 0, limit: 2000, 'where[schedaPubblicata][equals]': 'true' }),
     elenco('case-history', { depth: 1 }),
@@ -26,30 +33,23 @@ export const GET: APIRoute = async () => {
   const xml = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   // Foto principale della pagina: aiuta la ricerca per immagini.
   const foto = (m?: unknown) => (isMedia(m) ? `<image:image><image:loc>${xml(originale(m).replace(/^\//, `${base}/`))}</image:loc></image:image>` : '')
-  const url = (path: string, data?: string, immagine?: unknown) =>
-    LINGUE.map(
+  const url = (path: string, data?: string, immagine?: unknown, tipo?: string) =>
+    !regolaDa(reg, path, tipo).sitemap ? '' : LINGUE.map(
       (l) =>
         `<url><loc>${base}${percorso(l, path)}</loc>${data ? `<lastmod>${data.slice(0, 10)}</lastmod>` : ''}${alternative(path)}${foto(immagine)}</url>`,
     ).join('')
   const voci = [
-    url('/'),
-    url('/designer/'),
-    url('/installazioni/'),
-    url('/spunti-e-idee/'),
-    url('/journal/'),
-    url('/catalogo/'),
-    url('/materiali/'),
-    url('/heritage/'),
-    ...heritage.map((x) => url(`/heritage/${x.slug}/`, x.updatedAt, x.immagine)),
-    ...cats.filter((c) => (n.get(c.id) || 0) > 0).map((c) => url(urlCategoria(c, cats), c.updatedAt, c.immagine)),
-    ...prodotti.map((p) => url(urlProdotto(p, cats), p.updatedAt)),
-    ...casi.map((c) => url(`/case-history/${c.slug}/`, c.updatedAt, c.immagine)),
-    ...designer.map((d) => url(`/designer/${d.slug}/`, d.updatedAt, d.ritratto)),
-    ...spunti.map((x) => url(`/spunti-e-idee/${x.slug}/`, x.updatedAt, x.immagine)),
-    ...articoli.map((x) => url(`/journal/${x.slug}/`, x.updatedAt, x.immagine)),
-    ...materiali.map((x) => url(`/materiali/${x.slug}/`, x.updatedAt, x.immagine)),
-    ...pagine.map((x) => url(`/${x.slug}/`, x.updatedAt, x.immagine)),
-    ...contract.map((x) => url(x.sezione === 'principale' ? '/contract/' : `/contract/${x.sezione}/`, x.updatedAt, x.immagine)),
+    ...SEZIONI.map((x) => url(x.url)),
+    ...heritage.map((x) => url(`/heritage/${x.slug}/`, x.updatedAt, x.immagine, 'pagine-heritage')),
+    ...cats.filter((c) => (n.get(c.id) || 0) > 0).map((c) => url(urlCategoria(c, cats), c.updatedAt, c.immagine, 'categorie')),
+    ...prodotti.map((p) => url(urlProdotto(p, cats), p.updatedAt, undefined, 'prodotti')),
+    ...casi.map((c) => url(`/case-history/${c.slug}/`, c.updatedAt, c.immagine, 'case-history')),
+    ...designer.map((d) => url(`/designer/${d.slug}/`, d.updatedAt, d.ritratto, 'designer')),
+    ...spunti.map((x) => url(`/spunti-e-idee/${x.slug}/`, x.updatedAt, x.immagine, 'spunti')),
+    ...articoli.map((x) => url(`/journal/${x.slug}/`, x.updatedAt, x.immagine, 'articoli')),
+    ...materiali.map((x) => url(`/materiali/${x.slug}/`, x.updatedAt, x.immagine, 'materiali')),
+    ...pagine.map((x) => url(`/${x.slug}/`, x.updatedAt, x.immagine, 'pagine')),
+    ...contract.map((x) => url(x.sezione === 'principale' ? '/contract/' : `/contract/${x.sezione}/`, x.updatedAt, x.immagine, 'contract')),
   ]
   return new Response(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${voci.join('')}</urlset>`,

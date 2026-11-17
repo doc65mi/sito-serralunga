@@ -1,5 +1,8 @@
 /**
- * Motore di ricerca interno (Version: 1.01).
+ * Motore di ricerca interno (Version: 1.02).
+ * 1.02: corretto l’errore «duplicate ID» (pagine, materiali, heritage e contract con lo stesso numero) che
+ *       fermava tutta la ricerca; fuori l'area riservata e l'Account (sempre), i contenuti con «Escludi dalla ricerca interna» o
+ *       «Blocca in robots.txt» e gli indirizzi bloccati in Impostazioni > Indicizzazione (lib/indicizzazione.ts).
  * 1.01: anche le pagine di sezione (home, catalogo, designer, installazioni, journal, materiali,
  *       spunti, heritage); pagine di servizio (contatti, listino, FAQ, privacy, cookie) lette con
  *       un ordinamento valido (la collezione non ha il campo «ordine»).
@@ -18,6 +21,7 @@ import { isMedia, src } from './media'
 import { piatto } from './testo'
 import type { Lingua } from './lingua'
 import { categorie, conteggi, urlCategoria, urlProdotto } from './catalogo'
+import { regolaDa, regole, SEZIONI } from './indicizzazione'
 
 export type Tipo = 'prodotto' | 'categoria' | 'designer' | 'progetto' | 'spunto' | 'articolo' | 'pagina'
 
@@ -157,6 +161,7 @@ const TIPOLOGIA_CASE: Record<Lingua, string> = { it: 'Progetto', en: 'Project' }
 async function voci(L: Lingua): Promise<Voce[]> {
   // Un tipo di contenuto che non si legge non ferma la ricerca, ma resta traccia nel registro del server.
   const nulla = (e: unknown) => (console.error('[ricerca] lettura non riuscita:', (e as Error)?.message), [] as Doc[])
+  const reg = await regole()
   const [cats, prodotti, designer, casi, spunti, articoli, pagine, materiali, contract, heritage] = await Promise.all([
     categorie(L),
     elenco('prodotti', { depth: 1, limit: 2000, sort: 'nome', 'where[schedaPubblicata][equals]': 'true' }, L).catch(nulla),
@@ -175,11 +180,14 @@ async function voci(L: Lingua): Promise<Voce[]> {
   const n = await conteggi(cats, L).catch(() => new Map())
   const en = L === 'en'
   const tutti: Voce[] = []
+  const visti = new Set<string>()
   const aggiungi = (tipo: Tipo, d: Doc, url: string, extra: { titolo?: string; sotto?: string; chiavi?: string[]; img?: string } = {}) => {
     const titolo = extra.titolo || titoloDi(d)
-    if (!titolo || !url) return
+    if (!titolo || !url || visti.has(`${tipo}:${url}`) || !regolaDa(reg, url).ricerca) return
+    visti.add(`${tipo}:${url}`)
     tutti.push({
-      id: `${tipo}:${d.id}`,
+      // Indirizzo come chiave: pagine, materiali, heritage e contract sono tutti «pagina» e i loro id si ripetono.
+      id: `${tipo}:${url}`,
       tipo,
       titolo,
       url,
@@ -230,16 +238,7 @@ async function voci(L: Lingua): Promise<Voce[]> {
   return tutti
 }
 
-const SEZIONI: { globale: string; url: string; nome: Record<Lingua, string> }[] = [
-  { globale: 'home', url: '/', nome: { it: 'Serralunga, home', en: 'Serralunga, home' } },
-  { globale: 'pagina-catalogo', url: '/catalogo/', nome: { it: 'Catalogo', en: 'Catalogue' } },
-  { globale: 'pagina-designer', url: '/designer/', nome: { it: 'Designer', en: 'Designers' } },
-  { globale: 'pagina-installazioni', url: '/installazioni/', nome: { it: 'Installazioni', en: 'Installations' } },
-  { globale: 'pagina-spunti', url: '/spunti-e-idee/', nome: { it: 'Spunti e idee', en: 'Ideas' } },
-  { globale: 'pagina-journal', url: '/journal/', nome: { it: 'Journal', en: 'Journal' } },
-  { globale: 'pagina-materiali', url: '/materiali/', nome: { it: 'Materiali', en: 'Materials' } },
-  { globale: 'pagina-heritage', url: '/heritage/', nome: { it: 'Heritage', en: 'Heritage' } },
-]
+// Pagine di sezione: elenco in lib/indicizzazione.ts (SEZIONI).
 
 type Indice = { ms: MiniSearch<Voce>; voci: Map<string, Voce>; t: number }
 const indici = new Map<Lingua, Indice>()

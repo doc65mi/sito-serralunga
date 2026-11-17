@@ -557,6 +557,15 @@ export interface Prodotti {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -822,6 +831,15 @@ export interface Designer {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1103,6 +1121,15 @@ export interface Categorie {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1470,6 +1497,15 @@ export interface CaseHistory {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1684,6 +1720,15 @@ export interface Spunti {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1941,6 +1986,15 @@ export interface Materiali {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -2152,6 +2206,15 @@ export interface Articoli {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -2362,6 +2425,15 @@ export interface Pagine {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -2700,6 +2772,15 @@ export interface Contract {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -2968,6 +3049,15 @@ export interface PagineHeritage {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -3465,6 +3555,9 @@ export interface ProdottiSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -3606,6 +3699,9 @@ export interface CategorieSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -3838,6 +3934,9 @@ export interface CaseHistorySelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -3983,6 +4082,9 @@ export interface SpuntiSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4151,6 +4253,9 @@ export interface MaterialiSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4310,6 +4415,9 @@ export interface ArticoliSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4454,6 +4562,9 @@ export interface PagineSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4672,6 +4783,9 @@ export interface ContractSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4850,6 +4964,9 @@ export interface PagineHeritageSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -5028,6 +5145,9 @@ export interface DesignerSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -5569,6 +5689,15 @@ export interface Home {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -5772,6 +5901,15 @@ export interface PaginaCatalogo {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -5975,6 +6113,15 @@ export interface PaginaDesigner {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -6198,6 +6345,15 @@ export interface PaginaInstallazioni {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -6404,6 +6560,15 @@ export interface PaginaSpunti {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -6607,6 +6772,15 @@ export interface PaginaMateriali {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -6797,6 +6971,15 @@ export interface PaginaJournal {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -7167,6 +7350,15 @@ export interface PaginaHeritage {
     titolo?: string | null;
     descrizione?: string | null;
     immagine?: (number | null) | Media;
+    /**
+     * Noindex: la pagina resta visibile a chi ha il link ma esce da Google, Bing e assistenti AI, dalla sitemap e da llms.txt. «Blocca» aggiunge anche Disallow in robots.txt: usarlo solo per pagine mai indicizzate, perché un motore bloccato non legge più il noindex.
+     */
+    motori?: ('indicizza' | 'noindex' | 'blocca') | null;
+    /**
+     * La pagina resta indicizzabile ma non è segnalata nella sitemap.
+     */
+    fuoriSitemap?: boolean | null;
+    fuoriRicerca?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -7366,6 +7558,37 @@ export interface Impostazioni {
   linkedinInsight?: string | null;
   cookieTesto?: string | null;
   cookieLink?: string | null;
+  indicizzazione?: {
+    /**
+     * Uno per riga, senza dominio: /listino/. Con * alla fine vale per tutta la sezione: /journal/*. La versione inglese (/en/...) segue da sola.
+     */
+    percorsiNoindex?: string | null;
+    /**
+     * Uno per riga, stesse regole. Sono anche noindex e fuori dalla sitemap. Da usare solo per indirizzi che non devono essere letti affatto: un motore bloccato non vede il noindex, e una pagina già indicizzata può restare nei risultati senza descrizione.
+     */
+    percorsiBloccati?: string | null;
+    /**
+     * Le pagine restano indicizzabili e raggiungibili dai link: non sono solo elencate nella sitemap.
+     */
+    tipiFuoriSitemap?:
+      | (
+          | 'prodotti'
+          | 'categorie'
+          | 'designer'
+          | 'case-history'
+          | 'spunti'
+          | 'articoli'
+          | 'materiali'
+          | 'pagine-heritage'
+          | 'contract'
+          | 'pagine'
+        )[]
+      | null;
+    /**
+     * «Solo per rispondere» blocca in robots.txt GPTBot, ClaudeBot, CCBot, Google-Extended e Applebot-Extended e lascia OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User e Perplexity. Google e Bing non cambiano.
+     */
+    assistentiAI?: ('tutti' | 'ricerca' | 'nessuno') | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -7844,6 +8067,9 @@ export interface HomeSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   _status?: T;
   updatedAt?: T;
@@ -7981,6 +8207,9 @@ export interface PaginaCatalogoSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -8118,6 +8347,9 @@ export interface PaginaDesignerSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -8266,6 +8498,9 @@ export interface PaginaInstallazioniSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -8403,6 +8638,9 @@ export interface PaginaSpuntiSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -8540,6 +8778,9 @@ export interface PaginaMaterialiSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -8668,6 +8909,9 @@ export interface PaginaJournalSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   _status?: T;
   updatedAt?: T;
@@ -8922,6 +9166,9 @@ export interface PaginaHeritageSelect<T extends boolean = true> {
         titolo?: T;
         descrizione?: T;
         immagine?: T;
+        motori?: T;
+        fuoriSitemap?: T;
+        fuoriRicerca?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -9046,6 +9293,14 @@ export interface ImpostazioniSelect<T extends boolean = true> {
   linkedinInsight?: T;
   cookieTesto?: T;
   cookieLink?: T;
+  indicizzazione?:
+    | T
+    | {
+        percorsiNoindex?: T;
+        percorsiBloccati?: T;
+        tipiFuoriSitemap?: T;
+        assistentiAI?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

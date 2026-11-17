@@ -106,3 +106,14 @@ I rich result delle FAQ su Google sono limitati: il markup resta utile per altri
 - Pagine senza foto propria: per la condivisione usano l'immagine predefinita di Impostazioni > Marchio.
 - Finché `BLOCCA_INDICIZZAZIONE=1` ogni pagina dichiara `noindex`; la pagina 404 è sempre `noindex`.
 - Testi piccoli sul fondo chiaro: si usa `--accent-testo` e `--muted` (contrasto almeno 4,5:1), non `--accent`.
+
+## Indicizzazione 1.00 (aggiunta il 2026-11-17)
+
+Un solo modulo decide cosa va ai motori: `web/src/lib/indicizzazione.ts` (usato da pagine, sitemap, robots.txt, llms.txt e ricerca interna). Ordine di forza:
+
+1. `BLOCCA_INDICIZZAZIONE=1` sul server: tutto `noindex` e robots.txt `Disallow: /`. Prevale su tutto. La sitemap resta completa per il controllo SEO.
+2. Area riservata (`/contract/area-riservata/`) e pagina Account (link «Account» del menu o della barra mobile, se interno): sempre `noindex, follow` (meta e intestazione `X-Robots-Tag`), `Cache-Control: private, no-store`, fuori da sitemap, llms.txt e ricerca interna. Non si elencano in robots.txt, così i motori leggono il noindex.
+3. Impostazioni > Indicizzazione: indirizzi noindex, indirizzi bloccati in robots.txt (uno per riga, `*` finale per una sezione, `/en/` segue da solo), tipi di contenuto fuori dalla sitemap, assistenti AI (tutti / solo per rispondere / nessuno).
+4. Ogni pagina, prodotto, categoria, designer, progetto, articolo, materiale, pagina Contract o Heritage e pagina di sezione: SEO > «Motori di ricerca, sitemap e ricerca interna» (Indicizza / Non indicizzare / Non indicizzare e blocca in robots.txt; Escludi dalla sitemap; Escludi dalla ricerca interna).
+
+Regola: per togliere una pagina da Google si usa noindex, non robots.txt (un motore bloccato non legge il noindex).

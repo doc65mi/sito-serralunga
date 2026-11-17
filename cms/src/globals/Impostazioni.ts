@@ -356,6 +356,75 @@ export const Impostazioni: GlobalConfig = {
             },
           ],
         },
+        {
+          // Indicizzazione 1.00: regole per tutto il sito. Ogni pagina, prodotto o scheda ha in più le sue
+          // opzioni nel gruppo SEO. BLOCCA_INDICIZZAZIONE=1 del server prevale su tutto.
+          label: 'Indicizzazione',
+          description:
+            'Regole per motori di ricerca, sitemap, robots.txt e assistenti AI. Ogni contenuto ha in più le sue opzioni in SEO > «Motori di ricerca, sitemap e ricerca interna». Finché sul server BLOCCA_INDICIZZAZIONE=1 tutto il sito resta fuori dai motori, qualunque cosa sia scritta qui. L’area riservata e la pagina Account sono sempre escluse.',
+          fields: [
+            {
+              name: 'indicizzazione',
+              type: 'group',
+              label: 'Indicizzazione',
+              fields: [
+                {
+                  name: 'percorsiNoindex',
+                  type: 'textarea',
+                  label: 'Indirizzi da non indicizzare (noindex, fuori dalla sitemap)',
+                  admin: {
+                    description:
+                      'Uno per riga, senza dominio: /listino/. Con * alla fine vale per tutta la sezione: /journal/*. La versione inglese (/en/...) segue da sola.',
+                    placeholder: '/listino/\n/journal/*',
+                  },
+                },
+                {
+                  name: 'percorsiBloccati',
+                  type: 'textarea',
+                  label: 'Indirizzi da bloccare in robots.txt (Disallow)',
+                  admin: {
+                    description:
+                      'Uno per riga, stesse regole. Sono anche noindex e fuori dalla sitemap. Da usare solo per indirizzi che non devono essere letti affatto: un motore bloccato non vede il noindex, e una pagina già indicizzata può restare nei risultati senza descrizione.',
+                  },
+                },
+                {
+                  name: 'tipiFuoriSitemap',
+                  type: 'select',
+                  hasMany: true,
+                  label: 'Tipi di contenuto da togliere dalla sitemap',
+                  admin: { description: 'Le pagine restano indicizzabili e raggiungibili dai link: non sono solo elencate nella sitemap.' },
+                  options: [
+                    { label: 'Prodotti', value: 'prodotti' },
+                    { label: 'Categorie del catalogo', value: 'categorie' },
+                    { label: 'Designer', value: 'designer' },
+                    { label: 'Case history', value: 'case-history' },
+                    { label: 'Spunti e idee', value: 'spunti' },
+                    { label: 'Journal', value: 'articoli' },
+                    { label: 'Materiali', value: 'materiali' },
+                    { label: 'Heritage', value: 'pagine-heritage' },
+                    { label: 'Contract', value: 'contract' },
+                    { label: 'Pagine (contatti, listino, FAQ, legali...)', value: 'pagine' },
+                  ],
+                },
+                {
+                  name: 'assistentiAI',
+                  type: 'select',
+                  label: 'Assistenti AI (ChatGPT, Claude, Perplexity, Gemini...)',
+                  defaultValue: 'tutti',
+                  options: [
+                    { label: 'Possono leggere il sito (consigliato per GEO/AEO)', value: 'tutti' },
+                    { label: 'Solo per rispondere e citare, non per addestrare modelli', value: 'ricerca' },
+                    { label: 'Nessun assistente AI', value: 'nessuno' },
+                  ],
+                  admin: {
+                    description:
+                      '«Solo per rispondere» blocca in robots.txt GPTBot, ClaudeBot, CCBot, Google-Extended e Applebot-Extended e lascia OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User e Perplexity. Google e Bing non cambiano.',
+                  },
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
   ],
