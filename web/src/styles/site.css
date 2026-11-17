@@ -1,6 +1,6 @@
 /*
  * site.css — stile unico del sito Serralunga
- * Version: 1.10
+ * Version: 1.11
  * Fonte: template/*.dc.html (Claude Design), regole in file-md/design.md.
  * Nessuno stile nelle pagine: ogni valore passa da un token qui sotto.
  */
@@ -40,6 +40,9 @@
 
   --wrap: 1560px;
   --gut: 48px;
+  /* Larghezza esterna di un contenitore che ha i margini laterali (--gut) al suo interno:
+     così il contenuto resta largo al massimo --wrap, come nelle sezioni e nel footer. */
+  --wrap-fuori: calc(var(--wrap) + 2 * var(--gut));
   --sec: clamp(110px, 13vw, 180px);   /* spazio verticale delle sezioni della home */
   --sec-int: clamp(90px, 11vw, 150px);/* spazio verticale delle pagine interne */
   --head-gap: clamp(44px, 5vw, 68px); /* intestazione → contenuto */
@@ -125,6 +128,7 @@ h1, h2, h3 { margin: 0; font-weight: 300; }
 /* ---------- 4. Contenitori ---------- */
 .wrap { max-width: var(--wrap); margin: 0 auto; }
 .pad { padding-left: var(--gut); padding-right: var(--gut); }
+.wrap.pad { max-width: var(--wrap-fuori); }
 .sez { padding-top: var(--sec); padding-bottom: var(--sec); }
 .sez-int { padding-top: var(--sec-int); padding-bottom: var(--sec-int); }
 .fondo-paper { background: var(--paper); }
@@ -189,7 +193,8 @@ h1, h2, h3 { margin: 0; font-weight: 300; }
   border-bottom: 1px solid rgba(22, 21, 15, .10);
 }
 .testa__dentro {
-  position: relative; max-width: var(--wrap); margin: 0 auto; padding: 16px var(--gut);
+  /* Stessa larghezza e stessi margini di contenuti e footer (1.11): logo e menu sulle linee del contenuto. */
+  position: relative; max-width: var(--wrap-fuori); margin: 0 auto; padding: 16px var(--gut);
   display: flex; align-items: center; justify-content: space-between; gap: 40px;
 }
 .testa__logo { display: flex; align-items: center; flex: none; color: var(--ink); }
@@ -223,10 +228,12 @@ h1, h2, h3 { margin: 0; font-weight: 300; }
 }
 .menu-apri { display: none; }
 /* Link "Modifica menu" per chi ha fatto l'accesso al pannello */
+/* Dentro la testata, appeso al bordo alto al centro: non copre più il titolo della pagina (1.11). */
 .testa__modifica {
-  position: absolute; left: var(--gut); bottom: -26px; z-index: 2; font-size: 11px; letter-spacing: .12em;
-  text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 4px 10px;
+  position: absolute; left: 50%; top: 0; transform: translateX(-50%); z-index: 2; font-size: 10px; line-height: 1.4;
+  letter-spacing: .12em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 2px 10px;
 }
+@media (max-width: 700px) { .testa__modifica { display: none; } }
 
 @media (max-width: 1100px) {
   .testa__logo img { height: 44px; }
@@ -480,7 +487,7 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
   position: relative; padding: 0 0 96px;
   background: linear-gradient(90deg, rgba(22, 21, 15, .05) 1px, transparent 1px) var(--gut) 0 / 25% 100%, var(--paper);
 }
-.hero__wrap { position: relative; max-width: var(--wrap); margin: 0 auto; padding: 56px var(--gut) 0; }
+.hero__wrap { position: relative; max-width: var(--wrap-fuori); margin: 0 auto; padding: 56px var(--gut) 0; }
 .hero__palco { position: relative; height: min(66vh, 660px); min-height: 520px; }
 .hero__slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1000ms ease; visibility: hidden; }
 .hero__slide.attiva { opacity: 1; visibility: visible; }
@@ -992,7 +999,8 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
    Misure e colori sono quelli del template; le classi hf-* valgono solo per la home. */
 .pagina--home {
   --hf-paper: #f5f3ef; --hf-paper-2: #fbfaf8; --hf-sand: #edeae3; --hf-ink: #16150f;
-  --hf-text: #6e6a60; --hf-muted: #6b665c; --hf-on-dark: #cfc9bc; --hf-gut: 40px;
+  --hf-text: #6e6a60; --hf-muted: #6b665c; --hf-on-dark: #cfc9bc;
+  --hf-gut: var(--gut); /* stessi margini di testata e footer (1.11): prima 40px, la testata ne usa 48 */
   background: var(--hf-paper); color: var(--hf-ink); overflow-x: clip; font-weight: 400;
 }
 .pagina--home a:hover { color: var(--accent-testo); }
@@ -1165,7 +1173,6 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
   .hf-chi h2, .hf-contract h2, .hf-listino h2 { font-size: 40px; }
 }
 @media (max-width: 800px) {
-  .pagina--home { --hf-gut: 20px; }
   .hf-hero__testi { bottom: 44px; gap: 22px; }
   .hf-hero__riga { gap: 26px; }
   .hf-progetti, .hf-coll { padding-top: 72px; padding-bottom: 72px; }
