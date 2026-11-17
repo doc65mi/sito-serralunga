@@ -1,0 +1,51 @@
+---
+/**
+ * Version: 1.00
+ * Consensi in fondo a ogni modulo: casella privacy (obbligatoria, con link all'informativa),
+ * casella newsletter (facoltativa, spenta in partenza) e spazio per reCAPTCHA v2.
+ * Con reCAPTCHA v3 non si vede nulla: il token si chiede a Google al momento dell'invio
+ * (scripts/site.ts). Testi e link: pannello > Moduli, newsletter ed email.
+ */
+import { impostazioni } from '../lib/cms'
+import { percorso, traduttore } from '../lib/lingua'
+import { moduli, recaptcha } from '../lib/moduli'
+/** newsletter=false: modulo di iscrizione alla newsletter (consenso specifico, niente casella facoltativa). */
+interface Props { newsletter?: boolean; tono?: 'chiaro' | 'scuro' }
+const { newsletter = true, tono = 'chiaro' } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const [m, imp] = await Promise.all([moduli(L), impostazioni(L)])
+const rc = recaptcha(imp)
+const linkPrivacy = m.privacyLink ? percorso(L, m.privacyLink) : ''
+// «informativa privacy» / «privacy policy» diventa il link alla pagina dell'informativa.
+const etichetta = newsletter ? m.testi.privacyEtichetta : m.testi.privacyNewsletter
+const parola = L === 'en' ? /privacy policy/i : /informativa privacy/i
+const pezzo = linkPrivacy ? etichetta.match(parola) : null
+const prima = pezzo ? etichetta.slice(0, pezzo.index) : etichetta
+const dopo = pezzo ? etichetta.slice((pezzo.index || 0) + pezzo[0].length) : ''
+const id = `c${Math.random().toString(36).slice(2, 8)}`
+---
+<div class:list={['consensi', `consensi--${tono}`]}>
+  <label class="consenso" for={`${id}-p`}>
+    <input type="checkbox" id={`${id}-p`} name="privacy" value="1" required />
+    <span>
+      {prima}{pezzo && <a href={linkPrivacy} target="_blank" rel="noopener">{pezzo[0]}</a>}{dopo}
+    </span>
+  </label>
+  {newsletter && m.newsletterNeiModuli !== false && (
+    <label class="consenso" for={`${id}-n`}>
+      <input type="checkbox" id={`${id}-n`} name="newsletter" value="1" />
+      <span>{m.testi.newsletterEtichetta} <em class="consenso__facoltativo">({t('facoltativo')})</em></span>
+    </label>
+  )}
+  {rc?.tipo === 'v2' && <div class="consensi__recaptcha" data-recaptcha-v2></div>}
+  {rc?.tipo === 'v3' && (
+    <p class="consensi__nota">
+      {L === 'en' ? 'This form is protected by reCAPTCHA: Google’s ' : 'Modulo protetto da reCAPTCHA: valgono la '}
+      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a>
+      {L === 'en' ? ' and ' : ' e i '}
+      <a href="https://policies.google.com/terms" target="_blank" rel="noopener">{L === 'en' ? 'Terms of Service' : 'Termini di servizio'}</a>
+      {L === 'en' ? ' apply.' : ' di Google.'}
+    </p>
+  )}
+</div>

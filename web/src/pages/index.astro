@@ -11,6 +11,7 @@ import { globale, impostazioni, type Doc } from '../lib/cms'
 import { isMedia, urlFile } from '../lib/media'
 import { piatto, esterno } from '../lib/testo'
 import { percorso, traduttore } from '../lib/lingua'
+import Consensi from '../components/Consensi.astro'
 
 const L = Astro.locals.lingua
 const t = traduttore(L)
@@ -239,6 +240,7 @@ const categorie = [
           <label class="modulo__trappola" aria-hidden="true">{t('Non compilare')}<input type="text" name="sito_web" tabindex="-1" autocomplete="off" /></label>
           <input type="hidden" name="pagina" value={L === 'it' ? 'Home' : `Home (${L.toUpperCase()})`} />
           <input type="hidden" name="lingua" value={L} />
+          <Consensi tono="chiaro" />
           <button type="submit" class="hf-btn-scuro">{cat.pulsante || t('Richiesta catalogo')}</button>
           <p class="hf-modulo__esito" data-esito role="status" aria-live="polite"></p>
         </form>

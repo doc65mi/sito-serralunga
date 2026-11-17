@@ -1,0 +1,35 @@
+---
+/**
+ * Version: 1.00
+ * Nel <head>: meta di verifica (Search Console, Bing, altre), chiave reCAPTCHA per i moduli e
+ * consenso predefinito «negato» di Google Consent Mode v2. Gli script di statistica e marketing
+ * (GA4, GTM, Ads, Clarity, Meta, LinkedIn) si caricano solo dopo il consenso nel banner
+ * (scripts/consenso.ts). Codici: pannello > Impostazioni del sito > Sicurezza e tracciamento.
+ */
+import type { Doc } from '../lib/cms'
+import { recaptcha } from '../lib/moduli'
+import { codiciTracciamento, tracciamentoAttivo } from '../lib/tracciamento'
+interface Props { imp: Doc }
+const { imp } = Astro.props
+const L = Astro.locals.lingua
+const codici = codiciTracciamento(imp)
+const attivo = tracciamentoAttivo(imp)
+const rc = recaptcha(imp)
+const verifica = (v: unknown) => (typeof v === 'string' ? v.trim().replace(/^.*content=["']?([^"'\s>]+).*$/i, '$1').slice(0, 200) : '')
+const altre = (imp.altreVerifiche || [])
+  .map((v: Doc) => ({ nome: String(v.nome || '').trim(), valore: verifica(v.valore) }))
+  .filter((v: { nome: string; valore: string }) => /^[a-z0-9:._-]{2,60}$/i.test(v.nome) && v.valore)
+const config = JSON.stringify({ ...codici, lingua: L }).replace(/</g, '\\u003c')
+---
+{verifica(imp.googleSearchConsole) && <meta name="google-site-verification" content={verifica(imp.googleSearchConsole)} />}
+{verifica(imp.bingWebmaster) && <meta name="msvalidate.01" content={verifica(imp.bingWebmaster)} />}
+{altre.map((v: { nome: string; valore: string }) => <meta name={v.nome} content={v.valore} />)}
+{rc && <meta name="recaptcha" content={rc.chiave} data-tipo={rc.tipo} data-lingua={L} />}
+{attivo && (
+  <script is:inline data-tracciamento={config}>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied', functionality_storage: 'granted', security_storage: 'granted', wait_for_update: 500 });
+    gtag('set', 'ads_data_redaction', true);
+  </script>
+)}

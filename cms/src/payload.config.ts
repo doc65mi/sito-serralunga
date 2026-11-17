@@ -28,6 +28,9 @@ import { endpointSincronizza } from './strumenti/sincronizza'
 import { Ai } from './globals/Ai'
 import { PaginaJournal } from './globals/PaginaJournal'
 import { Richieste } from './collections/Richieste'
+import { IscrittiNewsletter } from './collections/IscrittiNewsletter'
+import { Moduli } from './globals/Moduli'
+import { endpointModuli } from './moduli/endpoints'
 import { Users } from './collections/Users'
 import { Home } from './globals/Home'
 import { Impostazioni } from './globals/Impostazioni'
@@ -121,9 +124,9 @@ export default buildConfig({
     fallback: true,
   },
   // Righe degli elenchi chiuse con il proprio nome (fields/etichette.ts) invece di "Voce 01".
-  collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, Users].map(conEtichette),
-  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Ai].map(conEtichette),
-  endpoints: [...endpointAi, ...endpointStrumenti, ...endpointSincronizza],
+  collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, IscrittiNewsletter, Users].map(conEtichette),
+  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Moduli, Ai].map(conEtichette),
+  endpoints: [...endpointAi, ...endpointStrumenti, ...endpointSincronizza, ...endpointModuli],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },

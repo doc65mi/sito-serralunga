@@ -1,12 +1,15 @@
 ---
 /**
- * Footer unico di tutto il sito, home compresa (Version: 2.00): marchio, colonne di link,
- * contatti e riga legale. Si cambia nel pannello: Impostazioni del sito > Footer.
+ * Footer unico di tutto il sito, home compresa (Version: 2.01): marchio, colonne di link,
+ * contatti, iscrizione alla newsletter (finestra), riga legale e preferenze cookie. Si cambia nel pannello: Impostazioni del sito > Footer.
  */
 import { isMedia, originale, src, tipoRidotte } from '../lib/media'
 import { esterno } from '../lib/testo'
 import type { Doc } from '../lib/cms'
 import { percorso, traduttore } from '../lib/lingua'
+import { moduli } from '../lib/moduli'
+import { tracciamentoAttivo } from '../lib/tracciamento'
+import ModuloNewsletter from './ModuloNewsletter.astro'
 interface Props { imp: Doc }
 const { imp } = Astro.props
 const L = Astro.locals.lingua
@@ -18,6 +21,9 @@ const logoAvif = logo && tipoRidotte(logo) === 'image/avif' ? src(logo, 400) : '
 const nome = imp.nomeSito || 'Serralunga'
 const copyright = (imp.copyright || '© {anno} Serralunga').replace('{anno}', String(new Date().getFullYear()))
 const tel = (a.telefono || '').replace(/[^+\d]/g, '')
+const m = await moduli(L)
+const newsletter = m.newsletterAttiva !== false
+const cookie = tracciamentoAttivo(imp)
 const fuori = (link?: string) => (esterno(link) ? { target: '_blank', rel: 'noopener' } : {})
 ---
 <footer class="piede">
@@ -30,6 +36,11 @@ const fuori = (link?: string) => (esterno(link) ? { target: '_blank', rel: 'noop
         </picture>
       ) : <span class="logo__testo">{nome}</span>}
       {imp.descrizione && <p>{imp.descrizione}</p>}
+      {newsletter && (
+        <a class="piede__newsletter" href={u('/newsletter/')} data-apri-newsletter aria-haspopup="dialog">
+          {m.testi.newsletterLink} <span aria-hidden="true">→</span>
+        </a>
+      )}
     </div>
     {(imp.colonne || []).map((c: Doc) => (
       <nav class="piede__col" aria-label={c.titolo}>
@@ -49,6 +60,15 @@ const fuori = (link?: string) => (esterno(link) ? { target: '_blank', rel: 'noop
     <span>{copyright}</span>
     <span class="piede__legali">
       {(imp.legali || []).map((l: Doc) => (l.link ? <a href={u(l.link)}>{l.etichetta}</a> : <span>{l.etichetta}</span>))}
+      {cookie && <button type="button" class="piede__pulsante" data-cookie-preferenze>{t('Preferenze cookie')}</button>}
     </span>
   </div>
 </footer>
+{newsletter && (
+  <dialog class="finestra" data-finestra-newsletter aria-labelledby="nl-titolo">
+    <div class="finestra__corpo">
+      <button type="button" class="finestra__chiudi" data-chiudi aria-label={t('Chiudi')}>×</button>
+      <ModuloNewsletter fonte={`Footer — ${Astro.url.pathname}`} idTitolo="nl-titolo" />
+    </div>
+  </dialog>
+)}

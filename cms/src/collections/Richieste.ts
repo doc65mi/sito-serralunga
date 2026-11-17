@@ -1,4 +1,4 @@
-import type { Access, CollectionAfterChangeHook, CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
 
 import { soloRedazione } from '../access'
 
@@ -9,30 +9,11 @@ const dalSitoOppureRedazione: Access = ({ req }) => {
   return Boolean(chiave) && req.headers.get('x-sito-chiave') === chiave
 }
 
-const avvisaRedazione: CollectionAfterChangeHook = async ({ doc, operation, req }) => {
-  const destinatario = process.env.NOTIFICHE_EMAIL
-  if (operation !== 'create' || !destinatario || !process.env.SMTP_HOST) return doc
-  try {
-    await req.payload.sendEmail({
-      to: destinatario,
-      replyTo: doc.email,
-      subject: `Nuova richiesta dal sito: ${doc.struttura || doc.referente || doc.email}`,
-      text: [
-        `Struttura o studio: ${doc.struttura || '-'}`,
-        `Referente: ${doc.referente || '-'}`,
-        `Email: ${doc.email}`,
-        `Città del progetto: ${doc.citta || '-'}`,
-        `Messaggio: ${doc.messaggio || '-'}`,
-        `Pagina: ${doc.pagina || '-'}`,
-      ].join('\n'),
-    })
-  } catch (err) {
-    req.payload.logger.error({ err, msg: 'Invio email richiesta non riuscito' })
-  }
-  return doc
-}
-
-/** Richieste arrivate dai moduli del sito (Home "Raccontateci il vostro luogo"). */
+/**
+ * Version: 1.01
+ * Richieste arrivate dai moduli del sito (home, preventivi, cataloghi Contract, pagine con modulo).
+ * Avviso alla redazione ed email di conferma al cliente partono da /api/moduli/richiesta (moduli/endpoints.ts).
+ */
 export const Richieste: CollectionConfig = {
   slug: 'richieste',
   labels: { singular: 'Richiesta', plural: 'Richieste' },
@@ -48,7 +29,6 @@ export const Richieste: CollectionConfig = {
     update: soloRedazione,
     delete: soloRedazione,
   },
-  hooks: { afterChange: [avvisaRedazione] },
   fields: [
     {
       type: 'row',
@@ -77,6 +57,27 @@ export const Richieste: CollectionConfig = {
         { label: 'Gestita', value: 'gestita' },
       ],
       admin: { position: 'sidebar' },
+    },
+    {
+      name: 'lingua',
+      type: 'select',
+      label: 'Lingua',
+      defaultValue: 'it',
+      options: [
+        { label: 'Italiano', value: 'it' },
+        { label: 'English', value: 'en' },
+      ],
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      type: 'collapsible',
+      label: 'Consensi',
+      admin: { position: 'sidebar' },
+      fields: [
+        { name: 'privacyIl', type: 'date', label: 'Privacy accettata il', admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } } },
+        { name: 'newsletter', type: 'checkbox', label: 'Ha chiesto la newsletter', admin: { readOnly: true } },
+        { name: 'emailCliente', type: 'checkbox', label: 'Email di conferma inviata al cliente', admin: { readOnly: true } },
+      ],
     },
   ],
 }

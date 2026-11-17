@@ -94,7 +94,7 @@ In **Environment Variables** → **Developer view** incollare il contenuto di `c
 | `SEED_PASSWORD` | password del primo utente (lunga, da cambiare poi dal pannello) |
 | `SEED_AUTOMATICO` | `1`: al primo avvio, con il database vuoto, carica da solo utente, testi e foto |
 | `BLOCCA_INDICIZZAZIONE` | `1` finché il sito è in prova, `0` al lancio |
-| `NOTIFICHE_EMAIL`, `SMTP_*` | facoltative: email di avviso a ogni richiesta dei moduli |
+| `NOTIFICHE_EMAIL`, `SMTP_*` | facoltative: valgono solo se nel pannello (Moduli, newsletter ed email › Email) il server di posta e gli avvisi sono vuoti. Meglio compilarli nel pannello, dove c'è anche «Invia un'email di prova» |
 
 `SERVICE_PASSWORD_64_PAYLOAD` e `SERVICE_PASSWORD_64_SITOCHIAVE` le genera Coolify: **non vanno toccate**. La prima cifra anche le chiavi API dell'AI salvate nel pannello: se cambia, le chiavi vanno reinserite.
 

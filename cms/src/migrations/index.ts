@@ -10,6 +10,7 @@ import * as migration_20261116_083258_materiali_colori from './20261116_083258_m
 import * as migration_20261116_083653_catalogo_categorie from './20261116_083653_catalogo_categorie';
 import * as migration_20261116_084128_heritage from './20261116_084128_heritage';
 import * as migration_20261116_174732_disegno_quotato_campioni from './20261116_174732_disegno_quotato_campioni';
+import * as migration_20261117_082017_moduli_newsletter_tracciamento from './20261117_082017_moduli_newsletter_tracciamento';
 
 export const migrations = [
   {
@@ -70,6 +71,11 @@ export const migrations = [
   {
     up: migration_20261116_174732_disegno_quotato_campioni.up,
     down: migration_20261116_174732_disegno_quotato_campioni.down,
-    name: '20261116_174732_disegno_quotato_campioni'
+    name: '20261116_174732_disegno_quotato_campioni',
+  },
+  {
+    up: migration_20261117_082017_moduli_newsletter_tracciamento.up,
+    down: migration_20261117_082017_moduli_newsletter_tracciamento.down,
+    name: '20261117_082017_moduli_newsletter_tracciamento'
   },
 ];

@@ -1,0 +1,88 @@
+---
+/**
+ * Version: 1.00
+ * Pagina della newsletter (/newsletter/ e /en/newsletter/):
+ *  - senza parametri: modulo di iscrizione (serve anche senza JavaScript);
+ *  - ?conferma=… e ?disiscrivi=…: link delle email. Si chiede un clic su un pulsante
+ *    perché i filtri antispam aprono i link delle email da soli: con un semplice GET
+ *    confermerebbero o disiscriverebbero al posto della persona.
+ *  - ?iscrizione=…: esito dell'invio senza JavaScript.
+ */
+import Base from '../layouts/Base.astro'
+import ModuloNewsletter from '../components/ModuloNewsletter.astro'
+import { percorso, traduttore } from '../lib/lingua'
+import { aPayload, moduli } from '../lib/moduli'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const m = await moduli(L)
+const q = Astro.url.searchParams
+const valido = (v: string | null) => (v && /^[A-Za-z0-9_-]{20,100}$/.test(v) ? v : '')
+
+let stato: 'modulo' | 'chiedi-conferma' | 'chiedi-disiscrizione' | 'iscritto' | 'disiscritto' | 'attesa' | 'errore' = 'modulo'
+let token = ''
+if (Astro.request.method === 'POST') {
+  const dati = await Astro.request.formData().catch(() => null)
+  token = valido(String(dati?.get('token') || ''))
+  const azione = dati?.get('azione') === 'disiscrivi' ? 'disiscrivi' : 'conferma'
+  if (token) {
+    try {
+      const { stato: s, dati: esito } = await aPayload('newsletter-azione', { token, azione })
+      stato = s < 300 ? (esito.stato === 'disiscritto' ? 'disiscritto' : esito.stato === 'iscritto' ? 'iscritto' : 'attesa') : 'errore'
+    } catch {
+      stato = 'errore'
+    }
+  } else stato = 'errore'
+} else if (valido(q.get('conferma'))) {
+  token = valido(q.get('conferma'))
+  stato = 'chiedi-conferma'
+} else if (valido(q.get('disiscrivi'))) {
+  token = valido(q.get('disiscrivi'))
+  stato = 'chiedi-disiscrizione'
+} else if (q.get('iscrizione')) {
+  const v = q.get('iscrizione')
+  stato = v === 'iscritto' ? 'iscritto' : v === 'errore' ? 'errore' : 'attesa'
+}
+const qui = percorso(L, '/newsletter/')
+const titolo = {
+  modulo: m.testi.newsletterTitolo,
+  'chiedi-conferma': t('Confermate l’iscrizione'),
+  'chiedi-disiscrizione': t('Annullare l’iscrizione?'),
+  iscritto: t('Iscrizione completata'),
+  disiscritto: t('Iscrizione annullata'),
+  attesa: t('Controllate la vostra email'),
+  errore: t('Link non valido o scaduto'),
+}[stato]
+const testo = {
+  modulo: '',
+  'chiedi-conferma': t('Premete il pulsante per completare l’iscrizione alla newsletter Serralunga.'),
+  'chiedi-disiscrizione': t('Premete il pulsante per non ricevere più la newsletter Serralunga.'),
+  iscritto: t('Grazie: riceverete novità di prodotto, progetti contract e nuovi cataloghi. Vi abbiamo inviato un’email di benvenuto.'),
+  disiscritto: t('Non riceverete più la newsletter. Potete iscrivervi di nuovo in qualsiasi momento.'),
+  attesa: m.testi.newsletterGrazie,
+  errore: t('Il link potrebbe essere già stato usato o non essere completo. Potete iscrivervi di nuovo qui sotto.'),
+}[stato]
+---
+<Base titolo={`${titolo} | Serralunga`} descrizione={m.testi.newsletterTesto} percorso={[{ nome: 'Newsletter', url: '/newsletter/' }]} pagina="newsletter" noindex>
+  <section class="pagina-nl">
+    {stato === 'modulo' ? (
+      <ModuloNewsletter fonte={L === 'en' ? 'Newsletter page (EN)' : 'Pagina newsletter'} titoloComeH1 />
+    ) : (
+      <div class="nl">
+        <span class="nl__occhiello">Newsletter</span>
+        <h1 class="nl__titolo">{titolo}</h1>
+        <span class="nl__filetto" aria-hidden="true"></span>
+        <p class="nl__testo">{testo}</p>
+        {(stato === 'chiedi-conferma' || stato === 'chiedi-disiscrizione') && (
+          <form method="post" action={qui}>
+            <input type="hidden" name="token" value={token} />
+            <input type="hidden" name="azione" value={stato === 'chiedi-conferma' ? 'conferma' : 'disiscrivi'} />
+            <button type="submit" class="nl__invia">{stato === 'chiedi-conferma' ? t('Confermo l’iscrizione') : t('Annulla l’iscrizione')}</button>
+          </form>
+        )}
+        {stato === 'errore' && <ModuloNewsletter fonte="Pagina newsletter" />}
+        {(stato === 'iscritto' || stato === 'disiscritto') && <p class="nl__testo"><a href={percorso(L, '/')}>{t('Torna alla home')} →</a></p>}
+      </div>
+    )}
+  </section>
+</Base>

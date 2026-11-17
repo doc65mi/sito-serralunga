@@ -1,11 +1,12 @@
 ---
 /**
- * Version: 1.01
+ * Version: 1.02 (consensi privacy e newsletter, reCAPTCHA, cataloghi con link nell'email di conferma)
  * Modulo "Richiedi il volume" (template: Home v2 #listino). Invia a /api/richiesta, che salva in Payload.
  * Con `cataloghi` (pagina Contract > Cataloghi) chi compila sceglie i PDF: la richiesta li registra
  * e, dopo l'invio, la pagina mostra i link per scaricarli (raccolta contatti, alberatura B2C).
  */
 import Img from './Img.astro'
+import Consensi from './Consensi.astro'
 import { impostazioni, type Doc } from '../lib/cms'
 import { percorso, traduttore } from '../lib/lingua'
 import { fmt } from '../lib/testo'
@@ -24,7 +25,7 @@ const email = imp.azienda?.email || 'info@serralunga.com'
         {cataloghi.map((c, k) => (
           <li>
             <label class="scelta-catalogo">
-              <input type="checkbox" name="catalogo" value={c.titolo} data-catalogo={k} checked />
+              <input type="checkbox" name="catalogo" value={`${c.titolo}||${c.file || ''}`} data-catalogo={k} checked />
               <span class="foto r-34 scelta-catalogo__foto"><Img media={c.immagine} alt="" sizes="(max-width: 560px) 50vw, 22vw" larghezza={700} /></span>
               <span class="scelta-catalogo__nome">{c.titolo}</span>
               <span class="scelta-catalogo__tipo">PDF</span>
@@ -44,6 +45,7 @@ const email = imp.azienda?.email || 'info@serralunga.com'
   <input type="hidden" name="pagina" value={L === 'it' ? pagina : `${pagina} (${L.toUpperCase()})`} />
   <input type="hidden" name="lingua" value={L} />
   <input type="hidden" name="ritorno" value={percorso(L, Astro.url.pathname)} />
+  <Consensi tono="scuro" />
   <button type="submit" class="btn btn--chiaro">{pulsante}</button>
   <p class="modulo__esito" data-esito role="status" aria-live="polite"></p>
   {cataloghi.length > 0 && (
@@ -56,5 +58,4 @@ const email = imp.azienda?.email || 'info@serralunga.com'
       </ul>
     </div>
   )}
-  <p class="modulo__privacy">{t('Usiamo questi dati solo per rispondere alla richiesta. Scrivici a')} <a href={`mailto:${email}`}>{email}</a> {t('per cancellarli.')}</p>
 </form>

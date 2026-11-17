@@ -16,7 +16,7 @@
  *    o riesce tutto o non cambia nulla. «Ripristina» rimette la copia.
  *
  * Restano di ciascun sito, mai copiati: utenti e accessi, preferenze del pannello,
- * richieste ricevute dai clienti (modulo catalogo), registro delle migrazioni.
+ * richieste ricevute dai clienti (modulo catalogo), iscritti alla newsletter, registro delle migrazioni.
  * Le chiavi API dell'AI viaggiano in chiaro solo dentro la connessione HTTPS e vengono
  * cifrate di nuovo con il PAYLOAD_SECRET del sito che le riceve.
  *
@@ -34,7 +34,7 @@ import type { Pool, PoolClient } from 'pg'
 
 import { cifra, decifra, uguali } from '../ai/segreto'
 
-export const VERSIONE_SINCRONIZZA = '1.00'
+export const VERSIONE_SINCRONIZZA = '1.01'
 
 /** Tabelle che restano di ciascun sito. Le tabelle dei blocchi bloccati si svuotano soltanto. */
 const ESCLUSE = new Set([
@@ -47,7 +47,18 @@ const ESCLUSE = new Set([
   'payload_migrations',
   'payload_kv',
   'richieste',
+  'iscritti_newsletter',
 ])
+/**
+ * Tabelle con chiavi cifrate (AI, reCAPTCHA, password SMTP): si inviano in chiaro e chi riceve
+ * le cifra con il proprio segreto. Le colonne qui sotto, se arrivano vuote, restano quelle di
+ * chi riceve: server di posta e destinatari degli avvisi sono propri di ciascun sito.
+ */
+const CON_SEGRETI = ['ai', 'impostazioni', 'moduli']
+const RESTANO_SE_VUOTE: Record<string, string[]> = {
+  moduli: ['smtp_host', 'smtp_porta', 'smtp_utente', 'smtp_password', 'notifiche_a', 'mittente_email'],
+  impostazioni: ['recaptcha_chiave_segreta'],
+}
 const DA_SVUOTARE = ['payload_locked_documents_rels', 'payload_locked_documents']
 const CIFRATO = 'c1:'
 
@@ -136,7 +147,7 @@ interface Pacchetto {
   origine: string
   migrazioni: string[]
   tabelle: Record<string, { colonne: string[]; righe: Record<string, unknown>[] }>
-  /** Chiavi dell'AI decifrate dal sito che invia: chi riceve le cifra con il proprio segreto. */
+  /** Chiavi (AI, reCAPTCHA, SMTP) decifrate dal sito che invia: chi riceve le cifra con il proprio segreto. */
   chiari?: Record<string, Record<string, string>>
 }
 
@@ -150,15 +161,19 @@ async function esporta(payload: Payload, origine: string, decifraChiavi: boolean
     const r = await db.query(`SELECT row_to_json(x) AS r FROM ${q(t)} x`)
     p.tabelle[t] = { colonne, righe: r.rows.map((x: { r: Record<string, unknown> }) => x.r) }
   }
-  if (decifraChiavi && p.tabelle.ai) {
-    p.chiari = { ai: {} }
-    for (const riga of p.tabelle.ai.righe)
-      for (const [k, v] of Object.entries(riga))
-        if (typeof v === 'string' && v.startsWith(CIFRATO)) {
-          const chiaro = decifra(v)
-          if (chiaro) p.chiari.ai[k] = chiaro
-          riga[k] = null
-        }
+  if (decifraChiavi) {
+    p.chiari = {}
+    for (const t of CON_SEGRETI) {
+      if (!p.tabelle[t]) continue
+      const chiari: Record<string, string> = (p.chiari[t] = {})
+      for (const riga of p.tabelle[t].righe)
+        for (const [k, v] of Object.entries(riga))
+          if (typeof v === 'string' && v.startsWith(CIFRATO)) {
+            const chiaro = decifra(v)
+            if (chiaro) chiari[k] = chiaro
+            riga[k] = null
+          }
+    }
   }
   return p
 }
@@ -233,8 +248,8 @@ async function importa(payload: Payload, p: Pacchetto, log: (r: string) => void,
     await client.query('BEGIN')
     // Chiavi dell'AI: quelle in arrivo si cifrano con il segreto di questo sito;
     // se non ne arrivano, restano quelle già salvate qui.
-    let aiPrima: Record<string, unknown> | undefined
-    if (locali.ai) aiPrima = (await client.query(`SELECT * FROM ai ORDER BY id LIMIT 1`)).rows[0]
+    const prima: Record<string, Record<string, unknown> | undefined> = {}
+    for (const t of CON_SEGRETI) if (locali[t]) prima[t] = (await client.query(`SELECT * FROM ${q(t)} ORDER BY id LIMIT 1`)).rows[0]
 
     const { lista, ciclo, autoRif } = await ordine(client, nomi)
     if (ciclo.length) {
@@ -251,12 +266,14 @@ async function importa(payload: Payload, p: Pacchetto, log: (r: string) => void,
       const arrivo = p.tabelle[t]
       if (!arrivo || !arrivo.righe.length) continue
       const colonne = arrivo.colonne.filter((c) => locali[t].includes(c))
-      if (t === 'ai') {
+      if (CON_SEGRETI.includes(t)) {
+        const qui = prima[t]
+        const restano = RESTANO_SE_VUOTE[t] || []
         for (const r of arrivo.righe) {
           for (const c of colonne) {
-            const chiaro = p.chiari?.ai?.[c]
+            const chiaro = p.chiari?.[t]?.[c]
             if (chiaro) r[c] = cifra(chiaro)
-            else if (r[c] == null && typeof aiPrima?.[c] === 'string' && String(aiPrima[c]).startsWith(CIFRATO)) r[c] = aiPrima[c]
+            else if ((r[c] == null || r[c] === '') && qui?.[c] != null && qui[c] !== '' && (restano.includes(c) || String(qui[c]).startsWith(CIFRATO))) r[c] = qui[c]
           }
         }
       }

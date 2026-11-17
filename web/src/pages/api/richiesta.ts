@@ -1,30 +1,18 @@
 import type { APIRoute } from 'astro'
-import { CMS_INTERNAL, env } from '../../lib/cms'
 import { lingua, traduttore } from '../../lib/lingua'
+import { aPayload, ipDi, stessoSito } from '../../lib/moduli'
 
 /**
- * Riceve il modulo del sito e lo salva nella collezione "richieste" di Payload.
- * La chiave SITO_CHIAVE (uguale in Astro e in Payload) autorizza la scrittura.
+ * Version: 1.01
+ * Riceve i moduli di richiesta del sito e li passa a Payload (/api/moduli/richiesta), che
+ * controlla privacy e reCAPTCHA, salva la richiesta, iscrive alla newsletter se richiesto
+ * e invia l'email di conferma al cliente e l'avviso alla redazione.
  *
  * Accetta solo invii dal sito stesso. Il controllo è qui e non in astro.config
  * (security.checkOrigin) perché l'indirizzo pubblico arriva a runtime da SITO_URL
  * e dietro il proxy di Coolify l'host visto da Node non è quello pubblico.
  */
-const host = (u: string | null) => {
-  try { return u ? new URL(u).host : '' } catch { return '' }
-}
-const stessoSito = (request: Request) => {
-  const origine = host(request.headers.get('origin')) || host(request.headers.get('referer'))
-  if (!origine) return false
-  const ammessi = [
-    host(env('SITO_URL')),
-    request.headers.get('x-forwarded-host')?.split(',')[0].trim(),
-    request.headers.get('host'),
-  ].filter(Boolean)
-  return ammessi.includes(origine)
-}
-
-export const POST: APIRoute = async ({ request, redirect }) => {
+export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   const vuole = (request.headers.get('accept') || '').includes('application/json')
   let t = traduttore('it')
   let home = '/'
@@ -53,29 +41,39 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Campo trappola per i bot: se è compilato fingiamo che sia andata bene.
   if (String(dati.get('sito_web') || '')) return risposta(200, { ok: true })
 
-  const campo = (k: string) => String(dati.get(k) || '').trim().slice(0, 500)
+  const campo = (k: string, max = 500) => String(dati.get(k) || '').trim().slice(0, max)
   const email = campo('email')
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return risposta(400, { errore: 'Inserite un indirizzo email valido' })
+  if (!dati.get('privacy')) return risposta(400, { errore: 'Per inviare serve il consenso privacy' })
+
+  // Cataloghi scelti: «Titolo||/percorso/del.pdf».
+  const cataloghi = dati
+    .getAll('catalogo')
+    .slice(0, 12)
+    .map((v) => {
+      const [titolo, url = ''] = String(v).split('||')
+      return { titolo: titolo.trim().slice(0, 120), url: url.trim().slice(0, 600) }
+    })
+    .filter((c) => c.titolo)
 
   try {
-    const res = await fetch(`${CMS_INTERNAL}/api/richieste`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-sito-chiave': env('SITO_CHIAVE') },
-      body: JSON.stringify({
-        struttura: campo('struttura'),
-        referente: campo('referente'),
-        email,
-        citta: campo('citta'),
-        messaggio: [
-          campo('tipologia') && `Tipologia di struttura: ${campo('tipologia')}`,
-          dati.getAll('catalogo').length > 0 && `Cataloghi richiesti: ${dati.getAll('catalogo').map((c) => String(c).trim().slice(0, 120)).slice(0, 12).join(', ')}`,
-          campo('messaggio'),
-        ].filter(Boolean).join('\n'),
-        pagina: campo('pagina'),
-      }),
+    const { stato, dati: esito } = await aPayload('richiesta', {
+      lingua: L,
+      struttura: campo('struttura', 200),
+      referente: campo('referente', 200),
+      email,
+      citta: campo('citta', 200),
+      tipologia: campo('tipologia', 200),
+      messaggio: campo('messaggio', 4000),
+      pagina: campo('pagina', 300),
+      cataloghi,
+      privacy: true,
+      newsletter: Boolean(dati.get('newsletter')),
+      recaptcha: campo('g-recaptcha-response', 4000) || campo('recaptcha', 4000),
+      ip: ipDi(request, clientAddress),
     })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    return risposta(201, { ok: true })
+    if (stato >= 400) return risposta(stato, { errore: String(esito.errore || 'Invio non riuscito') })
+    return risposta(201, { ok: true, newsletter: esito.newsletter ?? null })
   } catch (err) {
     console.error('Richiesta non salvata', err)
     return risposta(502, { errore: 'Invio non riuscito' })

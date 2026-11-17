@@ -81,6 +81,7 @@ export interface Config {
     media: Media;
     'spazi-foto': SpaziFoto;
     richieste: Richieste;
+    'iscritti-newsletter': IscrittiNewsletter;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -103,6 +104,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'spazi-foto': SpaziFotoSelect<false> | SpaziFotoSelect<true>;
     richieste: RichiesteSelect<false> | RichiesteSelect<true>;
+    'iscritti-newsletter': IscrittiNewsletterSelect<false> | IscrittiNewsletterSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -123,6 +125,7 @@ export interface Config {
     'pagina-journal': PaginaJournal;
     'pagina-heritage': PaginaHeritage;
     impostazioni: Impostazioni;
+    moduli: Moduli;
     ai: Ai;
   };
   globalsSelect: {
@@ -135,6 +138,7 @@ export interface Config {
     'pagina-journal': PaginaJournalSelect<false> | PaginaJournalSelect<true>;
     'pagina-heritage': PaginaHeritageSelect<false> | PaginaHeritageSelect<true>;
     impostazioni: ImpostazioniSelect<false> | ImpostazioniSelect<true>;
+    moduli: ModuliSelect<false> | ModuliSelect<true>;
     ai: AiSelect<false> | AiSelect<true>;
   };
   locale: 'it' | 'en';
@@ -2793,6 +2797,32 @@ export interface Richieste {
   messaggio?: string | null;
   pagina?: string | null;
   stato?: ('nuova' | 'lavorazione' | 'gestita') | null;
+  lingua?: ('it' | 'en') | null;
+  privacyIl?: string | null;
+  newsletter?: boolean | null;
+  emailCliente?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Per esportare: selezionare le righe e usare l’elenco, oppure filtrare per stato «Iscritto».
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "iscritti-newsletter".
+ */
+export interface IscrittiNewsletter {
+  id: number;
+  email: string;
+  nome?: string | null;
+  azienda?: string | null;
+  stato?: ('attesa' | 'iscritto' | 'disiscritto') | null;
+  lingua?: ('it' | 'en') | null;
+  fonte?: string | null;
+  consensoIl?: string | null;
+  confermatoIl?: string | null;
+  ip?: string | null;
+  disiscrittoIl?: string | null;
+  token?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2902,6 +2932,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'richieste';
         value: number | Richieste;
+      } | null)
+    | ({
+        relationTo: 'iscritti-newsletter';
+        value: number | IscrittiNewsletter;
       } | null)
     | ({
         relationTo: 'users';
@@ -4731,6 +4765,29 @@ export interface RichiesteSelect<T extends boolean = true> {
   messaggio?: T;
   pagina?: T;
   stato?: T;
+  lingua?: T;
+  privacyIl?: T;
+  newsletter?: T;
+  emailCliente?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "iscritti-newsletter_select".
+ */
+export interface IscrittiNewsletterSelect<T extends boolean = true> {
+  email?: T;
+  nome?: T;
+  azienda?: T;
+  stato?: T;
+  lingua?: T;
+  fonte?: T;
+  consensoIl?: T;
+  confermatoIl?: T;
+  ip?: T;
+  disiscrittoIl?: T;
+  token?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -6695,6 +6752,147 @@ export interface Impostazioni {
      */
     sitoUfficiale?: string | null;
   };
+  recaptchaAttivo?: boolean | null;
+  recaptchaTipo?: ('v3' | 'v2') | null;
+  /**
+   * Sotto questo punteggio l’invio è respinto. 0,5 è il valore suggerito da Google.
+   */
+  recaptchaSoglia?: number | null;
+  recaptchaChiaveSito?: string | null;
+  /**
+   * Resta cifrata sul server. Senza chiave segreta i moduli funzionano senza reCAPTCHA.
+   */
+  recaptchaChiaveSegreta?: string | null;
+  /**
+   * Solo il valore content del meta tag google-site-verification (oppure verifica via DNS e lasciare vuoto).
+   */
+  googleSearchConsole?: string | null;
+  /**
+   * Solo il valore content del meta tag msvalidate.01. Bing può anche importare il sito da Search Console.
+   */
+  bingWebmaster?: string | null;
+  /**
+   * Es. Pinterest (p:domain_verify), Yandex (yandex-verification), Meta (facebook-domain-verification).
+   */
+  altreVerifiche?:
+    | {
+        nome: string;
+        valore: string;
+        id?: string | null;
+      }[]
+    | null;
+  googleAnalytics?: string | null;
+  /**
+   * Facoltativo. Se Analytics e Ads sono già dentro GTM, lasciare vuoti gli altri campi Google per non contare due volte.
+   */
+  googleTagManager?: string | null;
+  microsoftClarity?: string | null;
+  googleAds?: string | null;
+  /**
+   * La parte dopo la barra (AW-123/etichetta). Parte a ogni modulo inviato con successo.
+   */
+  googleAdsConversione?: string | null;
+  /**
+   * Solo il numero. A ogni modulo inviato parte l’evento Lead.
+   */
+  metaPixel?: string | null;
+  /**
+   * Utile per il pubblico B2B. Solo il numero.
+   */
+  linkedinInsight?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina: «Usiamo cookie tecnici necessari al sito e, solo con il vostro consenso, cookie di statistica e di marketing…»
+   */
+  cookieTesto?: string | null;
+  /**
+   * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+   */
+  cookieLink?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Vale per tutti i moduli del sito: richiesta catalogo della home, richieste di preventivo, cataloghi Contract, pagine con modulo e iscrizione alla newsletter dal footer.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "moduli".
+ */
+export interface Moduli {
+  id: number;
+  /**
+   * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+   */
+  privacyLink?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio). Le parole «informativa privacy» diventano il link alla pagina indicata sopra.
+   */
+  privacyEtichetta?: string | null;
+  newsletterNeiModuli?: boolean | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio).
+   */
+  newsletterEtichetta?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio).
+   */
+  privacyNewsletter?: string | null;
+  newsletterAttiva?: boolean | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio).
+   */
+  newsletterLink?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio).
+   */
+  newsletterTitolo?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio).
+   */
+  newsletterTesto?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio).
+   */
+  newsletterPulsante?: string | null;
+  /**
+   * L’iscritto riceve un’email con il pulsante «Confermo l’iscrizione»: è la prova del consenso richiesta dal GDPR e tiene fuori gli indirizzi scritti da altri.
+   */
+  doppiaConferma?: boolean | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio). Con la doppia conferma spenta il sito mostra «Iscrizione completata».
+   */
+  newsletterGrazie?: string | null;
+  emailCliente?: boolean | null;
+  /**
+   * Uno o più indirizzi separati da virgola. Se vuoto si usa NOTIFICHE_EMAIL del server.
+   */
+  notificheA?: string | null;
+  mittenteNome?: string | null;
+  /**
+   * Deve essere autorizzato dal server di posta. Se vuoto si usa SMTP_FROM.
+   */
+  mittenteEmail?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio).
+   */
+  oggettoRichiesta?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio). Segue «Gentile Nome,»; sotto compare il riepilogo dei dati inviati.
+   */
+  testoRichiesta?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio).
+   */
+  firma?: string | null;
+  smtpHost?: string | null;
+  /**
+   * 587 (STARTTLS) o 465 (SSL).
+   */
+  smtpPorta?: number | null;
+  smtpUtente?: string | null;
+  /**
+   * Resta cifrata sul server.
+   */
+  smtpPassword?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -8054,6 +8252,61 @@ export interface ImpostazioniSelect<T extends boolean = true> {
         fondazione?: T;
         sitoUfficiale?: T;
       };
+  recaptchaAttivo?: T;
+  recaptchaTipo?: T;
+  recaptchaSoglia?: T;
+  recaptchaChiaveSito?: T;
+  recaptchaChiaveSegreta?: T;
+  googleSearchConsole?: T;
+  bingWebmaster?: T;
+  altreVerifiche?:
+    | T
+    | {
+        nome?: T;
+        valore?: T;
+        id?: T;
+      };
+  googleAnalytics?: T;
+  googleTagManager?: T;
+  microsoftClarity?: T;
+  googleAds?: T;
+  googleAdsConversione?: T;
+  metaPixel?: T;
+  linkedinInsight?: T;
+  cookieTesto?: T;
+  cookieLink?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "moduli_select".
+ */
+export interface ModuliSelect<T extends boolean = true> {
+  privacyLink?: T;
+  privacyEtichetta?: T;
+  newsletterNeiModuli?: T;
+  newsletterEtichetta?: T;
+  privacyNewsletter?: T;
+  newsletterAttiva?: T;
+  newsletterLink?: T;
+  newsletterTitolo?: T;
+  newsletterTesto?: T;
+  newsletterPulsante?: T;
+  doppiaConferma?: T;
+  newsletterGrazie?: T;
+  emailCliente?: T;
+  notificheA?: T;
+  mittenteNome?: T;
+  mittenteEmail?: T;
+  oggettoRichiesta?: T;
+  testoRichiesta?: T;
+  firma?: T;
+  smtpHost?: T;
+  smtpPorta?: T;
+  smtpUtente?: T;
+  smtpPassword?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

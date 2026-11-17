@@ -1,5 +1,5 @@
 /**
- * site.ts — comportamenti condivisi (Version: 1.01)
+ * site.ts — comportamenti condivisi (Version: 1.02: reCAPTCHA, newsletter, conversioni)
  * Ricavati dai template (classe Component di ogni .dc.html): slide della home,
  * caroselli, galleria prodotto, comparsa allo scorrimento, video, modulo richieste.
  */
@@ -241,10 +241,72 @@ if (document.documentElement.classList.contains('js-rivela')) {
   }
 }
 
-/* Modulo richieste */
-for (const form of $$<HTMLFormElement>('form[data-richiesta]')) {
-  const esito = form.querySelector<HTMLElement>('[data-esito]')
+/* reCAPTCHA (Impostazioni > Sicurezza e tracciamento): lo script di Google si carica solo
+   quando il visitatore inizia a usare un modulo, non a ogni pagina. */
+type Grecaptcha = {
+  ready(fn: () => void): void
+  execute(chiave: string, o: { action: string }): Promise<string>
+  render(el: HTMLElement, o: { sitekey: string }): number
+  getResponse(id?: number): string
+  reset(id?: number): void
+}
+const metaRc = document.querySelector<HTMLMetaElement>('meta[name="recaptcha"]')
+const rc = metaRc ? { chiave: metaRc.content, tipo: metaRc.dataset.tipo === 'v2' ? 'v2' : 'v3', lingua: metaRc.dataset.lingua || 'it' } : null
+let rcPronto: Promise<Grecaptcha> | null = null
+const caricaRecaptcha = (): Promise<Grecaptcha> | null => {
+  if (!rc) return null
+  if (!rcPronto) {
+    rcPronto = new Promise((ok, ko) => {
+      const nome = `rcPronto${Date.now()}`
+      ;(window as unknown as Record<string, () => void>)[nome] = () => {
+        const g = (window as unknown as { grecaptcha: Grecaptcha }).grecaptcha
+        g.ready(() => ok(g))
+      }
+      const s = document.createElement('script')
+      const render = rc.tipo === 'v3' ? encodeURIComponent(rc.chiave) : 'explicit'
+      s.src = `https://www.google.com/recaptcha/api.js?render=${render}&onload=${nome}&hl=${rc.lingua}`
+      s.async = true
+      s.onerror = () => ko(new Error('reCAPTCHA non raggiungibile'))
+      document.head.appendChild(s)
+    })
+  }
+  return rcPronto
+}
+const widget = new WeakMap<HTMLElement, number>()
+async function preparaRecaptcha(form: HTMLFormElement) {
+  const p = caricaRecaptcha()
+  if (!p || rc?.tipo !== 'v2') return
+  const box = form.querySelector<HTMLElement>('[data-recaptcha-v2]')
+  if (!box || widget.has(box)) return
+  const g = await p
+  if (!widget.has(box)) widget.set(box, g.render(box, { sitekey: rc.chiave }))
+}
+/** Token da allegare all'invio: v3 si chiede ora, v2 è la casella spuntata. */
+async function tokenRecaptcha(form: HTMLFormElement, azione: string): Promise<string> {
+  const p = caricaRecaptcha()
+  if (!p || !rc) return ''
+  const g = await p
+  if (rc.tipo === 'v3') return g.execute(rc.chiave, { action: azione })
+  const box = form.querySelector<HTMLElement>('[data-recaptcha-v2]')
+  const id = box ? widget.get(box) : undefined
+  return id === undefined ? '' : g.getResponse(id)
+}
+const azzeraRecaptcha = (form: HTMLFormElement) => {
+  const box = form.querySelector<HTMLElement>('[data-recaptcha-v2]')
+  const id = box ? widget.get(box) : undefined
+  if (id !== undefined) rcPronto?.then((g) => g.reset(id))
+}
+const testoRc = document.documentElement.lang === 'en'
+  ? 'Please tick the “I’m not a robot” box'
+  : 'Spuntate la casella «Non sono un robot»'
+
+/** Invio dei moduli (richieste e newsletter): JSON, messaggi in pagina, conversione. */
+function gestisci(form: HTMLFormElement, esito: HTMLElement | null, dopo: (dati: Record<string, unknown>) => void) {
   const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')
+  const azione = form.dataset.azione || 'richiesta'
+  const prepara = () => void preparaRecaptcha(form).catch(() => {})
+  form.addEventListener('focusin', prepara, { once: true })
+  form.addEventListener('pointerenter', prepara, { once: true })
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
     if (!form.reportValidity()) return
@@ -254,27 +316,78 @@ for (const form of $$<HTMLFormElement>('form[data-richiesta]')) {
       esito.textContent = form.dataset.invio || 'Invio in corso…'
     }
     try {
-      const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } })
+      const corpo = new FormData(form)
+      const token = await tokenRecaptcha(form, azione).catch(() => '')
+      if (rc?.tipo === 'v2' && !token) throw new Error(testoRc)
+      if (token) corpo.set('recaptcha', token)
+      corpo.delete('g-recaptcha-response')
+      const res = await fetch(form.action, { method: 'POST', body: corpo, headers: { Accept: 'application/json' } })
       const dati = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(dati.errore || form.dataset.errore || 'Invio non riuscito')
-      // Cataloghi (Contract > Cataloghi): dopo l'invio compaiono i link dei PDF scelti.
-      const scaricamenti = form.querySelector<HTMLElement>('[data-scaricamenti]')
-      if (scaricamenti) {
-        const scelti = new Set($$<HTMLInputElement>('input[data-catalogo]', form).filter((i) => i.checked).map((i) => i.dataset.catalogo))
-        for (const li of $$<HTMLElement>('[data-scarica]', scaricamenti)) li.hidden = !scelti.has(li.dataset.scarica)
-        scaricamenti.hidden = false
-      }
+      window.dispatchEvent(new CustomEvent('serralunga:lead', { detail: { tipo: azione } }))
+      dopo(dati)
       form.reset()
-      if (esito) esito.textContent = form.dataset.grazie || 'Grazie, vi ricontatteremo a breve.'
+      azzeraRecaptcha(form)
     } catch (err) {
+      azzeraRecaptcha(form)
       if (esito) {
         esito.dataset.tipo = 'errore'
-        esito.textContent = `${(err as Error).message}. ${form.dataset.anche || 'Potete scriverci anche a'} ${form.dataset.email || 'info@serralunga.com'}.`
+        const messaggio = (err as Error).message.replace(/\.$/, '')
+        esito.textContent = form.dataset.email
+          ? `${messaggio}. ${form.dataset.anche || 'Potete scriverci anche a'} ${form.dataset.email}.`
+          : `${messaggio}.`
       }
     } finally {
       if (btn) btn.disabled = false
     }
   })
+}
+
+/* Modulo richieste */
+for (const form of $$<HTMLFormElement>('form[data-richiesta]')) {
+  const esito = form.querySelector<HTMLElement>('[data-esito]')
+  gestisci(form, esito, () => {
+    // Cataloghi (Contract > Cataloghi): dopo l'invio compaiono i link dei PDF scelti.
+    const scaricamenti = form.querySelector<HTMLElement>('[data-scaricamenti]')
+    if (scaricamenti) {
+      const scelti = new Set($$<HTMLInputElement>('input[data-catalogo]', form).filter((i) => i.checked).map((i) => i.dataset.catalogo))
+      for (const li of $$<HTMLElement>('[data-scarica]', scaricamenti)) li.hidden = !scelti.has(li.dataset.scarica)
+      scaricamenti.hidden = false
+    }
+    if (esito) esito.textContent = form.dataset.grazie || 'Grazie, vi ricontatteremo a breve.'
+  })
+}
+
+/* Newsletter: finestra aperta dal footer e pagina /newsletter/ */
+for (const form of $$<HTMLFormElement>('form[data-newsletter]')) {
+  const box = form.closest<HTMLElement>('[data-nl]')
+  const esito = box?.querySelector<HTMLElement>('[data-esito]') || null
+  gestisci(form, esito, (dati) => {
+    if (esito) esito.textContent = dati.gia ? form.dataset.gia || '' : form.dataset.grazie || ''
+    box?.classList.add('nl--fatto')
+  })
+}
+const finestraNl = document.querySelector<HTMLDialogElement>('[data-finestra-newsletter]')
+if (finestraNl && typeof finestraNl.showModal === 'function') {
+  let origine: HTMLElement | null = null
+  for (const a of $$<HTMLAnchorElement>('[data-apri-newsletter]')) {
+    a.addEventListener('click', (e) => {
+      e.preventDefault()
+      origine = a
+      finestraNl.querySelector('[data-nl]')?.classList.remove('nl--fatto')
+      const esito = finestraNl.querySelector<HTMLElement>('[data-esito]')
+      if (esito) esito.textContent = ''
+      finestraNl.showModal()
+      finestraNl.querySelector<HTMLInputElement>('input[name="nome"]')?.focus()
+      void preparaRecaptcha(finestraNl.querySelector('form')!).catch(() => {})
+    })
+  }
+  finestraNl.querySelector('[data-chiudi]')?.addEventListener('click', () => finestraNl.close())
+  // Clic fuori dal riquadro: chiude.
+  finestraNl.addEventListener('click', (e) => {
+    if (e.target === finestraNl) finestraNl.close()
+  })
+  finestraNl.addEventListener('close', () => origine?.focus())
 }
 
 /* Modifica dalla pagina: lo strumento si carica solo per chi ha fatto l'accesso al pannello. */

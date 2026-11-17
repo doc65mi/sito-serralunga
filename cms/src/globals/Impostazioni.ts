@@ -2,8 +2,9 @@ import type { GlobalConfig } from 'payload'
 
 import { pubblico, soloRedazione } from '../access'
 import { area, immagine, link, testo } from '../fields'
+import { campoSegreto } from '../fields/segreto'
 
-/** Header, footer e dati del cliente (fonte: file-md/cliente.md). Version: 2.00 */
+/** Header, footer, dati del cliente (fonte: file-md/cliente.md), sicurezza e tracciamento. Version: 2.01 */
 export const Impostazioni: GlobalConfig = {
   slug: 'impostazioni',
   label: 'Impostazioni del sito',
@@ -158,6 +159,126 @@ export const Impostazioni: GlobalConfig = {
                 testo('fondazione', 'Anno di fondazione'),
                 link('sitoUfficiale', 'Sito ufficiale'),
               ],
+            },
+          ],
+        },
+        {
+          label: 'Sicurezza e tracciamento',
+          description:
+            'Codici di Google, Microsoft, Meta e LinkedIn. Si scrive solo l’identificativo (es. G-XXXXXXXXXX), mai il codice completo: il sito inserisce da sé gli script giusti. Statistiche e marketing partono solo dopo il consenso del visitatore nel banner dei cookie (Google Consent Mode v2).',
+          fields: [
+            {
+              type: 'collapsible',
+              label: 'reCAPTCHA (protezione dei moduli)',
+              admin: { description: 'Chiavi da https://www.google.com/recaptcha/admin con i domini del sito (prova e definitivo). Il tipo scelto qui deve essere quello scelto su Google. Vale per tutti i moduli e per l’iscrizione alla newsletter.' },
+              fields: [
+                { name: 'recaptchaAttivo', type: 'checkbox', label: 'Proteggi tutti i moduli con reCAPTCHA', defaultValue: false },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'recaptchaTipo',
+                      type: 'select',
+                      label: 'Tipo',
+                      defaultValue: 'v3',
+                      options: [
+                        { label: 'v3 invisibile (consigliato)', value: 'v3' },
+                        { label: 'v2 casella «Non sono un robot»', value: 'v2' },
+                      ],
+                    },
+                    {
+                      name: 'recaptchaSoglia',
+                      type: 'number',
+                      label: 'Soglia v3 (0–1)',
+                      defaultValue: 0.5,
+                      min: 0,
+                      max: 1,
+                      admin: { step: 0.1, description: 'Sotto questo punteggio l’invio è respinto. 0,5 è il valore suggerito da Google.' },
+                    },
+                  ],
+                },
+                { name: 'recaptchaChiaveSito', type: 'text', label: 'Chiave del sito (pubblica)', admin: { autoComplete: 'off' } },
+                campoSegreto('impostazioni', 'recaptchaChiaveSegreta', 'Chiave segreta', 'Resta cifrata sul server. Senza chiave segreta i moduli funzionano senza reCAPTCHA.'),
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Verifica dei motori di ricerca',
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'googleSearchConsole', type: 'text', label: 'Google Search Console', admin: { description: 'Solo il valore content del meta tag google-site-verification (oppure verifica via DNS e lasciare vuoto).' } },
+                    { name: 'bingWebmaster', type: 'text', label: 'Bing Webmaster Tools', admin: { description: 'Solo il valore content del meta tag msvalidate.01. Bing può anche importare il sito da Search Console.' } },
+                  ],
+                },
+                {
+                  name: 'altreVerifiche',
+                  type: 'array',
+                  label: 'Altre verifiche (meta tag)',
+                  labels: { singular: 'Verifica', plural: 'Verifiche' },
+                  admin: { description: 'Es. Pinterest (p:domain_verify), Yandex (yandex-verification), Meta (facebook-domain-verification).' },
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        { name: 'nome', type: 'text', label: 'name del meta tag', required: true },
+                        { name: 'valore', type: 'text', label: 'content', required: true },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Statistiche',
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'googleAnalytics', type: 'text', label: 'Google Analytics 4 (ID misurazione)', admin: { placeholder: 'G-XXXXXXXXXX' } },
+                    { name: 'googleTagManager', type: 'text', label: 'Google Tag Manager (contenitore)', admin: { placeholder: 'GTM-XXXXXXX', description: 'Facoltativo. Se Analytics e Ads sono già dentro GTM, lasciare vuoti gli altri campi Google per non contare due volte.' } },
+                    { name: 'microsoftClarity', type: 'text', label: 'Microsoft Clarity (ID progetto)' },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Marketing e conversioni',
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'googleAds', type: 'text', label: 'Google Ads (ID)', admin: { placeholder: 'AW-XXXXXXXXX' } },
+                    { name: 'googleAdsConversione', type: 'text', label: 'Etichetta conversione «modulo inviato»', admin: { description: 'La parte dopo la barra (AW-123/etichetta). Parte a ogni modulo inviato con successo.' } },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'metaPixel', type: 'text', label: 'Meta Pixel (Facebook/Instagram)', admin: { description: 'Solo il numero. A ogni modulo inviato parte l’evento Lead.' } },
+                    { name: 'linkedinInsight', type: 'text', label: 'LinkedIn Insight Tag (partner ID)', admin: { description: 'Utile per il pubblico B2B. Solo il numero.' } },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Banner dei cookie',
+              admin: { description: 'Compare solo se è attivo almeno un codice di statistiche o marketing. Il visitatore sceglie: solo necessari, accetta tutti, o per categoria; la scelta si riapre dal link «Preferenze cookie» nel footer.' },
+              fields: [
+                testo('cookieTesto', 'Testo del banner', {
+                  admin: { description: 'Vuoto = testo predefinito nella lingua della pagina: «Usiamo cookie tecnici necessari al sito e, solo con il vostro consenso, cookie di statistica e di marketing…»' },
+                }),
+                link('cookieLink', 'Pagina della cookie policy'),
+              ],
+            },
+            {
+              name: 'collegamenti',
+              type: 'ui',
+              admin: { components: { Field: '/componenti/NotaCollegamenti#NotaCollegamenti' } },
             },
           ],
         },

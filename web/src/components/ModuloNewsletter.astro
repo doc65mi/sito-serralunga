@@ -1,0 +1,46 @@
+---
+/**
+ * Version: 1.00
+ * Modulo di iscrizione alla newsletter: dentro la finestra aperta dal footer e nella pagina
+ * /newsletter/ (che funziona anche senza JavaScript). Pubblico B2B: nome, azienda o studio, email.
+ */
+import Consensi from './Consensi.astro'
+import { traduttore } from '../lib/lingua'
+import { moduli } from '../lib/moduli'
+interface Props { fonte?: string; titoloComeH1?: boolean; idTitolo?: string }
+const { fonte = 'Footer', titoloComeH1 = false, idTitolo } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const m = await moduli(L)
+const Titolo = titoloComeH1 ? 'h1' : 'h2'
+const grazie = m.doppiaConferma === false ? t('Iscrizione completata: vi abbiamo inviato un’email di conferma.') : m.testi.newsletterGrazie
+---
+<div class="nl" data-nl>
+  <span class="nl__occhiello">Newsletter</span>
+  <Titolo class="nl__titolo" id={idTitolo}>{m.testi.newsletterTitolo}</Titolo>
+  <span class="nl__filetto" aria-hidden="true"></span>
+  <p class="nl__testo">{m.testi.newsletterTesto}</p>
+  <form
+    class="nl__modulo"
+    method="post"
+    action="/api/newsletter"
+    data-newsletter
+    data-azione="newsletter"
+    data-grazie={grazie}
+    data-gia={t('Questo indirizzo è già iscritto alla newsletter.')}
+    data-invio={t('Invio in corso…')}
+    data-errore={t('Iscrizione non riuscita')}
+  >
+    <div class="nl__campi">
+      <label class="nl__campo">{t('Nome e cognome')}<input type="text" name="nome" autocomplete="name" maxlength="200" /></label>
+      <label class="nl__campo">{t('Azienda o studio')}<input type="text" name="azienda" autocomplete="organization" maxlength="200" /></label>
+      <label class="nl__campo nl__intero">{t('Email aziendale')} *<input type="email" name="email" autocomplete="email" required maxlength="200" /></label>
+    </div>
+    <label class="modulo__trappola" aria-hidden="true">{t('Non compilare')}<input type="text" name="sito_web" tabindex="-1" autocomplete="off" /></label>
+    <input type="hidden" name="lingua" value={L} />
+    <input type="hidden" name="fonte" value={fonte} />
+    <Consensi newsletter={false} tono="chiaro" />
+    <button type="submit" class="nl__invia">{m.testi.newsletterPulsante}</button>
+  </form>
+  <p class="nl__esito" data-esito role="status" aria-live="polite"></p>
+</div>
