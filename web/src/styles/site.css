@@ -266,6 +266,87 @@ h1, h2, h3 { margin: 0; font-weight: 300; }
   .testa__menu .testa__tendina a { padding: 10px 0; }
 }
 
+/* ---------- 6b. Social e barra mobile (Version: 1.00) ----------
+   Icone social nel menu (prima di Contatti) o barra laterale nera semitrasparente a destra;
+   su telefono: logo a sinistra, lingue e menu a panino a destra, barra rapida fissa in basso. */
+.icona { display: block; flex: none; }
+.testa__rapidi { display: none; }
+.testa__menu .testa__social { display: inline-flex; align-items: center; gap: 14px; padding-right: 22px; border-right: 1px solid var(--line); }
+.testa__menu .testa__social a { display: inline-flex; padding: 2px; color: #000; }
+.testa__menu .testa__social a:hover, .testa__menu .testa__social a:focus-visible { opacity: .6; }
+
+.barra-social {
+  position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 55;
+  background: rgba(0, 0, 0, .72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 4px 0 0 4px; padding: 6px 0; box-shadow: 0 10px 30px rgba(0, 0, 0, .18);
+}
+.barra-social ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.barra-social a { display: flex; align-items: center; justify-content: center; width: 46px; height: 44px; color: #fff; transition: background .2s; }
+.barra-social a:hover, .barra-social a:focus-visible { background: rgba(255, 255, 255, .16); }
+.barra-mobile { display: none; }
+
+@media (max-width: 1100px) {
+  .testa__rapidi { display: flex; align-items: center; gap: 18px; margin-left: auto; }
+  .testa__menu .lingue { display: none; }
+  .testa__rapidi .lingue--telefono { width: auto; padding: 0; border: 0; gap: 14px; }
+  .lingue--telefono a, .lingue--telefono span { color: #000; font-size: 14px; letter-spacing: .06em; }
+  .menu-apri { width: 44px; padding: 0; justify-content: center; border: 0; }
+  .panino, .panino span, .panino span::before, .panino span::after { display: block; width: 24px; height: 1.5px; background: #000; }
+  .panino { height: 16px; background: none; position: relative; }
+  .panino span { position: absolute; top: 7px; transition: background .2s; }
+  .panino span::before, .panino span::after { content: ''; position: absolute; left: 0; transition: transform .25s; }
+  .panino span::before { top: -7px; }
+  .panino span::after { top: 7px; }
+  .menu-apri[aria-expanded='true'] .panino span { background: transparent; }
+  .menu-apri[aria-expanded='true'] .panino span::before { transform: translateY(7px) rotate(45deg); }
+  .menu-apri[aria-expanded='true'] .panino span::after { transform: translateY(-7px) rotate(-45deg); }
+  .testa__menu .testa__social { width: 100%; padding: 8px 0 4px; border: 0; gap: 22px; }
+}
+
+@media (max-width: 900px) {
+  .barra-social { display: none; }
+  .barra-mobile {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 80;
+    background: #fff; border-top: 1px solid var(--line); box-shadow: 0 -6px 24px rgba(0, 0, 0, .06);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .barra-mobile__voci { list-style: none; margin: 0; padding: 0; display: flex; }
+  .barra-mobile__voci li { flex: 1 1 0; min-width: 0; }
+  .barra-mobile__voci a, .barra-mobile__voci button {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; width: 100%; min-height: 62px;
+    padding: 8px 2px 7px; border: 0; background: none; color: #000; font: 400 14px/1.1 var(--sans); text-decoration: none; cursor: pointer;
+  }
+  .barra-mobile__voci span { white-space: nowrap; }
+  .barra-mobile__voci [aria-expanded='true'] { background: var(--paper); }
+  .foglio {
+    position: absolute; left: 0; right: 0; bottom: 100%; max-height: 70vh; overflow-y: auto;
+    background: #fff; border-top: 2px solid var(--accent); box-shadow: 0 -18px 40px rgba(0, 0, 0, .14);
+    padding: 18px var(--gut) 8px;
+  }
+  .foglio[hidden] { display: none; }
+  .foglio__titolo { margin: 0 0 6px; color: #000; font-size: 14px; letter-spacing: .18em; text-transform: uppercase; }
+  .foglio ul { list-style: none; margin: 0; padding: 0; }
+  .foglio a { display: flex; align-items: center; gap: 14px; padding: 14px 0; color: #000; font-size: 16px; text-decoration: none; border-bottom: 1px solid var(--line-soft); overflow-wrap: anywhere; }
+  .foglio li:last-child a { border-bottom: 0; }
+  html[data-con-barra] body { padding-bottom: calc(63px + env(safe-area-inset-bottom)); }
+  html[data-con-barra] .cookie { bottom: calc(76px + env(safe-area-inset-bottom)); }
+  html[data-con-barra] .testa__menu { max-height: calc(100vh - 76px - 63px); max-height: calc(100dvh - 76px - 63px); }
+  html[data-con-barra].con-redazione body { padding-bottom: calc(115px + env(safe-area-inset-bottom)); }
+  .con-redazione .barra-mobile { bottom: 52px; padding-bottom: 0; }
+  /* La ricerca sta già nella barra in basso: nel menu a panino non si ripete */
+  html[data-con-barra] .testa__cerca { display: none; }
+}
+/* Telefoni stretti (fino a 480 px): logo, lingue e panino stanno sempre sulla stessa riga */
+@media (max-width: 480px) {
+  .testa__dentro { gap: 14px; padding-top: 12px; padding-bottom: 12px; }
+  .testa__logo { flex: 0 1 auto; min-width: 0; }
+  .testa__logo img { height: auto; max-height: 36px; max-width: 100%; }
+  .logo__testo { font-size: 22px; letter-spacing: .06em; }
+  .testa__rapidi { gap: 10px; flex: none; }
+  .testa__rapidi .lingue--telefono { gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .panino span, .panino span::before, .panino span::after { transition: none; } }
+
 .piede { background: var(--ink); color: var(--on-dark-muted); padding: 90px var(--gut) 40px; }
 .piede__griglia {
   max-width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1.2fr; gap: 50px;

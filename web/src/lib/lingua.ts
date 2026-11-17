@@ -45,6 +45,12 @@ const EN: Record<string, string> = {
   sottomenu: 'submenu',
   'Modifica menu': 'Edit menu',
   'Cambia lingua': 'Change language',
+  // social e barra mobile
+  'Serralunga sui social': 'Serralunga on social media',
+  'si apre in una nuova finestra': 'opens in a new window',
+  'Barra rapida': 'Quick bar',
+  Social: 'Social',
+  Account: 'Account',
   Contatti: 'Contacts',
   'P.IVA': 'VAT',
   // consensi, newsletter, cookie

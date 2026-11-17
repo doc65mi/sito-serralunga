@@ -6704,6 +6704,39 @@ export interface Impostazioni {
     link?: string | null;
   };
   /**
+   * L’ordine qui è l’ordine delle icone sul sito (trascinare per cambiarlo). Gli stessi indirizzi entrano nei dati strutturati (sameAs) per motori di ricerca e assistenti AI.
+   */
+  social?:
+    | {
+        rete: 'instagram' | 'facebook' | 'tiktok' | 'pinterest' | 'youtube' | 'linkedin';
+        indirizzo?: string | null;
+        attivo?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sui telefoni le icone stanno sempre nel pulsante «Social» della barra in basso.
+   */
+  socialPosizione?: ('barra' | 'menu' | 'entrambi' | 'nessuno') | null;
+  /**
+   * Cinque pulsanti fissi in basso: Social, Contatti, Catalogo, Cerca, Account. Email e telefono di «Contatti» vengono da Dati aziendali.
+   */
+  barraMobile?: {
+    attiva?: boolean | null;
+    /**
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+     */
+    catalogo?: string | null;
+    /**
+     * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+     */
+    account?: string | null;
+    /**
+     * Se compilato, «Contatti» propone anche WhatsApp accanto a email e telefono.
+     */
+    whatsapp?: string | null;
+  };
+  /**
    * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
    */
   descrizione?: string | null;
@@ -8212,6 +8245,23 @@ export interface ImpostazioniSelect<T extends boolean = true> {
         testo?: T;
         linkEtichetta?: T;
         link?: T;
+      };
+  social?:
+    | T
+    | {
+        rete?: T;
+        indirizzo?: T;
+        attivo?: T;
+        id?: T;
+      };
+  socialPosizione?: T;
+  barraMobile?:
+    | T
+    | {
+        attiva?: T;
+        catalogo?: T;
+        account?: T;
+        whatsapp?: T;
       };
   descrizione?: T;
   colonne?:

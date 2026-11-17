@@ -11,6 +11,7 @@ import * as migration_20261116_083653_catalogo_categorie from './20261116_083653
 import * as migration_20261116_084128_heritage from './20261116_084128_heritage';
 import * as migration_20261116_174732_disegno_quotato_campioni from './20261116_174732_disegno_quotato_campioni';
 import * as migration_20261117_082017_moduli_newsletter_tracciamento from './20261117_082017_moduli_newsletter_tracciamento';
+import * as migration_20261117_113758_social_barra_mobile from './20261117_113758_social_barra_mobile';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20261117_082017_moduli_newsletter_tracciamento.up,
     down: migration_20261117_082017_moduli_newsletter_tracciamento.down,
-    name: '20261117_082017_moduli_newsletter_tracciamento'
+    name: '20261117_082017_moduli_newsletter_tracciamento',
+  },
+  {
+    up: migration_20261117_113758_social_barra_mobile.up,
+    down: migration_20261117_113758_social_barra_mobile.down,
+    name: '20261117_113758_social_barra_mobile'
   },
 ];

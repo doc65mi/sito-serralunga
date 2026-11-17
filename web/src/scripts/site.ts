@@ -1,5 +1,5 @@
 /**
- * site.ts — comportamenti condivisi (Version: 1.02: reCAPTCHA, newsletter, conversioni)
+ * site.ts — comportamenti condivisi (Version: 1.03: barra rapida su telefono; 1.02: reCAPTCHA, newsletter, conversioni)
  * Ricavati dai template (classe Component di ogni .dc.html): slide della home,
  * caroselli, galleria prodotto, comparsa allo scorrimento, video, modulo richieste.
  */
@@ -32,12 +32,47 @@ for (const btn of $$<HTMLButtonElement>('[data-tendina-apri]')) {
     btn.setAttribute('aria-expanded', String(aperta))
   })
 }
+/* Barra rapida su telefono (1.03): «Social» e «Contatti» aprono un pannello sopra la barra, uno alla volta */
+const pulsantiFoglio = $$<HTMLButtonElement>('[data-foglio-apri]')
+const chiudiFogli = (tranne?: HTMLButtonElement) => {
+  for (const b of pulsantiFoglio) {
+    if (b === tranne) continue
+    b.setAttribute('aria-expanded', 'false')
+    const f = document.getElementById(b.getAttribute('aria-controls') || '')
+    if (f) f.hidden = true
+  }
+}
+for (const btn of pulsantiFoglio) {
+  btn.addEventListener('click', () => {
+    const foglio = document.getElementById(btn.getAttribute('aria-controls') || '')
+    if (!foglio) return
+    const apri = foglio.hidden
+    chiudiFogli(btn)
+    foglio.hidden = !apri
+    btn.setAttribute('aria-expanded', String(apri))
+    if (!apri) return
+    // Un pannello alla volta: si chiude anche il menu a panino
+    for (const testa of $$('[data-header].aperto')) {
+      testa.classList.remove('aperto')
+      testa.querySelector('[data-menu]')?.setAttribute('aria-expanded', 'false')
+    }
+    foglio.querySelector<HTMLElement>('a')?.focus({ preventScroll: true })
+  })
+}
+document.addEventListener('click', (e) => {
+  if (pulsantiFoglio.length && !(e.target as Element)?.closest?.('[data-barra-mobile]')) chiudiFogli()
+})
+for (const a of $$('[data-barra-mobile] [data-cerca-apri]')) a.addEventListener('click', () => chiudiFogli())
+
 /* Esc chiude menu e tendine */
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return
   for (const voce of $$('[data-tendina].aperta')) {
     voce.classList.remove('aperta')
     voce.querySelector('[data-tendina-apri]')?.setAttribute('aria-expanded', 'false')
+  }
+  for (const b of pulsantiFoglio) {
+    if (b.getAttribute('aria-expanded') === 'true') { chiudiFogli(); b.focus() }
   }
   for (const testa of $$('[data-header].aperto')) {
     testa.classList.remove('aperto')

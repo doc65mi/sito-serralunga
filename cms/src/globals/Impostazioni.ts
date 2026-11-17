@@ -1,10 +1,10 @@
-import type { GlobalConfig } from 'payload'
+import type { Field, GlobalConfig } from 'payload'
 
 import { pubblico, soloRedazione } from '../access'
 import { area, immagine, link, testo } from '../fields'
 import { campoSegreto } from '../fields/segreto'
 
-/** Header, footer, dati del cliente (fonte: file-md/cliente.md), sicurezza e tracciamento. Version: 2.01 */
+/** Header, footer, dati del cliente (fonte: file-md/cliente.md), social e barra mobile, sicurezza e tracciamento. Version: 2.02 */
 export const Impostazioni: GlobalConfig = {
   slug: 'impostazioni',
   label: 'Impostazioni del sito',
@@ -100,6 +100,85 @@ export const Impostazioni: GlobalConfig = {
               fields: [
                 testo('testo', 'Testo a sinistra'),
                 { type: 'row', fields: [testo('linkEtichetta', 'Link a destra'), link('link', 'Indirizzo')] },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Social e barra mobile',
+          description:
+            'Profili social del marchio e barra rapida in basso sui telefoni. Si scrive l’indirizzo completo del profilo (https://...). Un profilo compare sul sito solo se è attivo e ha un indirizzo.',
+          fields: [
+            {
+              name: 'social',
+              type: 'array',
+              label: 'Profili social',
+              labels: { singular: 'Profilo', plural: 'Profili' },
+              admin: { description: 'L’ordine qui è l’ordine delle icone sul sito (trascinare per cambiarlo). Gli stessi indirizzi entrano nei dati strutturati (sameAs) per motori di ricerca e assistenti AI.' },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'rete',
+                      type: 'select',
+                      label: 'Social',
+                      required: true,
+                      options: [
+                        { label: 'Instagram', value: 'instagram' },
+                        { label: 'Facebook', value: 'facebook' },
+                        { label: 'TikTok', value: 'tiktok' },
+                        { label: 'Pinterest', value: 'pinterest' },
+                        { label: 'YouTube', value: 'youtube' },
+                        { label: 'LinkedIn', value: 'linkedin' },
+                      ],
+                    },
+                    {
+                      name: 'indirizzo',
+                      type: 'text',
+                      label: 'Indirizzo del profilo',
+                      admin: { placeholder: 'https://www.instagram.com/...' },
+                      validate: (v: unknown) =>
+                        !v || /^https:\/\/[^\s]+\.[^\s]+$/.test(String(v)) || 'Serve un indirizzo completo che inizi con https://',
+                    },
+                    { name: 'attivo', type: 'checkbox', label: 'Attivo', defaultValue: true },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'socialPosizione',
+              type: 'radio',
+              label: 'Dove mostrare le icone social (computer)',
+              defaultValue: 'barra',
+              options: [
+                { label: 'Barra laterale nera a destra, a metà pagina', value: 'barra' },
+                { label: 'Nel menu in alto, prima di Contatti', value: 'menu' },
+                { label: 'In entrambi', value: 'entrambi' },
+                { label: 'Da nessuna parte (restano solo nei dati strutturati)', value: 'nessuno' },
+              ],
+              admin: { description: 'Sui telefoni le icone stanno sempre nel pulsante «Social» della barra in basso.' },
+            },
+            {
+              name: 'barraMobile',
+              type: 'group',
+              label: 'Barra in basso sui telefoni',
+              admin: { description: 'Cinque pulsanti fissi in basso: Social, Contatti, Catalogo, Cerca, Account. Email e telefono di «Contatti» vengono da Dati aziendali.' },
+              fields: [
+                { name: 'attiva', type: 'checkbox', label: 'Mostra la barra sui telefoni', defaultValue: true },
+                {
+                  type: 'row',
+                  fields: [
+                    { ...link('catalogo', 'Link di «Catalogo»'), defaultValue: '/catalogo/' } as Field,
+                    { ...link('account', 'Link di «Account»'), defaultValue: '/contract/area-riservata/' } as Field,
+                  ],
+                },
+                {
+                  name: 'whatsapp',
+                  type: 'text',
+                  label: 'Numero WhatsApp (facoltativo)',
+                  admin: { placeholder: '+39 ...', description: 'Se compilato, «Contatti» propone anche WhatsApp accanto a email e telefono.' },
+                },
               ],
             },
           ],

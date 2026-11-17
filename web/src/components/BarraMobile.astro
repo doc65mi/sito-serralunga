@@ -1,0 +1,72 @@
+---
+/**
+ * Barra rapida in basso sui telefoni (Version: 1.00): Social, Contatti, Catalogo, Cerca, Account.
+ * «Social» e «Contatti» aprono un pannello sopra la barra; «Cerca» apre la ricerca del sito
+ * (evento 'serralunga:cerca' tramite [data-cerca-apri], con /cerca/ come ripiego senza JavaScript).
+ * Si accende e spegne in Impostazioni > Social e barra mobile; email e telefono vengono da Dati aziendali.
+ */
+import Icona from './Icona.astro'
+import type { Doc } from '../lib/cms'
+import { socialAttivi } from '../lib/social'
+import { percorso, traduttore } from '../lib/lingua'
+interface Props { imp: Doc }
+const { imp } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (p?: string) => percorso(L, p)
+const b = imp.barraMobile || {}
+const attiva = b.attiva !== false
+const profili = socialAttivi(imp)
+const a = imp.azienda || {}
+const email = String(a.email || '').trim()
+const tel = String(a.telefono || '').trim()
+const telLink = tel.replace(/[^\d+]/g, '')
+const wa = String(b.whatsapp || '').replace(/\D/g, '')
+const haContatti = !!(email || telLink || wa)
+const catalogo = b.catalogo || '/catalogo/'
+const account = b.account || '/contract/area-riservata/'
+const nuova = t('si apre in una nuova finestra')
+---
+{attiva && (
+  <nav class="barra-mobile" aria-label={t('Barra rapida')} data-barra-mobile>
+    <ul class="barra-mobile__voci">
+      {profili.length > 0 && (
+        <li>
+          <button type="button" aria-expanded="false" aria-controls="foglio-social" data-foglio-apri>
+            <Icona nome="social" /><span>{t('Social')}</span>
+          </button>
+        </li>
+      )}
+      {haContatti && (
+        <li>
+          <button type="button" aria-expanded="false" aria-controls="foglio-contatti" data-foglio-apri>
+            <Icona nome="contatti" /><span>{t('Contatti')}</span>
+          </button>
+        </li>
+      )}
+      <li><a href={u(catalogo)}><Icona nome="catalogo" /><span>{t('Catalogo')}</span></a></li>
+      <li><a href={u('/cerca/')} data-cerca-apri><Icona nome="cerca" /><span>{t('Cerca')}</span></a></li>
+      <li><a href={u(account)}><Icona nome="account" /><span>{t('Account')}</span></a></li>
+    </ul>
+    {profili.length > 0 && (
+      <div class="foglio" id="foglio-social" hidden data-foglio>
+        <p class="foglio__titolo">{t('Serralunga sui social')}</p>
+        <ul>
+          {profili.map((s) => (
+            <li><a href={s.url} target="_blank" rel="noopener noreferrer me" aria-label={`${s.nome} (${nuova})`}><Icona nome={s.rete} /><span>{s.nome}</span></a></li>
+          ))}
+        </ul>
+      </div>
+    )}
+    {haContatti && (
+      <div class="foglio" id="foglio-contatti" hidden data-foglio>
+        <p class="foglio__titolo">{t('Contatti')}</p>
+        <ul>
+          {email && <li><a href={`mailto:${email}`}><Icona nome="email" /><span>{email}</span></a></li>}
+          {telLink && <li><a href={`tel:${telLink}`}><Icona nome="telefono" /><span>{tel}</span></a></li>}
+          {wa && <li><a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp (${nuova})`}><Icona nome="whatsapp" /><span>WhatsApp</span></a></li>}
+        </ul>
+      </div>
+    )}
+  </nav>
+)}

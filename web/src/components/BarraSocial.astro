@@ -1,0 +1,29 @@
+---
+/**
+ * Barra social laterale (Version: 1.00): nera semitrasparente, a destra, a metà altezza.
+ * Solo su schermi larghi e solo se in Impostazioni > Social e barra mobile la posizione è «barra» o «entrambi».
+ * Sui telefoni gli stessi profili stanno nel pulsante «Social» della barra in basso.
+ */
+import Icona from './Icona.astro'
+import type { Doc } from '../lib/cms'
+import { posizioneSocial, socialAttivi } from '../lib/social'
+import { traduttore } from '../lib/lingua'
+interface Props { imp: Doc }
+const { imp } = Astro.props
+const t = traduttore(Astro.locals.lingua)
+const profili = socialAttivi(imp)
+const mostra = profili.length > 0 && ['barra', 'entrambi'].includes(posizioneSocial(imp))
+---
+{mostra && (
+  <aside class="barra-social" aria-label={t('Serralunga sui social')}>
+    <ul>
+      {profili.map((s) => (
+        <li>
+          <a href={s.url} target="_blank" rel="noopener noreferrer me" aria-label={`${s.nome} (${t('si apre in una nuova finestra')})`} title={s.nome}>
+            <Icona nome={s.rete} dim={20} />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}

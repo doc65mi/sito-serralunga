@@ -1,6 +1,8 @@
 ---
 /**
- * Testata unica di tutto il sito, home compresa (Version: 2.00).
+ * Testata unica di tutto il sito, home compresa (Version: 2.10).
+ * 2.10: icone social prima di Contatti (se scelto in Impostazioni > Social e barra mobile);
+ * su telefono logo a sinistra, lingue e menu a panino a destra.
  * Logo originale Serralunga a sinistra (versione AVIF), a destra due menu allineati:
  * sopra il menu di servizio (Contatti, Richiedi catalogo, Listino, Account, Faq) con la lingua,
  * sotto il menu principale con le sottovoci a tendina. Le voci si cambiano nel pannello:
@@ -10,6 +12,8 @@ import { isMedia, originale, src, tipoRidotte } from '../lib/media'
 import { esterno } from '../lib/testo'
 import type { Doc } from '../lib/cms'
 import { INFO, LINGUE, percorso, traduttore } from '../lib/lingua'
+import { posizioneSocial, socialAttivi } from '../lib/social'
+import Icona from './Icona.astro'
 interface Props { imp: Doc; corrente?: string }
 const { imp, corrente = '/' } = Astro.props
 const logo = isMedia(imp.logo) ? imp.logo : null
@@ -25,6 +29,8 @@ const nome = imp.nomeSito || 'Serralunga'
 // Logo: versione AVIF ridotta (400 px) con il file caricato come riserva per i browser senza AVIF.
 const logoAvif = logo && tipoRidotte(logo) === 'image/avif' ? src(logo, 400) : ''
 const redazione = Astro.cookies.has('payload-token')
+const socialNelMenu = ['menu', 'entrambi'].includes(posizioneSocial(imp)) ? socialAttivi(imp) : []
+const nuova = t('si apre in una nuova finestra')
 ---
 <header class="testa" data-header>
   <div class="testa__dentro">
@@ -36,10 +42,29 @@ const redazione = Astro.cookies.has('payload-token')
         </picture>
       ) : <span class="logo__testo">{nome}</span>}
     </a>
-    <button type="button" class="menu-apri" aria-expanded="false" aria-controls="menu-sito" data-menu>{t('Menu')}</button>
+    <div class="testa__rapidi">
+      <div class="lingue lingue--telefono" role="group" aria-label={t('Cambia lingua')}>
+        {LINGUE.map((l) => (
+          l === L
+            ? <span aria-current="true" lang={INFO[l].html}>{INFO[l].sigla}</span>
+            : <a href={percorso(l, corrente)} hreflang={INFO[l].html} lang={INFO[l].html} title={INFO[l].nome}>{INFO[l].sigla}</a>
+        ))}
+      </div>
+      <button type="button" class="menu-apri" aria-expanded="false" aria-controls="menu-sito" data-menu>
+        <span class="panino" aria-hidden="true"><span></span></span>
+        <span class="sr-only">{t('Menu')}</span>
+      </button>
+    </div>
     <div class="testa__menu" id="menu-sito">
       <nav class="testa__sopra" aria-label={t('Menu di servizio')}>
         <ul>
+          {socialNelMenu.length > 0 && (
+            <li class="testa__social">
+              {socialNelMenu.map((s) => (
+                <a href={s.url} target="_blank" rel="noopener noreferrer me" aria-label={`${s.nome} (${nuova})`} title={s.nome}><Icona nome={s.rete} dim={18} /></a>
+              ))}
+            </li>
+          )}
           {sopra.map((v) => (
             <li><a href={u(v.link) || '#'} aria-current={attivo(v.link) ? 'page' : undefined} {...fuori(v.link)}>{v.etichetta}</a></li>
           ))}
