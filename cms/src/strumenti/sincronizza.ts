@@ -1,40 +1,49 @@
 /**
- * Version: 1.00
- * Pubblica su Coolify: copia contenuti e foto dal sito sul PC al sito online con un clic.
+ * Version: 2.00
+ * Contenuti su GitHub: GitHub è l'unico punto di riferimento, per il codice e per i contenuti.
  *
- * Perché: su GitHub viaggia solo il codice. Testi, menu, logo, blocchi della home, ritratti e
- * schede modificati dal pannello o dalla pagina stanno nel database e nella cartella media,
- * quindi senza questo strumento le due copie del sito si allontanano.
+ * Perché: testi, menu, logo, blocchi della home, schede e foto modificati dal pannello o dalla
+ * pagina stanno nel database e nella cartella media di ciascun sito. Senza questo strumento il
+ * sito sul PC e quello su Coolify si allontanano (come era successo con logo, menu e catalogo).
  *
- * Come funziona (il PC invia, Coolify riceve):
- * 1. Controllo: i due siti devono avere lo stesso schema del database (stesse migrazioni,
- *    cioè la stessa versione del codice). Se no si ferma e dice quale aggiornare.
- * 2. Foto: si confrontano nome e dimensione dei file; si inviano solo quelli che mancano o
- *    sono cambiati. La volta successiva passano solo le foto nuove.
- * 3. Contenuti: si inviano tutte le tabelle dei contenuti. Coolify salva prima una copia di
- *    quello che ha (media/.compiti/copie/), poi sostituisce tutto in una sola transazione:
- *    o riesce tutto o non cambia nulla. «Ripristina» rimette la copia.
+ * Dove: nel repository del sito, ramo `contenuti` (solo contenuti, separato dal codice: salvare i
+ * contenuti non fa ricompilare Coolify). Dentro:
+ *   manifesto.json        chi ha salvato, quando, impronta dei contenuti, versione dello schema
+ *   dati/<tabella>.json   ogni tabella dei contenuti, una riga per riga del database
+ *   media/<file>          foto, video e PDF caricati (con le versioni AVIF)
+ * La cronologia del ramo è la cronologia dei contenuti: ogni salvataggio è un commit.
  *
- * Restano di ciascun sito, mai copiati: utenti e accessi, preferenze del pannello,
- * richieste ricevute dai clienti (modulo catalogo), iscritti alla newsletter, registro delle migrazioni.
- * Le chiavi API dell'AI viaggiano in chiaro solo dentro la connessione HTTPS e vengono
- * cifrate di nuovo con il PAYLOAD_SECRET del sito che le riceve.
+ * Come (da qualunque sito, PC o Coolify):
+ * - «Salva su GitHub»: scrive lo stato di questo sito nel ramo `contenuti` (git push, solo le
+ *   differenze). Se su GitHub c'è un salvataggio più recente che questo sito non ha ancora
+ *   caricato si ferma, per non cancellare il lavoro fatto altrove (si può forzare).
+ * - «Carica da GitHub»: porta qui i contenuti del ramo. Prima salva una copia locale
+ *   (media/.compiti/copie/, ultime 5, «Ripristina»), poi sostituisce tutto in una transazione.
+ * - Automatico: ogni 10 minuti e all'avvio ogni sito controlla GitHub e carica da solo i
+ *   contenuti nuovi, ma solo se qui non ci sono modifiche non ancora salvate: in quel caso lo
+ *   segnala nel pannello e aspetta una scelta.
  *
- * Sicurezza: il sito che riceve accetta solo richieste con la sua chiave di ricezione
- * (Authorization: Bearer), generata la prima volta che un redattore apre Strumenti.
- * Si può fissare anche con la variabile SINCRONIZZA_CHIAVE.
+ * Restano di ciascun sito, mai su GitHub: utenti e accessi, preferenze del pannello, richieste dei
+ * clienti, iscritti alla newsletter, registro delle migrazioni, chiavi e password cifrate (AI,
+ * reCAPTCHA, SMTP) e dati del server di posta.
+ *
+ * Accesso a GitHub: token personale con permesso Contents (lettura e scrittura) sul repository,
+ * inserito una volta nel pannello (salvato cifrato in media/.compiti/github.json) oppure nella
+ * variabile CONTENUTI_GITHUB_TOKEN. Repository e ramo: CONTENUTI_GITHUB_REPO, CONTENUTI_GITHUB_RAMO.
  */
+import { execFile } from 'child_process'
 import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import zlib from 'zlib'
 
-import type { Endpoint, Payload, PayloadRequest } from 'payload'
+import type { Endpoint, Payload } from 'payload'
 import type { Pool, PoolClient } from 'pg'
 
-import { cifra, decifra, uguali } from '../ai/segreto'
+import { cifra, decifra } from '../ai/segreto'
 
-export const VERSIONE_SINCRONIZZA = '1.01'
+export const VERSIONE_SINCRONIZZA = '2.00'
+const MAX_FILE = 95 * 1024 * 1024 // GitHub rifiuta i file oltre 100 MB
 
 /** Tabelle che restano di ciascun sito. Le tabelle dei blocchi bloccati si svuotano soltanto. */
 const ESCLUSE = new Set([
@@ -90,36 +99,6 @@ function leggiJson<T>(nome: string, riserva: T): T {
 
 const pool = (payload: Payload) => (payload.db as unknown as { pool: Pool }).pool
 
-/* ------------------------------------------------------------------ registro e stato */
-
-type Lato = 'invio' | 'ricezione'
-function stato(lato: Lato, valore: string, extra: Record<string, unknown> = {}) {
-  scrivi(`sincronizza-${lato}.stato.json`, JSON.stringify({ stato: valore, quando: ora(), ...extra }))
-}
-function registra(lato: Lato, riga: string, da = false) {
-  fs.mkdirSync(cartella(), { recursive: true })
-  const testo = `[${new Date().toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome' })}] ${riga}\n`
-  if (da) fs.writeFileSync(file(`sincronizza-${lato}.log`), testo)
-  else fs.appendFileSync(file(`sincronizza-${lato}.log`), testo)
-}
-const coda = (lato: Lato, n = 40) => leggi(`sincronizza-${lato}.log`).split('\n').filter(Boolean).slice(-n).join('\n')
-
-/* ------------------------------------------------------------------ chiave di ricezione */
-
-function chiaveRicezione(crea = false): string {
-  if (process.env.SINCRONIZZA_CHIAVE) return process.env.SINCRONIZZA_CHIAVE
-  const salvata = leggi('sincronizza.chiave').trim()
-  if (salvata || !crea) return salvata
-  const nuova = crypto.randomBytes(32).toString('hex')
-  scrivi('sincronizza.chiave', nuova)
-  return nuova
-}
-function autorizzato(req: PayloadRequest) {
-  const attesa = chiaveRicezione()
-  const data = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim()
-  return Boolean(attesa && data && uguali(attesa, data))
-}
-
 /* ------------------------------------------------------------------ database */
 
 async function tabelle(db: Pool | PoolClient) {
@@ -151,31 +130,48 @@ interface Pacchetto {
   chiari?: Record<string, Record<string, string>>
 }
 
-/** Tutte le tabelle dei contenuti, riga per riga, così come sono nel database. */
+/** Ordine stabile delle righe: per id, così lo stesso contenuto produce sempre lo stesso file. */
+function ordina(righe: Record<string, unknown>[]) {
+  const chiave = (r: Record<string, unknown>) => (r.id ?? JSON.stringify(r)) as string | number
+  return righe.sort((a, b) => {
+    const x = chiave(a)
+    const y = chiave(b)
+    if (typeof x === 'number' && typeof y === 'number') return x - y
+    return String(x) < String(y) ? -1 : String(x) > String(y) ? 1 : 0
+  })
+}
+
+/** Tutte le tabelle dei contenuti, riga per riga, così come sono nel database (orari in UTC). */
 async function esporta(payload: Payload, origine: string, decifraChiavi: boolean): Promise<Pacchetto> {
-  const db = pool(payload)
-  const tutte = await tabelle(db)
-  const p: Pacchetto = { versione: VERSIONE_SINCRONIZZA, creato: ora(), origine, migrazioni: await migrazioni(db), tabelle: {} }
-  for (const [t, colonne] of Object.entries(tutte).sort()) {
-    if (ESCLUSE.has(t)) continue
-    const r = await db.query(`SELECT row_to_json(x) AS r FROM ${q(t)} x`)
-    p.tabelle[t] = { colonne, righe: r.rows.map((x: { r: Record<string, unknown> }) => x.r) }
-  }
-  if (decifraChiavi) {
-    p.chiari = {}
-    for (const t of CON_SEGRETI) {
-      if (!p.tabelle[t]) continue
-      const chiari: Record<string, string> = (p.chiari[t] = {})
-      for (const riga of p.tabelle[t].righe)
-        for (const [k, v] of Object.entries(riga))
-          if (typeof v === 'string' && v.startsWith(CIFRATO)) {
-            const chiaro = decifra(v)
-            if (chiaro) chiari[k] = chiaro
-            riga[k] = null
-          }
+  const client = await pool(payload).connect()
+  try {
+    await client.query(`SET TIME ZONE 'UTC'`)
+    const tutte = await tabelle(client)
+    const p: Pacchetto = { versione: VERSIONE_SINCRONIZZA, creato: ora(), origine, migrazioni: await migrazioni(client), tabelle: {} }
+    for (const [t, colonne] of Object.entries(tutte).sort(([a], [b]) => (a < b ? -1 : 1))) {
+      if (ESCLUSE.has(t)) continue
+      const r = await client.query(`SELECT row_to_json(x) AS r FROM ${q(t)} x`)
+      p.tabelle[t] = { colonne, righe: ordina(r.rows.map((x: { r: Record<string, unknown> }) => x.r)) }
     }
+    if (decifraChiavi) {
+      p.chiari = {}
+      for (const t of CON_SEGRETI) {
+        if (!p.tabelle[t]) continue
+        const chiari: Record<string, string> = (p.chiari[t] = {})
+        for (const riga of p.tabelle[t].righe)
+          for (const [k, v] of Object.entries(riga))
+            if (typeof v === 'string' && v.startsWith(CIFRATO)) {
+              const chiaro = decifra(v)
+              if (chiaro) chiari[k] = chiaro
+              riga[k] = null
+            }
+      }
+    }
+    return p
+  } finally {
+    await client.query('RESET TIME ZONE').catch(() => undefined)
+    client.release()
   }
-  return p
 }
 
 /** Ordine di inserimento: prima le tabelle a cui le altre fanno riferimento. */
@@ -222,23 +218,21 @@ async function importa(payload: Payload, p: Pacchetto, log: (r: string) => void,
   const db = pool(payload)
   const locali = await tabelle(db)
   const mieMigr = await migrazioni(db)
-  if (p.migrazioni.join('|') !== mieMigr.join('|')) {
-    const manca = p.migrazioni.filter((m) => !mieMigr.includes(m))
-    const troppe = mieMigr.filter((m) => !p.migrazioni.includes(m))
+  const manca = p.migrazioni.filter((m) => !mieMigr.includes(m))
+  if (manca.length)
     throw new Error(
-      `Le due copie del sito hanno versioni diverse del codice. ${manca.length ? `Qui mancano: ${manca.join(', ')} (attendi il deploy di Coolify). ` : ''}${troppe.length ? `Sul PC mancano: ${troppe.join(', ')} (aggiorna il PC con aggiorna-pc.bat). ` : ''}`.trim(),
+      `I contenuti su GitHub sono stati salvati da una versione più nuova del codice (${manca.join(', ')}). Questo sito li carica dopo il proprio aggiornamento: deploy di Coolify, oppure aggiorna-pc.bat sul PC.`,
     )
-  }
 
   if (copia) {
-    const io = await esporta(payload, 'copia prima della sincronizzazione', false)
+    const io = await esporta(payload, 'copia prima del caricamento da GitHub', false)
     const giorno = ora().replace(/[:.]/g, '-')
-    const dove = path.join(cartella(), 'copie', `${giorno}-prima-della-sincronizzazione.json.gz`)
+    const dove = path.join(cartella(), 'copie', `${giorno}-prima-del-caricamento.json.gz`)
     fs.mkdirSync(path.dirname(dove), { recursive: true })
     fs.writeFileSync(dove, zlib.gzipSync(JSON.stringify(io)))
     log(`Copia dei contenuti attuali salvata: copie/${path.basename(dove)}`)
     // Si tengono le ultime 5 copie.
-    const vecchie = fs.readdirSync(path.dirname(dove)).filter((f) => f.endsWith('-prima-della-sincronizzazione.json.gz')).sort().slice(0, -5)
+    const vecchie = fs.readdirSync(path.dirname(dove)).filter((f) => f.endsWith('-prima-del-caricamento.json.gz')).sort().slice(0, -5)
     for (const f of vecchie) fs.rmSync(path.join(path.dirname(dove), f), { force: true })
   }
 
@@ -311,315 +305,429 @@ function fileMedia(): [string, number][] {
     return fs
       .readdirSync(mediaDir(), { withFileTypes: true })
       .filter((d) => d.isFile() && !d.name.startsWith('.'))
-      .map((d) => [d.name, fs.statSync(path.join(mediaDir(), d.name)).size])
+      .map((d) => [d.name, fs.statSync(path.join(mediaDir(), d.name)).size] as [string, number])
+      .sort(([a], [b]) => (a < b ? -1 : 1))
   } catch {
     return []
   }
 }
-const nomeValido = (n: string) => !!n && n === path.basename(n) && !n.startsWith('.') && !/[\\/\0]/.test(n) && n.length < 250
 
-/* ------------------------------------------------------------------ invio (PC) */
+/* ------------------------------------------------------------------ registro */
 
-interface Destinazione {
-  url: string
-  chiave: string
+function registra(riga: string, da = false) {
+  fs.mkdirSync(cartella(), { recursive: true })
+  const testo = `[${new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'short', timeStyle: 'medium' })}] ${riga}\n`
+  if (da) fs.writeFileSync(file('github.log'), testo)
+  else fs.appendFileSync(file('github.log'), testo)
 }
-const destinazione = () => leggiJson<Destinazione | null>('sincronizza.destinazione.json', null)
-let inCorso = false
-let ferma = false
+const registro = (n = 40) => leggi('github.log').split('\n').filter(Boolean).slice(-n).join('\n')
 
-async function chiama(d: Destinazione, percorso: string, init: RequestInit & { attesa?: number } = {}) {
-  const r = await fetch(`${d.url}/api/sincronizza/${percorso}`, {
-    ...init,
-    headers: { authorization: `Bearer ${d.chiave}`, ...(init.headers || {}) },
-    signal: AbortSignal.timeout(init.attesa || 120_000),
-  })
-  const testo = await r.text()
-  let dati: Record<string, unknown> = {}
+/* ------------------------------------------------------------------ configurazione */
+
+const REPO = () => (process.env.CONTENUTI_GITHUB_REPO || 'doc65mi/sito-serralunga').trim()
+/** Indirizzo del repository: di norma GitHub; CONTENUTI_GIT_URL serve per le prove con un repository locale. */
+const URL_GIT = () => process.env.CONTENUTI_GIT_URL || `https://github.com/${REPO()}.git`
+const RAMO = () => (process.env.CONTENUTI_GITHUB_RAMO || 'contenuti').trim()
+interface Config {
+  token?: string
+  automatico?: boolean
+}
+const config = () => leggiJson<Config>('github.json', {})
+const token = () => process.env.CONTENUTI_GITHUB_TOKEN?.trim() || decifra(config().token || '')
+const automatico = () => config().automatico !== false
+
+/** Stato rispetto a GitHub: quale salvataggio è caricato qui e com'erano i contenuti in quel momento. */
+interface Allineamento {
+  /** impronta del salvataggio di GitHub con cui questo sito è allineato */
+  github?: string
+  /** impronta dei contenuti di questo sito subito dopo l'ultimo salvataggio o caricamento */
+  locale?: string
+  commit?: string
+  quando?: string
+}
+const allineamento = () => leggiJson<Allineamento>('github.allineamento.json', {})
+const salvaAllineamento = (a: Allineamento) => scrivi('github.allineamento.json', JSON.stringify({ ...a, quando: ora() }))
+
+interface Manifesto {
+  versione: string
+  salvato: string
+  da: string
+  chi: string
+  impronta: string
+  migrazioni: string[]
+  tabelle: number
+  righe: number
+  file: number
+}
+
+/* ------------------------------------------------------------------ istantanea */
+
+/** Tabelle che finiscono su GitHub: senza segreti e senza i dati del server di posta di questo sito. */
+function perGithub(p: Pacchetto) {
+  const file = new Map<string, string>()
+  let righe = 0
+  for (const [t, { colonne, righe: rr }] of Object.entries(p.tabelle)) {
+    if (!rr.length) continue
+    const restano = RESTANO_SE_VUOTE[t] || []
+    const pulite = rr.map((r) => {
+      if (!CON_SEGRETI.includes(t)) return r
+      const c = { ...r }
+      for (const [k, v] of Object.entries(c)) if ((typeof v === 'string' && v.startsWith(CIFRATO)) || restano.includes(k)) c[k] = null
+      return c
+    })
+    righe += pulite.length
+    file.set(`dati/${t}.json`, `{"colonne":${JSON.stringify(colonne)},"righe":[\n${pulite.map((r) => JSON.stringify(r)).join(',\n')}\n]}\n`)
+  }
+  const impronta = crypto.createHash('sha256')
+  for (const k of [...file.keys()].sort()) impronta.update(k).update('\0').update(file.get(k)!).update('\0')
+  return { file, impronta: impronta.digest('hex').slice(0, 20), righe }
+}
+async function improntaLocale(payload: Payload) {
+  return perGithub(await esporta(payload, 'impronta', false)).impronta
+}
+
+/* ------------------------------------------------------------------ git */
+
+const dirGit = () => path.join(cartella(), 'contenuti-git')
+
+function git(args: string[], conToken = false): Promise<string> {
+  const t = token()
+  const extra = conToken && t ? ['-c', `http.extraHeader=Authorization: Basic ${Buffer.from(`x-access-token:${t}`).toString('base64')}`] : []
+  return new Promise((ok, ko) =>
+    execFile(
+      'git',
+      [...extra, '-c', 'core.quotepath=off', '-c', 'safe.directory=*', ...args],
+      { cwd: dirGit(), maxBuffer: 256 * 1024 * 1024, env: { ...process.env, GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C' } },
+      (e, out, err) => {
+        if (!e) return ok(String(out))
+        const msg = `${String(err || '')} ${e.message}`.replace(t || '\u0000', '***').trim()
+        ko(new Error(msg.split('\n').filter((r) => !r.startsWith('hint:')).slice(-3).join(' ')))
+      },
+    ),
+  )
+}
+
+async function preparaRepo() {
+  fs.mkdirSync(dirGit(), { recursive: true })
+  if (!fs.existsSync(path.join(dirGit(), '.git'))) {
+    await git(['init', '-q'])
+    await git(['remote', 'add', 'origin', URL_GIT()])
+  } else await git(['remote', 'set-url', 'origin', URL_GIT()])
+}
+
+/** Scarica l'ultimo salvataggio di GitHub (solo l'ultimo commit). Null se il ramo non esiste ancora. */
+async function scaricaRemoto(): Promise<{ commit: string; manifesto: Manifesto | null } | null> {
+  if (!token()) throw new Error('Manca il token di GitHub: inseriscilo nel riquadro «Contenuti su GitHub».')
+  await preparaRepo()
   try {
-    dati = JSON.parse(testo)
+    await git(['fetch', '-q', '--depth', '1', 'origin', `+refs/heads/${RAMO()}:refs/remotes/origin/${RAMO()}`], true)
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    if (/couldn't find remote ref|not found.*ref/i.test(msg)) return null
+    if (/403|401|Authentication failed|could not read Username/i.test(msg)) throw new Error('GitHub ha rifiutato il token: controlla che sia valido e abbia il permesso Contents in scrittura sul repository.')
+    throw new Error(`GitHub non raggiungibile: ${msg}`)
+  }
+  const commit = (await git(['rev-parse', `refs/remotes/origin/${RAMO()}`])).trim()
+  let manifesto: Manifesto | null = null
+  try {
+    manifesto = JSON.parse(await git(['show', `${commit}:manifesto.json`])) as Manifesto
   } catch {
-    /* risposta non JSON */
+    /* ramo senza manifesto */
   }
-  if (!r.ok) {
-    if (r.status === 401) throw new Error('Coolify ha rifiutato la chiave di ricezione: ricopiala da Strumenti sul sito online.')
-    if (r.status === 404) throw new Error('Su Coolify questo strumento non c’è ancora: attendi che finisca il deploy del codice nuovo.')
-    throw new Error(String(dati.errore || `Coolify ha risposto ${r.status}`))
-  }
-  return dati
+  return { commit, manifesto }
 }
 
-async function pubblica(payload: Payload, chi: string) {
-  const d = destinazione()
-  if (!d) throw new Error('Manca l’indirizzo del sito online.')
-  const log = (r: string) => registra('invio', r)
-  registra('invio', `Pubblicazione verso ${d.url} avviata da ${chi}`, true)
-  stato('invio', 'in-corso', { verso: d.url })
+/** Collega (o copia, se non si può) un file senza duplicare lo spazio quando possibile. */
+function collega(da: string, a: string) {
+  fs.rmSync(a, { force: true })
+  try {
+    fs.linkSync(da, a)
+  } catch {
+    fs.copyFileSync(da, a)
+  }
+}
 
-  // 1. Stessa versione del codice?
-  const info = (await chiama(d, 'info')) as { migrazioni: string[] }
-  const mie = await migrazioni(pool(payload))
-  if (info.migrazioni.join('|') !== mie.join('|')) {
-    const manca = mie.filter((m) => !info.migrazioni.includes(m))
-    const troppe = info.migrazioni.filter((m) => !mie.includes(m))
+/* ------------------------------------------------------------------ salva */
+
+let occupato: string | null = null
+
+async function salva(payload: Payload, chi: string, forza: boolean) {
+  registra(`Salvataggio su GitHub (${REPO()}, ramo ${RAMO()}) avviato da ${chi}`, true)
+  const remoto = await scaricaRemoto()
+  const a = allineamento()
+  if (remoto?.manifesto && remoto.manifesto.impronta !== a.github && !forza)
     throw new Error(
-      `Il codice dei due siti non è alla stessa versione. ${manca.length ? `Su Coolify manca: ${manca.join(', ')} (attendi la fine del deploy). ` : ''}${troppe.length ? `Sul PC manca: ${troppe.join(', ')} (lancia aggiorna-pc.bat). ` : ''}`.trim(),
+      `Su GitHub c'è un salvataggio più recente (${remoto.manifesto.da}, ${new Date(remoto.manifesto.salvato).toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}) che questo sito non ha ancora caricato. Carica prima da GitHub, oppure «Salva comunque» per sostituirlo con i contenuti di qui.`,
     )
-  }
-  log('Versione del codice: uguale sui due siti')
 
-  // 2. Foto: solo quelle che mancano o sono cambiate.
-  const locali = fileMedia()
-  const mancanti: string[] = []
-  for (let i = 0; i < locali.length; i += 2000) {
-    const r = (await chiama(d, 'media-mancanti', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ file: locali.slice(i, i + 2000) }),
-    })) as { mancanti: string[] }
-    mancanti.push(...r.mancanti)
-  }
-  log(`Foto e file: ${locali.length} sul PC, ${mancanti.length} da inviare`)
-  let inviati = 0
-  let pesoInviato = 0
-  const coda = [...mancanti]
-  const lavora = async () => {
-    for (let nome = coda.shift(); nome; nome = coda.shift()) {
-      if (ferma) throw new Error('Interrotto: le foto già inviate restano su Coolify, «Pubblica» riparte da quelle mancanti.')
-      const corpo = fs.readFileSync(path.join(mediaDir(), nome))
-      await chiama(d, `media?nome=${encodeURIComponent(nome)}`, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/octet-stream' },
-        body: corpo,
-        attesa: 600_000,
-      })
-      inviati++
-      pesoInviato += corpo.length
-      if (inviati % 25 === 0 || inviati === mancanti.length)
-        log(`Inviati ${inviati} di ${mancanti.length} file (${(pesoInviato / 1048576).toFixed(0)} MB)`)
-      stato('invio', 'in-corso', { verso: d.url, file: inviati, daInviare: mancanti.length })
+  const p = await esporta(payload, chi, false)
+  const { file: dati, impronta, righe } = perGithub(p)
+
+  // Cartella di lavoro: da zero, così i file tolti qui spariscono anche su GitHub.
+  if (remoto) await git(['reset', '-q', '--mixed', remoto.commit])
+  else if (!(await git(['branch', '--show-current']).catch(() => '')).trim()) await git(['checkout', '-q', '--orphan', RAMO()]).catch(() => undefined)
+  for (const d of ['dati', 'media']) fs.rmSync(path.join(dirGit(), d), { recursive: true, force: true })
+  fs.mkdirSync(path.join(dirGit(), 'dati'), { recursive: true })
+  fs.mkdirSync(path.join(dirGit(), 'media'), { recursive: true })
+  for (const [nome, testo] of dati) fs.writeFileSync(path.join(dirGit(), nome), testo)
+  let nFile = 0
+  for (const [nome, peso] of fileMedia()) {
+    if (peso > MAX_FILE) {
+      registra(`Saltato ${nome}: ${(peso / 1048576).toFixed(0)} MB, oltre il limite di GitHub (100 MB). Va caricato a mano su ogni sito.`)
+      continue
     }
+    collega(path.join(mediaDir(), nome), path.join(dirGit(), 'media', nome))
+    nFile++
   }
-  await Promise.all([lavora(), lavora(), lavora()])
-
-  // 3. Contenuti.
-  if (ferma) throw new Error('Interrotto prima dei contenuti.')
-  const p = await esporta(payload, `PC (${chi})`, true)
-  const righe = Object.values(p.tabelle).reduce((n, t) => n + t.righe.length, 0)
-  const corpo = zlib.gzipSync(JSON.stringify(p))
-  log(`Contenuti: ${Object.keys(p.tabelle).length} tabelle, ${righe} righe (${(corpo.length / 1048576).toFixed(1)} MB compressi), invio…`)
-  await chiama(d, 'dati', { method: 'POST', headers: { 'content-type': 'application/gzip' }, body: corpo, attesa: 600_000 })
-  // Coolify li applica in background: si attende l'esito.
-  const fine = Date.now() + 30 * 60_000
-  for (;;) {
-    await new Promise((ok) => setTimeout(ok, 3000))
-    const e = (await chiama(d, 'esito')) as { stato: string; errore?: string; registro?: string }
-    if (e.stato === 'ok') break
-    if (e.stato === 'errore') throw new Error(`Coolify non ha applicato i contenuti: ${e.errore || 'vedi il registro su Coolify'}. Nulla è cambiato.`)
-    if (Date.now() > fine) throw new Error('Coolify non ha risposto entro 30 minuti: controlla Strumenti sul sito online.')
+  const manifesto: Manifesto = {
+    versione: VERSIONE_SINCRONIZZA,
+    salvato: ora(),
+    da: (process.env.SITO_URL || 'sito').replace(/\/+$/, ''),
+    chi,
+    impronta,
+    migrazioni: p.migrazioni,
+    tabelle: dati.size,
+    righe,
+    file: nFile,
   }
-  log('Fatto: il sito online ora ha gli stessi contenuti e le stesse foto del PC.')
-  stato('invio', 'ok', { verso: d.url, file: inviati })
-}
+  fs.writeFileSync(path.join(dirGit(), 'manifesto.json'), `${JSON.stringify(manifesto, null, 2)}\n`)
 
-/* ------------------------------------------------------------------ ricezione (Coolify) */
-
-let ricevendo = false
-function avviaImportazione(payload: Payload, origine: string, leggiPacchetto: () => Pacchetto, copia: boolean) {
-  ricevendo = true
-  stato('ricezione', 'in-corso', { origine })
-  registra('ricezione', `Contenuti in arrivo: ${origine}`, true)
-  setImmediate(async () => {
-    try {
-      await importa(payload, leggiPacchetto(), (r) => registra('ricezione', r), copia)
-      stato('ricezione', 'ok', { origine })
-      // Da qui il PC è la fonte dei contenuti: avvio.sh non lancia più gli aggiornamenti automatici.
-      scrivi('sincronizza.ricevuta', `${ora()}\n`)
-      registra('ricezione', 'Completato')
-      payload.logger.info(`[sincronizza] contenuti applicati (${origine})`)
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      stato('ricezione', 'errore', { origine, errore: msg })
-      registra('ricezione', `Errore: ${msg}. I contenuti di prima sono rimasti com’erano.`)
-      payload.logger.error(`[sincronizza] ${msg}`)
-    } finally {
-      ricevendo = false
-      fs.rmSync(file('sincronizza-arrivo.json.gz'), { force: true })
-    }
-  })
-}
-
-const copie = () => {
+  await git(['add', '-A'])
+  const cambiati = (await git(['status', '--porcelain'])).split('\n').filter(Boolean)
+  if (remoto && cambiati.length <= 1 && remoto.manifesto?.impronta === impronta) {
+    await git(['reset', '-q', '--hard', remoto.commit])
+    salvaAllineamento({ github: impronta, locale: impronta, commit: remoto.commit })
+    registra('Nessuna differenza: GitHub ha già questi contenuti.')
+    return
+  }
+  const foto = cambiati.filter((r) => r.slice(3).startsWith('media/')).length
+  registra(`Da inviare: ${cambiati.length} file cambiati (${foto} tra foto e documenti), ${dati.size} tabelle, ${righe} righe`)
+  await git([
+    '-c', 'user.name=Sito Serralunga', '-c', 'user.email=contenuti@serralunga.invalid',
+    'commit', '-q', '-m', `Contenuti salvati da ${manifesto.da} (${chi})`, '-m', `${dati.size} tabelle, ${righe} righe, ${nFile} file. Impronta ${impronta}.`,
+  ])
   try {
-    return fs.readdirSync(path.join(cartella(), 'copie')).filter((f) => f.endsWith('-prima-della-sincronizzazione.json.gz')).sort().reverse()
-  } catch {
-    return []
+    await git(['push', '-q', 'origin', `HEAD:refs/heads/${RAMO()}`, ...(forza && remoto ? [`--force-with-lease=refs/heads/${RAMO()}:${remoto.commit}`] : [])], true)
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    if (/rejected|non-fast-forward|fetch first|stale info/i.test(msg)) throw new Error('Nel frattempo un altro sito ha salvato su GitHub: carica prima i suoi contenuti, poi salva di nuovo.')
+    throw e
+  }
+  const commit = (await git(['rev-parse', 'HEAD'])).trim()
+  salvaAllineamento({ github: impronta, locale: impronta, commit })
+  registra(`Fatto: contenuti salvati su GitHub (commit ${commit.slice(0, 7)}).`)
+}
+
+/* ------------------------------------------------------------------ carica */
+
+async function carica(payload: Payload, chi: string, forza: boolean, auto = false) {
+  if (!auto) registra(`Caricamento da GitHub avviato da ${chi}`, true)
+  const remoto = await scaricaRemoto()
+  if (!remoto?.manifesto) {
+    if (!auto) registra('Su GitHub non ci sono ancora contenuti: salva da questo sito (o da quello più aggiornato).')
+    return 'vuoto'
+  }
+  const m = remoto.manifesto
+  const a = allineamento()
+  if (m.impronta === a.github && !forza) {
+    if (!auto) registra('Questo sito ha già l’ultimo salvataggio di GitHub.')
+    return 'allineato'
+  }
+  if (!forza) {
+    // Mai sovrascrivere da soli modifiche fatte qui e non ancora salvate.
+    const qui = await improntaLocale(payload)
+    if (!a.locale || qui !== a.locale) {
+      if (auto) return 'conflitto'
+      throw new Error('Qui ci sono modifiche non ancora salvate su GitHub. Salvale prima, oppure «Carica comunque» (finiscono nella copia di sicurezza).')
+    }
+  }
+  if (auto) registra(`Contenuti nuovi su GitHub (${m.da}, ${m.chi}): caricamento automatico`, true)
+  const mieMigr = await migrazioni(pool(payload))
+  const manca = m.migrazioni.filter((x) => !mieMigr.includes(x))
+  if (manca.length) {
+    if (auto) return 'codice-vecchio'
+    throw new Error(`Il salvataggio su GitHub viene da una versione più nuova del codice: aggiorna prima questo sito (deploy di Coolify, oppure aggiorna-pc.bat sul PC).`)
+  }
+
+  await git(['checkout', '-q', '-f', '-B', RAMO(), remoto.commit])
+  await git(['clean', '-q', '-fd'])
+  // 1. Foto: solo quelle mancanti o diverse.
+  const qui = new Map(fileMedia())
+  const dir = path.join(dirGit(), 'media')
+  let nuove = 0
+  if (fs.existsSync(dir))
+    for (const nome of fs.readdirSync(dir)) {
+      const st = fs.statSync(path.join(dir, nome))
+      if (!st.isFile() || qui.get(nome) === st.size) continue
+      collega(path.join(dir, nome), path.join(mediaDir(), nome))
+      nuove++
+    }
+  registra(`Foto e documenti: ${nuove} nuovi o cambiati`)
+  // 2. Contenuti.
+  const p: Pacchetto = { versione: m.versione, creato: m.salvato, origine: m.da, migrazioni: m.migrazioni, tabelle: {} }
+  const dd = path.join(dirGit(), 'dati')
+  for (const f of fs.existsSync(dd) ? fs.readdirSync(dd) : []) {
+    if (!f.endsWith('.json')) continue
+    p.tabelle[f.slice(0, -5)] = JSON.parse(fs.readFileSync(path.join(dd, f), 'utf8'))
+  }
+  await importa(payload, p, (r) => registra(r), true)
+  salvaAllineamento({ github: m.impronta, locale: await improntaLocale(payload), commit: remoto.commit })
+  registra(`Fatto: contenuti caricati da GitHub (salvati da ${m.da}, ${new Date(m.salvato).toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}).`)
+  return 'caricato'
+}
+
+/* ------------------------------------------------------------------ controllo periodico */
+
+interface Controllo {
+  quando: string
+  esito: 'allineato' | 'da-salvare' | 'da-caricare' | 'conflitto' | 'vuoto' | 'codice-vecchio' | 'senza-token' | 'errore'
+  errore?: string
+  github?: Pick<Manifesto, 'salvato' | 'da' | 'chi'>
+}
+const ultimoControllo = () => leggiJson<Controllo | null>('github.controllo.json', null)
+
+async function controlla(payload: Payload, auto: boolean) {
+  if (!token()) return scrivi('github.controllo.json', JSON.stringify({ quando: ora(), esito: 'senza-token' }))
+  try {
+    const remoto = await scaricaRemoto()
+    const a = allineamento()
+    const qui = await improntaLocale(payload)
+    const m = remoto?.manifesto
+    const cambiatoQui = !a.locale || qui !== a.locale
+    const cambiatoLa = !!m && m.impronta !== a.github
+    let esito: Controllo['esito'] = !m ? 'vuoto' : cambiatoLa && cambiatoQui ? 'conflitto' : cambiatoLa ? 'da-caricare' : cambiatoQui ? 'da-salvare' : 'allineato'
+    if (esito === 'da-caricare' && auto && automatico()) {
+      occupato = 'carica'
+      try {
+        const r = await carica(payload, 'aggiornamento automatico', false, true)
+        if (r === 'caricato') esito = 'allineato'
+        else if (r === 'codice-vecchio') esito = 'codice-vecchio'
+      } finally {
+        occupato = null
+      }
+    }
+    scrivi('github.controllo.json', JSON.stringify({ quando: ora(), esito, github: m ? { salvato: m.salvato, da: m.da, chi: m.chi } : undefined }))
+  } catch (e) {
+    scrivi('github.controllo.json', JSON.stringify({ quando: ora(), esito: 'errore', errore: e instanceof Error ? e.message : String(e) }))
   }
 }
 
-/* ------------------------------------------------------------------ endpoint */
+let avviato = false
+/** Da payload.config onInit: controllo all'avvio (dopo 1 minuto) e poi ogni 10 minuti (CONTENUTI_GITHUB_MINUTI). */
+export function avviaControlloContenuti(payload: Payload) {
+  if (avviato || process.env.CONTENUTI_GITHUB_CONTROLLO === '0') return
+  avviato = true
+  const giro = () => {
+    if (occupato || !token()) return
+    occupato = 'controllo'
+    controlla(payload, true)
+      .catch(() => undefined)
+      .finally(() => {
+        if (occupato === 'controllo') occupato = null
+      })
+  }
+  const minuti = Math.max(1, Number(process.env.CONTENUTI_GITHUB_MINUTI) || 10)
+  setTimeout(giro, 60_000).unref?.()
+  setInterval(giro, minuti * 60_000).unref?.()
+}
 
-async function corpoJson<T>(req: PayloadRequest): Promise<T> {
+/* ------------------------------------------------------------------ endpoint del pannello */
+
+async function corpoJson<T>(req: { json?: () => Promise<unknown> }): Promise<T> {
   try {
     return (await (req as unknown as Request).json()) as T
   } catch {
     return {} as T
   }
 }
-const negato = () => json({ errore: 'Chiave di ricezione mancante o errata.' }, 401)
 const soloRedazione = () => json({ errore: 'Serve l’accesso alla redazione.' }, 401)
+const copie = () => {
+  try {
+    return fs.readdirSync(path.join(cartella(), 'copie')).filter((f) => f.endsWith('-prima-del-caricamento.json.gz')).sort().reverse()
+  } catch {
+    return []
+  }
+}
+
+function inBackground(payload: Payload, nome: string, lavoro: () => Promise<unknown>) {
+  occupato = nome
+  setImmediate(async () => {
+    try {
+      await lavoro()
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      registra(`Non completato: ${msg}`)
+      payload.logger.error(`[contenuti-github] ${msg}`)
+    } finally {
+      occupato = 'controllo'
+      await controlla(payload, false).catch(() => undefined)
+      occupato = null
+    }
+  })
+}
 
 export const endpointSincronizza: Endpoint[] = [
-  // --- chiamati dal PC, con la chiave di ricezione
   {
-    path: '/sincronizza/info',
-    method: 'get',
-    handler: async (req) => {
-      if (!autorizzato(req)) return negato()
-      return json({ versione: VERSIONE_SINCRONIZZA, migrazioni: await migrazioni(pool(req.payload)) })
-    },
-  },
-  {
-    path: '/sincronizza/media-mancanti',
-    method: 'post',
-    handler: async (req) => {
-      if (!autorizzato(req)) return negato()
-      const { file: elenco = [] } = await corpoJson<{ file?: [string, number][] }>(req)
-      const qui = new Map(fileMedia())
-      return json({ mancanti: elenco.filter(([n, s]) => nomeValido(n) && qui.get(n) !== s).map(([n]) => n) })
-    },
-  },
-  {
-    path: '/sincronizza/media',
-    method: 'put',
-    handler: async (req) => {
-      if (!autorizzato(req)) return negato()
-      const nome = new URL(req.url || '', 'http://x').searchParams.get('nome') || ''
-      if (!nomeValido(nome)) return json({ errore: 'Nome di file non valido.' }, 400)
-      const dati = Buffer.from(await (req as unknown as Request).arrayBuffer())
-      fs.mkdirSync(mediaDir(), { recursive: true })
-      const tmp = path.join(mediaDir(), `.arrivo-${crypto.randomBytes(6).toString('hex')}`)
-      fs.writeFileSync(tmp, dati)
-      fs.renameSync(tmp, path.join(mediaDir(), nome))
-      return json({ ok: true })
-    },
-  },
-  {
-    path: '/sincronizza/dati',
-    method: 'post',
-    handler: async (req) => {
-      if (!autorizzato(req)) return negato()
-      if (ricevendo) return json({ errore: 'Sta già applicando un invio precedente.' }, 409)
-      const dati = Buffer.from(await (req as unknown as Request).arrayBuffer())
-      fs.mkdirSync(cartella(), { recursive: true })
-      fs.writeFileSync(file('sincronizza-arrivo.json.gz'), dati)
-      avviaImportazione(
-        req.payload,
-        'dal PC',
-        () => JSON.parse(zlib.gunzipSync(fs.readFileSync(file('sincronizza-arrivo.json.gz'))).toString('utf8')) as Pacchetto,
-        true,
-      )
-      return json({ ok: true }, 202)
-    },
-  },
-  {
-    path: '/sincronizza/esito',
-    method: 'get',
-    handler: async (req) => {
-      if (!autorizzato(req)) return negato()
-      const s = leggiJson<Record<string, unknown>>('sincronizza-ricezione.stato.json', { stato: 'mai' })
-      return json({ ...s, registro: coda('ricezione', 10) })
-    },
-  },
-
-  // --- pannello (redazione)
-  {
-    path: '/sincronizza/stato',
+    path: '/contenuti-github/stato',
     method: 'get',
     handler: async (req) => {
       if (!req.user) return soloRedazione()
-      const d = destinazione()
       return json({
         versione: VERSIONE_SINCRONIZZA,
-        chiave: chiaveRicezione(true),
-        chiaveDaVariabile: Boolean(process.env.SINCRONIZZA_CHIAVE),
-        destinazione: d ? { url: d.url, chiave: d.chiave ? `••••${d.chiave.slice(-4)}` : '' } : null,
-        invio: { ...leggiJson('sincronizza-invio.stato.json', { stato: 'mai' }), registro: coda('invio') },
-        ricezione: { ...leggiJson('sincronizza-ricezione.stato.json', { stato: 'mai' }), registro: coda('ricezione') },
-        ultimaRicevuta: leggi('sincronizza.ricevuta').trim(),
+        repo: REPO(),
+        ramo: RAMO(),
+        token: process.env.CONTENUTI_GITHUB_TOKEN ? 'variabile' : config().token ? `••••${token().slice(-4)}` : '',
+        automatico: automatico(),
+        occupato,
+        controllo: ultimoControllo(),
+        allineamento: allineamento(),
+        registro: registro(),
         copie: copie().slice(0, 5),
       })
     },
   },
   {
-    path: '/sincronizza/destinazione',
+    path: '/contenuti-github/impostazioni',
     method: 'post',
     handler: async (req) => {
       if (!req.user) return soloRedazione()
-      const b = await corpoJson<{ url?: string; chiave?: string }>(req)
-      let url: URL
-      try {
-        url = new URL(String(b.url || '').trim())
-      } catch {
-        return json({ errore: 'Indirizzo non valido: scrivilo completo, per esempio https://serralunga1825.oltre.media' }, 400)
+      const b = await corpoJson<{ token?: string; automatico?: boolean }>(req)
+      const c = config()
+      if (typeof b.token === 'string' && b.token.trim()) {
+        if (!/^(gh[pousr]_|github_pat_)[A-Za-z0-9_]{20,}$/.test(b.token.trim())) return json({ errore: 'Non sembra un token di GitHub (inizia con github_pat_ o ghp_).' }, 400)
+        c.token = cifra(b.token.trim())
       }
-      if (url.protocol !== 'https:' && !/^(localhost|127\.0\.0\.1)$/.test(url.hostname))
-        return json({ errore: 'Serve un indirizzo https: le chiavi viaggiano in questa connessione.' }, 400)
-      const prima = destinazione()
-      const chiave = String(b.chiave || '').trim() || (prima?.url === url.origin ? prima.chiave : '')
-      if (chiave.length < 32) return json({ errore: 'Incolla la chiave di ricezione del sito online (Strumenti, riquadro «Ricevi dal PC»).' }, 400)
-      scrivi('sincronizza.destinazione.json', JSON.stringify({ url: url.origin, chiave }))
+      if (typeof b.automatico === 'boolean') c.automatico = b.automatico
+      scrivi('github.json', JSON.stringify(c))
+      if (!occupato) inBackground(req.payload, 'controllo', () => controlla(req.payload, false))
       return json({ ok: true })
     },
   },
   {
-    path: '/sincronizza/pubblica',
+    path: '/contenuti-github/azione',
     method: 'post',
     handler: async (req) => {
       if (!req.user) return soloRedazione()
-      if (inCorso) return json({ errore: 'La pubblicazione è già in corso.' }, 409)
-      if (!destinazione()) return json({ errore: 'Prima salva indirizzo e chiave del sito online.' }, 400)
-      inCorso = true
-      ferma = false
-      const chi = req.user.email || 'redazione'
+      if (occupato && occupato !== 'controllo') return json({ errore: 'C’è già un’operazione in corso: attendi che finisca.' }, 409)
+      if (occupato === 'controllo') return json({ errore: 'Sto controllando GitHub: riprova tra qualche secondo.' }, 409)
+      const { azione, forza } = await corpoJson<{ azione?: string; forza?: boolean }>(req)
+      const chi = String(req.user.email || 'redazione')
       const payload = req.payload
-      setImmediate(async () => {
-        try {
-          await pubblica(payload, String(chi))
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : String(e)
-          registra('invio', `Errore: ${msg}`)
-          stato('invio', 'errore', { errore: msg })
-        } finally {
-          inCorso = false
-        }
-      })
-      return json({ ok: true })
-    },
-  },
-  {
-    path: '/sincronizza/ferma',
-    method: 'post',
-    handler: async (req) => {
-      if (!req.user) return soloRedazione()
-      ferma = true
-      return json({ ok: true })
-    },
-  },
-  {
-    path: '/sincronizza/ripristina',
-    method: 'post',
-    handler: async (req) => {
-      if (!req.user) return soloRedazione()
-      if (ricevendo) return json({ errore: 'Sta già applicando dei contenuti.' }, 409)
-      const ultima = copie()[0]
-      if (!ultima) return json({ errore: 'Non ci sono copie da ripristinare.' }, 404)
-      avviaImportazione(
-        req.payload,
-        `ripristino della copia ${ultima}`,
-        () => JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(cartella(), 'copie', ultima))).toString('utf8')) as Pacchetto,
-        false,
-      )
+      if (azione === 'salva') inBackground(payload, 'salva', () => salva(payload, chi, forza === true))
+      else if (azione === 'carica') inBackground(payload, 'carica', () => carica(payload, chi, forza === true))
+      else if (azione === 'controlla') inBackground(payload, 'controllo', () => controlla(payload, false))
+      else if (azione === 'ripristina') {
+        const ultima = copie()[0]
+        if (!ultima) return json({ errore: 'Non ci sono copie da ripristinare.' }, 404)
+        inBackground(payload, 'ripristina', async () => {
+          registra(`Ripristino della copia ${ultima} avviato da ${chi}`, true)
+          const p = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(cartella(), 'copie', ultima))).toString('utf8')) as Pacchetto
+          await importa(payload, p, (r) => registra(r), false)
+          // Dopo un ripristino questo sito ha contenuti diversi da GitHub: vanno salvati o ricaricati.
+          salvaAllineamento({ ...allineamento(), locale: 'ripristino' })
+          registra('Fatto: contenuti di prima ripristinati. Non sono su GitHub finché non li salvi.')
+        })
+      } else return json({ errore: 'Azione sconosciuta.' }, 400)
       return json({ ok: true })
     },
   },

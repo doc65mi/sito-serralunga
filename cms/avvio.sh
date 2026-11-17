@@ -8,9 +8,10 @@
 #    seed:aggiorna e poi seed:catalogo. Entrambi aggiungono solo ciò che manca:
 #    i testi e le foto modificati dal pannello o dalla pagina restano come sono.
 #    Il sito resta raggiungibile mentre i contenuti si caricano.
-#    Eccezione: un sito che riceve i contenuti dal PC (Strumenti > Pubblica su Coolify,
-#    file .compiti/sincronizza.ricevuta) non li aggiorna da solo: la fonte è il PC,
-#    e un aggiornamento fatto solo qui creerebbe differenze tra le due copie.
+#    Eccezione: un sito collegato ai contenuti su GitHub (token nel pannello, file
+#    .compiti/github.json, o CONTENUTI_GITHUB_TOKEN) non li aggiorna da solo: la fonte è
+#    GitHub, e un aggiornamento fatto solo qui creerebbe differenze tra i siti. I compiti
+#    si lanciano a mano da Strumenti su un sito, poi «Salva su GitHub».
 set -e
 
 DIR="${MEDIA_DIR:-./media}/.compiti"
@@ -37,8 +38,8 @@ if [ "${SEED_AUTOMATICO:-0}" = "1" ] || [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1"
     if [ "${SEED_AUTOMATICO:-0}" = "1" ]; then
       nice -n 19 env VIPS_CONCURRENCY=1 UV_THREADPOOL_SIZE=2 npm run seed:primo || echo "[avvio] contenuti di partenza non completati: si rilanciano dal pannello, Strumenti"
     fi
-    if [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1" ] && [ -f "$DIR/sincronizza.ricevuta" ]; then
-      echo "[avvio] contenuti ricevuti dal PC: aggiornamento automatico saltato (si pubblica dal PC, Strumenti > Pubblica su Coolify)"
+    if [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1" ] && { [ -f "$DIR/github.json" ] || [ -n "${CONTENUTI_GITHUB_TOKEN:-}" ]; }; then
+      echo "[avvio] contenuti collegati a GitHub: aggiornamento automatico saltato (si caricano da GitHub)"
     elif [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1" ]; then
       VERSIONE="$(cat .versione-seed 2>/dev/null || echo sconosciuta)"
       for c in aggiorna catalogo; do

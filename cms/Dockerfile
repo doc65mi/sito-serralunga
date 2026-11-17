@@ -1,4 +1,4 @@
-# Payload CMS (Next.js) — Version: 1.02
+# Payload CMS (Next.js) — Version: 1.03
 # Contesto di build: la radice del repository (serve template/assets per il seed).
 FROM node:22-alpine AS base
 WORKDIR /app
@@ -17,6 +17,8 @@ RUN find src/seed -type f | sort | xargs cat | sha1sum | cut -c1-12 > .versione-
 RUN PAYLOAD_SECRET=solo-per-la-build DATABASE_URL=postgres://build:build@127.0.0.1:1/build npm run build
 
 FROM base AS run
+# git: i contenuti si salvano e si caricano dal ramo `contenuti` di GitHub (strumenti/sincronizza.ts).
+RUN apk add --no-cache git
 ENV NODE_ENV=production
 ENV MEDIA_DIR=/app/media
 ENV SEED_TEMPLATE_DIR=/app/seed-template

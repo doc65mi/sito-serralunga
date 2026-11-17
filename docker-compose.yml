@@ -1,4 +1,4 @@
-# Serralunga — Astro + Payload + Postgres. Version: 1.03
+# Serralunga — Astro + Payload + Postgres. Version: 1.04
 # Locale: copia .env.example in .env, poi `docker compose up -d --build`.
 # Sito e pannello rispondono sulla stessa porta (servizio proxy): http://localhost:8080 e /admin.
 # Coolify: usa docker-compose.coolify.yml (vedi DEPLOY.md).
@@ -38,6 +38,8 @@ services:
       # 1 = dopo un aggiornamento del codice con contenuti nuovi, aggiunge da solo ciò che manca
       # (modalità prudente: non modifica nulla di ciò che esiste). Avanzamento in Strumenti.
       AGGIORNAMENTO_AUTOMATICO: ${AGGIORNAMENTO_AUTOMATICO:-1}
+      # Contenuti su GitHub (facoltativo: il token si può inserire anche nel pannello).
+      CONTENUTI_GITHUB_TOKEN: ${CONTENUTI_GITHUB_TOKEN:-}
       NOTIFICHE_EMAIL: ${NOTIFICHE_EMAIL:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}

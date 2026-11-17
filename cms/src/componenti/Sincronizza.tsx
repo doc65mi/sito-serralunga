@@ -1,72 +1,95 @@
 'use client'
 
 /**
- * Version: 1.00
- * Riquadro "Pubblica su Coolify" nel cruscotto (strumenti/sincronizza.ts).
- * - Sul PC: indirizzo del sito online e sua chiave di ricezione (si inseriscono una volta),
- *   poi un clic su «Pubblica su Coolify» copia contenuti e foto. Avanzamento ogni 3 secondi.
- * - Sul sito online: la chiave di ricezione da copiare sul PC, l'ultima ricezione e
- *   «Ripristina» per tornare ai contenuti di prima dell'ultima pubblicazione.
+ * Version: 2.00
+ * Riquadro "Contenuti su GitHub" nel cruscotto (strumenti/sincronizza.ts).
+ * GitHub è il punto di riferimento: da qualunque sito si salvano lì i contenuti, e ogni sito
+ * carica da solo quelli nuovi (se non ha modifiche non salvate). Stato aggiornato ogni 3 secondi.
  */
 import React, { useCallback, useEffect, useState } from 'react'
 
-interface Fase {
-  stato: 'mai' | 'in-corso' | 'ok' | 'errore'
-  quando?: string
-  errore?: string
-  verso?: string
-  origine?: string
-  file?: number
-  daInviare?: number
-  registro: string
-}
 interface Stato {
-  chiave: string
-  chiaveDaVariabile: boolean
-  destinazione: { url: string; chiave: string } | null
-  invio: Fase
-  ricezione: Fase
-  ultimaRicevuta: string
+  repo: string
+  ramo: string
+  token: string
+  automatico: boolean
+  occupato: string | null
+  controllo: {
+    quando: string
+    esito: 'allineato' | 'da-salvare' | 'da-caricare' | 'conflitto' | 'vuoto' | 'codice-vecchio' | 'senza-token' | 'errore'
+    errore?: string
+    github?: { salvato: string; da: string; chi: string }
+  } | null
+  allineamento: { github?: string; locale?: string; commit?: string; quando?: string }
+  registro: string
   copie: string[]
 }
 
 const quando = (iso?: string) => (iso ? new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '')
 
-function etichetta(f: Fase, cosa: string) {
-  if (f.stato === 'in-corso') return f.daInviare ? `In corso: ${f.file || 0} di ${f.daInviare} file inviati` : 'In corso…'
-  if (f.stato === 'ok') return `${cosa} completata il ${quando(f.quando)}`
-  if (f.stato === 'errore') return `Non completata (${quando(f.quando)}): ${f.errore || 'vedi il registro'}`
-  return 'Mai eseguita'
+const OCCUPATO: Record<string, string> = {
+  salva: 'Salvataggio su GitHub in corso…',
+  carica: 'Caricamento da GitHub in corso…',
+  ripristina: 'Ripristino in corso…',
+  controllo: 'Controllo di GitHub in corso…',
+}
+
+function descrivi(s: Stato) {
+  const c = s.controllo
+  const ultimo = c?.github ? `Ultimo salvataggio: ${c.github.da}, ${quando(c.github.salvato)} (${c.github.chi})` : ''
+  switch (c?.esito) {
+    case 'allineato':
+      return { classe: 'ok', testo: `Allineato con GitHub. ${ultimo}` }
+    case 'da-salvare':
+      return { classe: 'avviso', testo: `Qui ci sono modifiche non ancora salvate su GitHub. ${ultimo}` }
+    case 'da-caricare':
+      return { classe: 'avviso', testo: `Su GitHub ci sono contenuti più recenti: si caricano da soli entro 10 minuti, oppure subito con «Carica da GitHub». ${ultimo}` }
+    case 'conflitto':
+      return {
+        classe: 'errore',
+        testo: s.allineamento.locale
+          ? `Contenuti cambiati sia qui sia su GitHub. ${ultimo}. Scegli quale tenere: «Salva comunque» sostituisce GitHub con questo sito, «Carica comunque» sostituisce questo sito (copia di sicurezza prima).`
+          : `Questo sito non è ancora collegato ai contenuti di GitHub. ${ultimo}. Se il sito più aggiornato è un altro, «Carica comunque»; se è questo, «Salva comunque».`,
+      }
+    case 'vuoto':
+      return { classe: 'avviso', testo: 'Su GitHub non ci sono ancora contenuti: salvali dal sito più aggiornato.' }
+    case 'codice-vecchio':
+      return { classe: 'avviso', testo: 'Su GitHub ci sono contenuti salvati con una versione più nuova del codice: si caricano dopo l’aggiornamento di questo sito.' }
+    case 'senza-token':
+      return { classe: 'avviso', testo: 'Inserisci il token di GitHub per collegare questo sito.' }
+    case 'errore':
+      return { classe: 'errore', testo: `Controllo non riuscito: ${c.errore || 'vedi il registro'}` }
+    default:
+      return { classe: 'mai', testo: 'Controllo in attesa…' }
+  }
 }
 
 export default function Sincronizza() {
   const [s, setS] = useState<Stato | null>(null)
-  const [url, setUrl] = useState('')
-  const [chiave, setChiave] = useState('')
-  const [modifica, setModifica] = useState(false)
+  const [token, setToken] = useState('')
+  const [modificaToken, setModificaToken] = useState(false)
   const [messaggio, setMessaggio] = useState('')
-  const [registro, setRegistro] = useState<'invio' | 'ricezione' | null>(null)
-  const [conferma, setConferma] = useState<'pubblica' | 'ripristina' | null>(null)
-  const [mostraChiave, setMostraChiave] = useState(false)
+  const [registro, setRegistro] = useState(false)
+  const [conferma, setConferma] = useState<string | null>(null)
 
-  const carica = useCallback(async () => {
+  const aggiorna = useCallback(async () => {
     try {
-      const r = await fetch('/api/sincronizza/stato', { credentials: 'same-origin', cache: 'no-store' })
+      const r = await fetch('/api/contenuti-github/stato', { credentials: 'same-origin', cache: 'no-store' })
       if (r.ok) setS((await r.json()) as Stato)
     } catch {
       /* si riprova al giro dopo */
     }
   }, [])
   useEffect(() => {
-    carica()
-    const t = setInterval(carica, 3000)
+    aggiorna()
+    const t = setInterval(aggiorna, 3000)
     return () => clearInterval(t)
-  }, [carica])
+  }, [aggiorna])
 
-  async function chiama(azione: string, corpo: Record<string, unknown> = {}) {
+  async function chiama(percorso: string, corpo: Record<string, unknown>) {
     setMessaggio('')
     setConferma(null)
-    const r = await fetch(`/api/sincronizza/${azione}`, {
+    const r = await fetch(`/api/contenuti-github/${percorso}`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
@@ -74,22 +97,42 @@ export default function Sincronizza() {
     })
     const d = (await r.json().catch(() => ({}))) as { errore?: string }
     if (!r.ok) setMessaggio(d.errore || `Errore ${r.status}`)
-    await carica()
+    await aggiorna()
     return r.ok
+  }
+  const azione = (a: string, forza = false) => {
+    setRegistro(true)
+    return chiama('azione', { azione: a, forza })
   }
 
   if (!s) return null
-  const invioInCorso = s.invio.stato === 'in-corso'
-  const ricezioneInCorso = s.ricezione.stato === 'in-corso'
-  const configurato = !!s.destinazione && !modifica
+  const d = descrivi(s)
+  const libero = !s.occupato
+  const esito = s.controllo?.esito
+  const senzaToken = !s.token
+
+  const Conferma = ({ id, testo, si, onSi }: { id: string; testo: string; si: string; onSi: () => void }) =>
+    conferma === id ? (
+      <>
+        <span className="sl-strumento__testo">{testo}</span>
+        <div className="sl-strumento__azioni">
+          <button type="button" className="sl-strumento__pulsante sl-strumento__pulsante--rischio" onClick={onSi}>
+            {si}
+          </button>
+          <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setConferma(null)}>
+            Annulla
+          </button>
+        </div>
+      </>
+    ) : null
 
   return (
-    <section id="pubblica-coolify" className="sl-strumenti" aria-label="Pubblica su Coolify">
-      <h2 className="sl-strumenti__titolo">Pubblica su Coolify</h2>
+    <section id="contenuti-github" className="sl-strumenti" aria-label="Contenuti su GitHub">
+      <h2 className="sl-strumenti__titolo">Contenuti su GitHub</h2>
       <p className="sl-strumenti__nota">
-        Il codice arriva su Coolify da GitHub; contenuti e foto (testi, menu, logo, home, schede, ritratti) si copiano da qui con un clic. Il sito online
-        prende tutto dal PC; restano suoi solo utenti, richieste dei clienti e registro del database. Prima di sostituire, il sito online salva una copia
-        dei contenuti che aveva.
+        GitHub è il punto di riferimento per codice e contenuti. Dopo aver modificato testi, menu, foto o schede, premi «Salva su GitHub»: gli altri
+        siti (PC o Coolify) li caricano da soli entro 10 minuti. Utenti, richieste dei clienti, iscritti alla newsletter e chiavi segrete restano di
+        ciascun sito.
       </p>
       {messaggio && (
         <p className="sl-strumenti__errore" role="alert">
@@ -97,131 +140,109 @@ export default function Sincronizza() {
         </p>
       )}
       <div className="sl-strumenti__griglia">
-        <div className={`sl-strumento sl-strumento--${s.invio.stato}`}>
-          <span className="sl-strumento__titolo">Invia dal PC al sito online</span>
-          {configurato ? (
-            <span className="sl-strumento__testo">
-              Destinazione: <strong>{s.destinazione!.url}</strong> · chiave {s.destinazione!.chiave}{' '}
-              <button type="button" className="sl-strumento__registro-pulsante" onClick={() => { setUrl(s.destinazione!.url); setChiave(''); setModifica(true) }}>
-                Cambia
+        <div className={`sl-strumento sl-strumento--${d.classe === 'ok' ? 'ok' : d.classe === 'errore' ? 'errore' : 'mai'}`}>
+          <span className="sl-strumento__titolo">Stato dei contenuti</span>
+          <span className="sl-strumento__stato" aria-live="polite">
+            {!libero && <span className="sl-strumento__spia" aria-hidden="true" />}
+            {s.occupato ? OCCUPATO[s.occupato] || 'In corso…' : d.testo}
+          </span>
+          {s.controllo?.quando && libero && <span className="sl-strumento__testo">Controllato il {quando(s.controllo.quando)}.</span>}
+
+          {!senzaToken && (
+            <div className="sl-strumento__azioni">
+              <button type="button" className="sl-strumento__pulsante" disabled={!libero} onClick={() => (esito === 'conflitto' || esito === 'da-caricare' ? setConferma('salva') : azione('salva'))}>
+                Salva su GitHub
               </button>
-            </span>
-          ) : (
+              <button type="button" className="sl-strumento__registro-pulsante" disabled={!libero} onClick={() => (esito === 'conflitto' || esito === 'da-salvare' ? setConferma('carica') : azione('carica'))}>
+                Carica da GitHub
+              </button>
+              <button type="button" className="sl-strumento__registro-pulsante" disabled={!libero} onClick={() => azione('controlla')}>
+                Controlla ora
+              </button>
+              {s.registro && (
+                <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setRegistro(!registro)}>
+                  {registro ? 'Nascondi registro' : 'Mostra registro'}
+                </button>
+              )}
+            </div>
+          )}
+          <Conferma
+            id="salva"
+            testo="Su GitHub ci sono contenuti salvati da un altro sito che qui non sono ancora caricati: salvando, GitHub prende i contenuti di questo sito al loro posto (restano nella cronologia di GitHub)."
+            si="Salva comunque"
+            onSi={() => azione('salva', true)}
+          />
+          <Conferma
+            id="carica"
+            testo="Le modifiche fatte qui e non salvate su GitHub verranno sostituite. Prima viene salvata una copia locale, recuperabile con «Ripristina»."
+            si="Carica comunque"
+            onSi={() => azione('carica', true)}
+          />
+          {registro && s.registro && <pre className="sl-strumento__registro">{s.registro}</pre>}
+        </div>
+
+        <div className="sl-strumento">
+          <span className="sl-strumento__titolo">Collegamento a GitHub</span>
+          <span className="sl-strumento__testo">
+            Repository <strong>{s.repo}</strong>, ramo <strong>{s.ramo}</strong> (solo contenuti: salvarli non ricompila il sito).
+          </span>
+          {s.token === 'variabile' ? (
+            <span className="sl-strumento__testo">Token impostato con la variabile CONTENUTI_GITHUB_TOKEN.</span>
+          ) : senzaToken || modificaToken ? (
             <form
               className="sl-strumento__modulo"
               onSubmit={async (e) => {
                 e.preventDefault()
-                if (await chiama('destinazione', { url, chiave })) setModifica(false)
+                if (await chiama('impostazioni', { token })) {
+                  setToken('')
+                  setModificaToken(false)
+                }
               }}
             >
-              <span className="sl-strumento__testo">Una volta sola: indirizzo del sito online e chiave di ricezione, che trovi su quel sito in Strumenti, riquadro «Ricevi dal PC».</span>
+              <span className="sl-strumento__testo">
+                Una volta per ogni sito. Su GitHub: Settings → Developer settings → Fine-grained tokens → Generate new token, repository {s.repo}, permesso
+                «Contents: Read and write». Copia il token qui.
+              </span>
               <label className="sl-strumento__campo">
-                <span>Indirizzo del sito online</span>
-                <input type="url" required placeholder="https://serralunga1825.oltre.media" value={url} onChange={(e) => setUrl(e.target.value)} />
-              </label>
-              <label className="sl-strumento__campo">
-                <span>Chiave di ricezione</span>
-                <input type="password" autoComplete="off" placeholder={s.destinazione ? 'lascia vuoto per tenere quella salvata' : ''} value={chiave} onChange={(e) => setChiave(e.target.value)} />
+                <span>Token di GitHub</span>
+                <input type="password" autoComplete="off" required placeholder="github_pat_…" value={token} onChange={(e) => setToken(e.target.value)} />
               </label>
               <div className="sl-strumento__azioni">
-                <button type="submit" className="sl-strumento__pulsante">Salva</button>
-                {s.destinazione && (
-                  <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setModifica(false)}>
+                <button type="submit" className="sl-strumento__pulsante">Salva token</button>
+                {!senzaToken && (
+                  <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setModificaToken(false)}>
                     Annulla
                   </button>
                 )}
               </div>
             </form>
-          )}
-          <span className="sl-strumento__stato" aria-live="polite">
-            {invioInCorso && <span className="sl-strumento__spia" aria-hidden="true" />}
-            {etichetta(s.invio, 'Pubblicazione')}
-          </span>
-          {configurato && (
-            <div className="sl-strumento__azioni">
-              {invioInCorso ? (
-                <button type="button" className="sl-strumento__pulsante sl-strumento__pulsante--ferma" onClick={() => chiama('ferma')}>
-                  Interrompi
-                </button>
-              ) : conferma === 'pubblica' ? (
-                <>
-                  <button type="button" className="sl-strumento__pulsante sl-strumento__pulsante--rischio" onClick={() => { chiama('pubblica'); setRegistro('invio') }}>
-                    Sì, sostituisci i contenuti online
-                  </button>
-                  <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setConferma(null)}>
-                    Annulla
-                  </button>
-                </>
-              ) : (
-                <button type="button" className="sl-strumento__pulsante" onClick={() => setConferma('pubblica')}>
-                  Pubblica su Coolify
-                </button>
-              )}
-              {s.invio.registro && (
-                <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setRegistro(registro === 'invio' ? null : 'invio')}>
-                  {registro === 'invio' ? 'Nascondi registro' : 'Mostra registro'}
-                </button>
-              )}
-            </div>
-          )}
-          {conferma === 'pubblica' && (
+          ) : (
             <span className="sl-strumento__testo">
-              I contenuti del sito online verranno sostituiti da quelli di questo PC (copia di sicurezza automatica prima). Le modifiche fatte direttamente sul sito
-              online dopo l’ultima pubblicazione andranno perse.
+              Token {s.token}{' '}
+              <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setModificaToken(true)}>
+                Cambia
+              </button>
             </span>
           )}
-          {registro === 'invio' && s.invio.registro && <pre className="sl-strumento__registro">{s.invio.registro}</pre>}
-        </div>
-
-        <div className={`sl-strumento sl-strumento--${s.ricezione.stato}`}>
-          <span className="sl-strumento__titolo">Ricevi dal PC</span>
-          <span className="sl-strumento__testo">
-            Chiave di ricezione di questo sito, da incollare nel pannello del PC:{' '}
-            {s.chiaveDaVariabile ? (
-              <em>impostata con la variabile SINCRONIZZA_CHIAVE</em>
-            ) : (
-              <>
-                <code className="sl-strumento__chiave">{mostraChiave ? s.chiave : `${'•'.repeat(12)}${s.chiave.slice(-4)}`}</code>{' '}
-                <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setMostraChiave(!mostraChiave)}>
-                  {mostraChiave ? 'Nascondi' : 'Mostra'}
-                </button>{' '}
-                <button type="button" className="sl-strumento__registro-pulsante" onClick={() => navigator.clipboard?.writeText(s.chiave).then(() => setMessaggio('Chiave copiata.'))}>
-                  Copia
+          <label className="sl-strumento__campo sl-strumento__campo--riga">
+            <input type="checkbox" checked={s.automatico} onChange={(e) => chiama('impostazioni', { automatico: e.target.checked })} />
+            <span>Carica da solo i contenuti nuovi di GitHub (solo se qui non ci sono modifiche non salvate)</span>
+          </label>
+          {!!s.copie.length && libero && (
+            <>
+              <div className="sl-strumento__azioni">
+                <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setConferma('ripristina')}>
+                  Ripristina i contenuti di prima dell’ultimo caricamento…
                 </button>
-              </>
-            )}
-          </span>
-          <span className="sl-strumento__stato" aria-live="polite">
-            {ricezioneInCorso && <span className="sl-strumento__spia" aria-hidden="true" />}
-            {etichetta(s.ricezione, s.ricezione.origine?.startsWith('ripristino') ? 'Ripristino' : 'Ricezione')}
-          </span>
-          {s.ultimaRicevuta && (
-            <span className="sl-strumento__testo">
-              Questo sito riceve i contenuti dal PC: gli aggiornamenti automatici dopo un deploy sono spenti, per non creare differenze.
-            </span>
+              </div>
+              <Conferma
+                id="ripristina"
+                testo={`Torna ai contenuti salvati nella copia ${s.copie[0].slice(0, 16).replace('T', ' ')} (UTC). Poi andranno salvati su GitHub o ricaricati.`}
+                si="Sì, ripristina"
+                onSi={() => azione('ripristina')}
+              />
+            </>
           )}
-          <div className="sl-strumento__azioni">
-            {!!s.copie.length && !ricezioneInCorso && (conferma === 'ripristina' ? (
-              <>
-                <button type="button" className="sl-strumento__pulsante sl-strumento__pulsante--rischio" onClick={() => { chiama('ripristina'); setRegistro('ricezione') }}>
-                  Sì, ripristina
-                </button>
-                <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setConferma(null)}>
-                  Annulla
-                </button>
-              </>
-            ) : (
-              <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setConferma('ripristina')}>
-                Ripristina i contenuti di prima dell’ultima ricezione…
-              </button>
-            ))}
-            {s.ricezione.registro && (
-              <button type="button" className="sl-strumento__registro-pulsante" onClick={() => setRegistro(registro === 'ricezione' ? null : 'ricezione')}>
-                {registro === 'ricezione' ? 'Nascondi registro' : 'Mostra registro'}
-              </button>
-            )}
-          </div>
-          {registro === 'ricezione' && s.ricezione.registro && <pre className="sl-strumento__registro">{s.ricezione.registro}</pre>}
         </div>
       </div>
     </section>

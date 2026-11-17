@@ -1,8 +1,7 @@
 @echo off
-rem Aggiorna il sito sul PC - Version: 1.00
+rem Aggiorna il sito sul PC - Version: 1.01
 rem Doppio clic: copia di sicurezza del database, codice nuovo da GitHub, ricostruzione e riavvio.
-rem Dopo qualche minuto il pannello (Strumenti) aggiunge da solo i contenuti nuovi, senza toccare quelli modificati.
-rem Per portare contenuti e foto su Coolify: pannello > Pubblica su Coolify.
+rem I contenuti (testi, menu, foto) non passano da qui: arrivano dal ramo contenuti di GitHub, pannello > Contenuti su GitHub.
 chcp 65001 >nul
 cd /d "%~dp0"
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HHmm"') do set ORA=%%i
@@ -25,7 +24,7 @@ if errorlevel 1 goto errore
 
 echo.
 echo Fatto. Pannello: http://127.0.0.1:8091/admin  -  Sito: http://127.0.0.1:8091/
-echo Per allineare il sito online: pannello, riquadro "Pubblica su Coolify".
+echo Contenuti: pannello, riquadro "Contenuti su GitHub" (Salva su GitHub dopo le modifiche).
 pause
 exit /b 0
 

@@ -24,7 +24,7 @@ import { SpaziFoto } from './collections/SpaziFoto'
 import { Articoli } from './collections/Articoli'
 import { endpointAi } from './ai/endpoints'
 import { endpointStrumenti } from './strumenti/endpoints'
-import { endpointSincronizza } from './strumenti/sincronizza'
+import { avviaControlloContenuti, endpointSincronizza } from './strumenti/sincronizza'
 import { Ai } from './globals/Ai'
 import { PaginaJournal } from './globals/PaginaJournal'
 import { Richieste } from './collections/Richieste'
@@ -127,6 +127,10 @@ export default buildConfig({
   collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, IscrittiNewsletter, Users].map(conEtichette),
   globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Moduli, Ai].map(conEtichette),
   endpoints: [...endpointAi, ...endpointStrumenti, ...endpointSincronizza, ...endpointModuli],
+  // Contenuti su GitHub: controllo all'avvio e ogni 10 minuti (strumenti/sincronizza.ts).
+  onInit: async (payload) => {
+    if (process.env.NEXT_PHASE !== 'phase-production-build') avviaControlloContenuti(payload)
+  },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },

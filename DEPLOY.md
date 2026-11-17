@@ -1,6 +1,6 @@
 # Avvio e pubblicazione
 
-Version: 1.09
+Version: 1.10
 
 Quattro servizi Docker: `db` (PostgreSQL 16), `cms` (Payload), `web` (Astro) e `proxy` (Caddy). Solo il proxy è aperto verso l'esterno: **sito e pannello stanno sulla stessa porta**, il pannello su `/admin`.
 Il database e le foto caricate stanno in due volumi: `db-dati` e `media`. **Sono gli unici da salvare nei backup.**
@@ -133,19 +133,21 @@ A ogni invio su GitHub nel ramo scelto Coolify ricompila e ripubblica da solo (s
 Il seed **non** va rilanciato dopo aver modificato i testi: riporta quelli italiani ai valori di partenza.
 Per aggiornare un sito già avviato senza toccare i testi modificati c'è `npm run seed:aggiorna` (dal terminale del servizio `cms`, in locale `docker compose exec cms npm run seed:aggiorna`). Aggiunge le schede dei designer mancanti, scarica da serralunga.com i ritratti a risoluzione piena e le foto delle creazioni di ogni designer (solo se la scheda non ne ha già), crea le pagine Installazioni e Spunti e idee con le loro voci di menu, rigenera in AVIF le versioni ridotte di tutte le foto e scrive nel registro l'elenco delle foto più strette di 1200 px. Si può rilanciare quando si vuole.
 
-### Il PC è la fonte: «Pubblica su Coolify» (dalla 1.09)
+### GitHub è il riferimento, anche per i contenuti (dalla 1.10)
 
-Su GitHub viaggia solo il **codice**. Contenuti e foto (testi, menu, logo, blocchi della home, schede, ritratti migliorati con l'AI) stanno nel database e nella cartella `media` di ciascun sito: se si modificano sul PC non arrivano da soli su Coolify, ed è così che le due copie si erano allontanate (logo, menu e sezione catalogo diversi). Da questa versione il flusso è:
+Su GitHub ci sono **codice** (ramo `claude/project-thread-cs7x7p`) e **contenuti** (ramo `contenuti`: testi, menu, logo, blocchi della home, schede, foto). Ogni sito, PC o Coolify, si modifica dal pannello o dalla pagina come sempre; poi:
 
-1. **Codice** – Claude invia su GitHub (ramo `claude/project-thread-cs7x7p`); Coolify ricompila da solo (Auto Deploy).
-2. **PC** – doppio clic su `aggiorna-pc.bat` nella cartella `sito-serralunga-app`: copia del database in `backup\`, `git pull`, ricostruzione. I contenuti nuovi del codice si aggiungono da soli (Strumenti), come su Coolify.
-3. **Contenuti e foto** – sul PC, pannello → cruscotto → **Pubblica su Coolify** → «Pubblica su Coolify» → conferma. La prima volta si inseriscono indirizzo del sito online e la sua *chiave di ricezione* (pannello di Coolify → stesso riquadro, «Ricevi dal PC» → Copia).
+1. **Salvare** – pannello → cruscotto → riquadro **Contenuti su GitHub** → «Salva su GitHub». Il sito scrive i suoi contenuti nel ramo `contenuti` (solo le differenze; ogni salvataggio è un commit, quindi c'è la cronologia). Salvare i contenuti non ricompila Coolify.
+2. **Caricare** – gli altri siti controllano GitHub all'avvio e ogni 10 minuti e caricano da soli i contenuti nuovi. Prima salvano una copia locale (`media/.compiti/copie/`, ultime 5; «Ripristina…»), poi sostituiscono tutto in una transazione: o riesce tutto o non cambia nulla. Si può anche premere «Carica da GitHub».
+3. **Codice** – Claude invia su GitHub, Coolify ricompila da solo; sul PC doppio clic su `aggiorna-pc.bat` (copia del database in `backup\`, `git pull`, ricostruzione).
 
-Cosa fa la pubblicazione: controlla che i due siti abbiano la stessa versione del codice (stesse migrazioni; se no dice quale aggiornare), invia solo le foto mancanti o cambiate, poi invia tutti i contenuti. Coolify salva prima una copia di quello che ha (`media/.compiti/copie/`, ultime 5) e sostituisce tutto in una sola transazione: o riesce tutto o non cambia nulla. «Ripristina i contenuti di prima dell'ultima ricezione…» rimette la copia.
+**Nessuna modifica si perde da sola.** Un sito con modifiche non ancora salvate non carica i contenuti nuovi di GitHub: lo segnala («Contenuti cambiati sia qui sia su GitHub») e si sceglie quale tenere. Allo stesso modo «Salva su GitHub» si ferma se su GitHub c'è un salvataggio di un altro sito non ancora caricato qui. In entrambi i casi «Salva comunque» o «Carica comunque» forzano la scelta (la versione scartata resta nella cronologia di GitHub o nella copia locale).
 
-Restano di ciascun sito: utenti e accessi, preferenze del pannello, **richieste ricevute dai clienti**. Le chiavi API dell'AI passano dentro la connessione HTTPS e vengono cifrate di nuovo con il `PAYLOAD_SECRET` di Coolify. Un sito che ha ricevuto contenuti dal PC non lancia più gli aggiornamenti automatici dopo un deploy (lo fa il PC): così le due copie non si separano di nuovo.
+**Restano di ciascun sito, mai su GitHub:** utenti e accessi, preferenze del pannello, richieste dei clienti, iscritti alla newsletter, registro delle migrazioni, chiavi e password cifrate (AI, reCAPTCHA, SMTP) e dati del server di posta.
 
-**Regola:** si modifica sul PC e si pubblica. Una modifica fatta direttamente sul pannello di Coolify viene sostituita alla pubblicazione successiva (resta nella copia di sicurezza).
+**Primo collegamento (una volta per sito).** Su GitHub: Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token; Repository access: solo `doc65mi/sito-serralunga`; Permissions → Contents: *Read and write*. Il token si incolla nel riquadro «Collegamento a GitHub» del pannello (resta cifrato in `media/.compiti/github.json`) oppure nella variabile `CONTENUTI_GITHUB_TOKEN`. Poi, dal sito con i contenuti più aggiornati, «Salva su GitHub»; sull'altro, la prima volta, «Carica comunque».
+
+Un sito collegato a GitHub non lancia più da solo `seed:aggiorna` / `seed:catalogo` dopo un deploy (creerebbe differenze tra i siti): si lanciano a mano da Strumenti su un sito, poi «Salva su GitHub». File oltre 100 MB (limite di GitHub) non vengono salvati e il registro lo segnala. Variabili facoltative: `CONTENUTI_GITHUB_REPO`, `CONTENUTI_GITHUB_RAMO` (predefinito `contenuti`), `CONTENUTI_GITHUB_MINUTI` (predefinito 10).
 
 ### Cambio di dominio (dalla prova al lancio)
 
