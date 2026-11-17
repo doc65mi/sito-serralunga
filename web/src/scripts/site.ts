@@ -1,5 +1,6 @@
 /**
- * site.ts — comportamenti condivisi (Version: 1.04: lightbox con miniature e swipe, slider a dissolvenza
+ * site.ts — comportamenti condivisi (Version: 1.05: colore e codice della foto nella galleria prodotto;
+ * 1.04: lightbox con miniature e swipe, slider a dissolvenza
  * nella scheda prodotto; 1.03: barra rapida su telefono; 1.02: reCAPTCHA, newsletter, conversioni)
  * Ricavati dai template (classe Component di ogni .dc.html): slide della home,
  * caroselli, galleria prodotto, comparsa allo scorrimento, video, modulo richieste.
@@ -311,6 +312,7 @@ for (const gal of $$('[data-galleria]')) {
   const mini = $$<HTMLButtonElement>('[data-mini]', gal)
   const conto = gal.querySelector('[data-conto]')
   const pausa = gal.querySelector<HTMLButtonElement>('[data-pausa]')
+  const colore = gal.querySelector<HTMLElement>('[data-colore-attivo]')
   const n = foto.length
   if (!palco || !n) continue
   let k = 0
@@ -332,6 +334,21 @@ for (const gal of $$('[data-galleria]')) {
       riga.scrollTo({ left: m.offsetLeft - (riga.clientWidth - m.offsetWidth) / 2, behavior: riduciMovimento ? 'auto' : 'smooth' })
     }
     if (conto) conto.textContent = `${k + 1} / ${n}`
+    // Nome del colore e codice della foto visibile (Scheda prodotto 1.03)
+    if (colore) {
+      const [nome = '', codice = ''] = (foto[k].dataset.colore || '').split(' · ')
+      colore.hidden = !nome
+      colore.innerHTML = ''
+      if (nome) {
+        const a = document.createElement('span')
+        a.className = 'galleria__colore-nome'
+        a.textContent = nome
+        const b = document.createElement('span')
+        b.className = 'galleria__colore-codice'
+        b.textContent = codice
+        colore.append(a, ' ', b)
+      }
+    }
   }
   const ferma = () => window.clearInterval(timer)
   const avvia = () => {

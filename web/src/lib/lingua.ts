@@ -178,6 +178,7 @@ const EN: Record<string, string> = {
   Prodotti: 'Products',
   Vista: 'View',
   'Foto del prodotto': 'Product photos',
+  codice: 'code',
   'Foto precedente': 'Previous photo',
   'Foto successiva': 'Next photo',
   'Ferma lo scorrimento delle foto': 'Pause the photo slideshow',

@@ -1,7 +1,9 @@
 ---
 /**
- * Scheda prodotto — Version: 1.02. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * Scheda prodotto — Version: 1.03. Template: template/Aqua Lounger - Scheda tecnica.dc.html
  * Usata dalle schede del Catalogo (/catalogo/{categoria}/{slug}/) e dal vecchio /prodotti/{slug}/.
+ * 1.03: sotto ogni miniatura nome del colore e codice articolo della variante fotografata (anche
+ *       sulla foto in evidenza, nel testo alternativo e nella lightbox): vedi coloreDellaFoto().
  * 1.02: foto in evidenza a slider con dissolvenza (frecce, punti-miniatura, swipe, tastiera, pausa)
  *       e lightbox a tutto schermo con scorrimento fra tutte le foto della scheda (viste, disegno,
  *       ambientazioni: attributo data-lb="prodotto"). Script in scripts/site.ts.
@@ -56,6 +58,38 @@ const MATERIALI: Record<string, string> = { polietilene: t('Polietilene'), moles
 const materiali = (p.materiali || []).map((m: string) => MATERIALI[m] || m)
 // Colori scelti dalla cartella colori (collezione "colori"): quadrati 30×30 col colore pieno del campione.
 const campioni: Doc[] = (p.campioni || []).filter((c: unknown) => c && typeof c === 'object' && ((c as Doc).hex || isMedia((c as Doc).campione)))
+/*
+ * Colore della foto: le foto importate da serralunga.com si chiamano col codice della variante
+ * (Cubotti_Alto_Planter_335-WH.jpg, collegata alla variante BIANCO 335-WH). Si cerca nel nome
+ * del file il codice articolo più lungo fra le varianti a listino; il nome del colore viene dalla
+ * cartella colori quando la parte finale del codice coincide (WH → Bianco), altrimenti dalla variante.
+ * Le foto senza codice nel nome (ambientazioni, foto di gruppo) restano senza didascalia.
+ */
+const nomeFoto = (m: unknown) => {
+  if (!isMedia(m)) return ''
+  const f = (m as Doc).filename || String(m.url || '').split('?')[0].split('/').pop() || ''
+  return decodeURIComponent(f).replace(/\.[a-z0-9]+$/i, '').toUpperCase()
+}
+const piano = (x: string) => x.toUpperCase().replace(/[^A-Z0-9]+/g, '-')
+const campionePer = new Map<string, Doc>(campioni.filter((c) => c.codice).map((c) => [String(c.codice).toUpperCase(), c]))
+function coloreDellaFoto(m: unknown): { nome: string; codice: string; hex?: string } | null {
+  const file = `-${piano(nomeFoto(m))}-`
+  if (file === '--') return null
+  const f = finiture
+    .filter((x) => x.codice && file.includes(`-${piano(String(x.codice))}-`))
+    .sort((a, b) => String(b.codice).length - String(a.codice).length)[0]
+  if (!f) return null
+  const codice = String(f.codice)
+  const c = campionePer.get(codice.split(/[-_\s]/).pop()!.toUpperCase())
+  return { nome: c?.nome || f.nome, codice, hex: c?.hex || undefined }
+}
+const coloriViste = viste.map(coloreDellaFoto)
+const conColori = coloriViste.some(Boolean)
+const altVista = (v: unknown, k: number) => {
+  const c = coloriViste[k]
+  if (c) return `${p.nome} — ${c.nome} (${c.codice})`
+  return isMedia(v) && v.alt ? undefined : `${p.nome} — ${t('Vista')} ${k + 1}`
+}
 const q: Doc = p.disegno?.quote || {}
 const conQuote = !!q.forma && q.altezza > 0 && (q.diametro > 0 || q.larghezza > 0)
 const tondo = q.forma === 'cilindro' || q.forma === 'troncoConico'
@@ -110,8 +144,13 @@ const jsonld = [{
       >
         <div class="galleria__palco" data-palco>
           {viste.map((v, k) => (
-            <Img media={v} alt={isMedia(v) && v.alt ? undefined : `${p.nome} — ${t('Vista')} ${k + 1}`} class={k === 0 ? 'attiva' : ''} priorita={k === 0} sizes="(max-width: 900px) 100vw, 56vw" larghezza={1800} data-vista data-lb="prodotto" />
+            <Img media={v} alt={altVista(v, k)} class={k === 0 ? 'attiva' : ''} priorita={k === 0} sizes="(max-width: 900px) 100vw, 56vw" larghezza={1800} data-vista data-lb="prodotto" data-colore={coloriViste[k] ? `${coloriViste[k]!.nome} · ${coloriViste[k]!.codice}` : undefined} />
           ))}
+          {conColori && (
+            <p class="galleria__colore" data-colore-attivo aria-live="polite" hidden={!coloriViste[0]}>
+              {coloriViste[0] && <><span class="galleria__colore-nome">{coloriViste[0].nome}</span> <span class="galleria__colore-codice">{coloriViste[0].codice}</span></>}
+            </p>
+          )}
           {isMedia(viste[0]) && (
             <button type="button" class="galleria__zoom" data-zoom aria-label={t('Ingrandisci la foto')}>
               <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M10.5 4a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zM15.3 15.3 20 20M10.5 7.5v6M7.5 10.5h6" /></svg>
@@ -130,12 +169,21 @@ const jsonld = [{
           )}
         </div>
         {viste.length > 1 && (
-          <div class="galleria__miniature" data-miniature>
-            {viste.map((v, k) => (
-              <button type="button" data-mini aria-current={k === 0 ? 'true' : 'false'} aria-label={`${t('Vista')} ${k + 1} ${t('di')} ${viste.length}`}>
-                <Img media={v} alt="" sizes="120px" larghezza={400} />
-              </button>
-            ))}
+          <div class:list={['galleria__miniature', conColori && 'galleria__miniature--colori']} data-miniature>
+            {viste.map((v, k) => {
+              const c = coloriViste[k]
+              return (
+                <button type="button" data-mini aria-current={k === 0 ? 'true' : 'false'} aria-label={`${t('Vista')} ${k + 1} ${t('di')} ${viste.length}${c ? `: ${c.nome}, ${t('codice')} ${c.codice}` : ''}`}>
+                  <span class="galleria__mini-foto"><Img media={v} alt="" sizes="120px" larghezza={400} /></span>
+                  {conColori && (
+                    <span class="galleria__mini-testo" aria-hidden="true">
+                      {c && <span class="galleria__mini-nome">{c.nome}</span>}
+                      {c && <span class="galleria__mini-codice">{c.codice}</span>}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         )}
       </div>
