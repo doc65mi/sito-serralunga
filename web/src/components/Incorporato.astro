@@ -1,0 +1,35 @@
+---
+/**
+ * Version: 1.00
+ * Video (YouTube, Vimeo) o mappa (Google Maps) bloccato fino al consenso (CMP, specifica §3 C).
+ * Al posto dell'<iframe> c'è un riquadro locale: «Contenuto bloccato» + «Accetta e mostra».
+ * L'indirizzo vero sta in data-cmp-src e diventa src solo dopo il consenso alla categoria
+ * (scripts/consenso.ts). Nessuna richiesta verso il fornitore prima del consenso.
+ */
+import { CHIAVE, FORNITORI, NOME_CATEGORIA, fornitoreEmbed } from '../lib/cmp'
+import { traduttore } from '../lib/lingua'
+interface Props { url?: string; titolo?: string; formato?: string }
+const { url = '', titolo = '', formato = 'largo' } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const e = fornitoreEmbed(url)
+const f = e ? FORNITORI[e.id] : null
+const cat = f?.categoria || 'marketing'
+const nomeCat = t(NOME_CATEGORIA[cat])
+const RAPPORTI: Record<string, string> = { largo: 'r-169', panoramico: 'r-219', classico: 'r-43' }
+const descr = titolo || (e?.id === 'maps' ? t('Mappa') : t('Video'))
+---
+{e && f && (
+  <div class:list={['incorporato', RAPPORTI[formato] || 'r-169']} data-cmp-embed data-cmp-category={CHIAVE[cat]} data-cmp-src={e.src} data-cmp-titolo={descr}>
+    <div class="incorporato__blocco">
+      <p class="incorporato__testo">
+        <strong>{t('Contenuto bloccato')}: {f.nome}.</strong>
+        {' '}{t('Per vederlo accettate i cookie della categoria')} «{nomeCat}».
+      </p>
+      <div class="incorporato__azioni">
+        <button type="button" class="btn btn--scuro" data-cmp-sblocca={CHIAVE[cat]}>{t('Accetta e mostra')}</button>
+        <a href={url} target="_blank" rel="noopener nofollow">{t('Apri su')} {f.nome}<span class="sr-only"> ({t('si apre in una nuova finestra')})</span></a>
+      </div>
+    </div>
+  </div>
+)}

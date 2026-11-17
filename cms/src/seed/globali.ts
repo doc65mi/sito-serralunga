@@ -167,8 +167,8 @@ export const impostazioniDati = async (m: Media) => ({
     'Mobili, illuminazione, fioriere e oggetti di design 100% made in Italy per interni ed esterni, hospitality e contract.',
   colonne: COLONNE,
   copyright: '© {anno} Serralunga — 1825 S.R.L.',
-  // Le pagine legali non esistono ancora: voci senza link finché non vengono create.
-  legali: [{ etichetta: 'Privacy' }, { etichetta: 'Cookie' }, { etichetta: 'Termini' }],
+  // Pagine legali create da seed/legali.ts (CMP 1.00); «Termini» resta senza pagina finché il cliente non la fornisce.
+  legali: [{ etichetta: 'Privacy Policy', link: '/privacy-policy/' }, { etichetta: 'Cookie Policy', link: '/cookie-policy/' }, { etichetta: 'Termini' }],
   azienda: {
     ragioneSociale: '1825 S.R.L.',
     marchio: 'Serralunga',

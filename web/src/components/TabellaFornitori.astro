@@ -1,0 +1,34 @@
+---
+/**
+ * Version: 1.00
+ * Fornitori e cookie di una categoria: nome del cookie, dominio, finalità, durata e link alla
+ * privacy policy del fornitore (specifica CMP §4, secondo livello). Usata nel pannello delle
+ * preferenze e nella pagina Cookie Policy: un solo elenco, sempre allineato ai servizi attivi.
+ */
+import type { Fornitore } from '../lib/cmp'
+import { traduttore } from '../lib/lingua'
+interface Props { fornitori: Fornitore[]; livello?: 'h3' | 'h4' }
+const { fornitori, livello: H = 'h4' } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const dominio = (d: string) => (d === 'sito' ? t('questo sito') : d)
+---
+{fornitori.map((f) => (
+  <div class="cmp-fornitore">
+    <H class="cmp-fornitore__nome">{f.nome}{f.societa && <span> — {f.societa}</span>}</H>
+    {f.descrizione[L] && <p>{f.descrizione[L]}</p>}
+    {f.cookie.length > 0 ? (
+      <div class="cmp-tabella" role="region" aria-label={`${t('Cookie di')} ${f.nome}`} tabindex="0">
+        <table>
+          <thead><tr><th scope="col">{t('Nome')}</th><th scope="col">{t('Dominio')}</th><th scope="col">{t('Finalità')}</th><th scope="col">{t('Durata')}</th></tr></thead>
+          <tbody>
+            {f.cookie.map((k) => (
+              <tr><th scope="row"><code>{k.nome}</code></th><td>{dominio(k.dominio)}</td><td>{k.finalita[L]}</td><td>{k.durata[L]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : <p>{t('Nessun cookie proprio.')}</p>}
+    {f.privacy && <p><a href={f.privacy} target="_blank" rel="noopener nofollow">{t('Privacy policy di')} {f.societa || f.nome}<span class="sr-only"> ({t('si apre in una nuova finestra')})</span></a></p>}
+  </div>
+))}

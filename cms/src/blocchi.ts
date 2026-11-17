@@ -3,7 +3,7 @@ import type { Block, Field } from 'payload'
 import { area, immagine, link, testo } from './fields'
 
 /**
- * Version: 1.00
+ * Version: 1.01 (blocco «Video o mappa» con consenso ai cookie)
  * Blocchi aggiuntivi: si aggiungono in fondo a una pagina dal pannello oppure dalla pagina
  * stessa (anche descrivendoli all'AI). Ogni blocco ha un solo scopo e un markup fisso:
  * l'AI sceglie il tipo e compila i campi, non scrive HTML.
@@ -117,7 +117,36 @@ export const BloccoDomande: Block = {
   ],
 }
 
-export const BLOCCHI: Block[] = [BloccoTesto, BloccoImmagineTesto, BloccoSlider, BloccoProdotti, BloccoCitazione, BloccoDomande, BloccoInvito]
+/** Video (YouTube, Vimeo) o mappa (Google Maps): bloccato da un riquadro finché il visitatore non dà il consenso (CMP 1.00). */
+export const BloccoIncorporato: Block = {
+  slug: 'incorporato',
+  labels: { singular: 'Video o mappa', plural: 'Video o mappe' },
+  fields: [
+    testo('kicker', 'Kicker'),
+    area('titolo', 'Titolo'),
+    {
+      name: 'url',
+      type: 'text',
+      label: 'Indirizzo del video o della mappa',
+      admin: { description: 'YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.' },
+    },
+    testo('descrizione', 'Descrizione del contenuto (accessibilità)', { admin: { description: 'Es. «Video: la produzione a rotazione nello stabilimento di Biella».' } }),
+    {
+      name: 'formato',
+      type: 'select',
+      label: 'Formato',
+      defaultValue: 'largo',
+      options: [
+        { label: '16:9', value: 'largo' },
+        { label: '4:3', value: 'classico' },
+        { label: '21:9', value: 'panoramico' },
+      ],
+    },
+    sfondo,
+  ],
+}
+
+export const BLOCCHI: Block[] = [BloccoTesto, BloccoImmagineTesto, BloccoSlider, BloccoProdotti, BloccoCitazione, BloccoDomande, BloccoInvito, BloccoIncorporato]
 
 /** Campo da aggiungere a pagine e schede. */
 export const blocchiField: Field = {

@@ -1,6 +1,6 @@
 ---
 /**
- * Version: 1.00
+ * Version: 1.01 (link predefinito alla pagina /privacy-policy/)
  * Consensi in fondo a ogni modulo: casella privacy (obbligatoria, con link all'informativa),
  * casella newsletter (facoltativa, spenta in partenza) e spazio per reCAPTCHA v2.
  * Con reCAPTCHA v3 non si vede nulla: il token si chiede a Google al momento dell'invio
@@ -16,7 +16,8 @@ const L = Astro.locals.lingua
 const t = traduttore(L)
 const [m, imp] = await Promise.all([moduli(L), impostazioni(L)])
 const rc = recaptcha(imp)
-const linkPrivacy = m.privacyLink ? percorso(L, m.privacyLink) : ''
+// Senza un link nel pannello si usa la pagina Privacy Policy del sito.
+const linkPrivacy = percorso(L, m.privacyLink || '/privacy-policy/')
 // «informativa privacy» / «privacy policy» diventa il link alla pagina dell'informativa.
 const etichetta = newsletter ? m.testi.privacyEtichetta : m.testi.privacyNewsletter
 const parola = L === 'en' ? /privacy policy/i : /informativa privacy/i

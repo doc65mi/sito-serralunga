@@ -1,14 +1,14 @@
 ---
 /**
- * Footer unico di tutto il sito, home compresa (Version: 2.01): marchio, colonne di link,
- * contatti, iscrizione alla newsletter (finestra), riga legale e preferenze cookie. Si cambia nel pannello: Impostazioni del sito > Footer.
+ * Footer unico di tutto il sito, home compresa (Version: 2.02): marchio, colonne di link,
+ * contatti, iscrizione alla newsletter (finestra), riga legale e «Gestisci preferenze cookie»
+ * (sempre presente: riapre il pannello della CMP). Si cambia nel pannello: Impostazioni del sito > Footer.
  */
 import { isMedia, originale, src, tipoRidotte } from '../lib/media'
 import { esterno } from '../lib/testo'
 import type { Doc } from '../lib/cms'
 import { percorso, traduttore } from '../lib/lingua'
 import { moduli } from '../lib/moduli'
-import { tracciamentoAttivo } from '../lib/tracciamento'
 import ModuloNewsletter from './ModuloNewsletter.astro'
 interface Props { imp: Doc }
 const { imp } = Astro.props
@@ -23,7 +23,6 @@ const copyright = (imp.copyright || '© {anno} Serralunga').replace('{anno}', St
 const tel = (a.telefono || '').replace(/[^+\d]/g, '')
 const m = await moduli(L)
 const newsletter = m.newsletterAttiva !== false
-const cookie = tracciamentoAttivo(imp)
 const fuori = (link?: string) => (esterno(link) ? { target: '_blank', rel: 'noopener' } : {})
 ---
 <footer class="piede">
@@ -60,7 +59,7 @@ const fuori = (link?: string) => (esterno(link) ? { target: '_blank', rel: 'noop
     <span>{copyright}</span>
     <span class="piede__legali">
       {(imp.legali || []).map((l: Doc) => (l.link ? <a href={u(l.link)}>{l.etichetta}</a> : <span>{l.etichetta}</span>))}
-      {cookie && <button type="button" class="piede__pulsante" data-cookie-preferenze>{t('Preferenze cookie')}</button>}
+      <button type="button" class="piede__pulsante" data-cookie-preferenze aria-haspopup="dialog">{t('Gestisci preferenze cookie')}</button>
     </span>
   </div>
 </footer>

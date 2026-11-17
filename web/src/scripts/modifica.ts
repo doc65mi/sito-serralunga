@@ -1,5 +1,5 @@
 /**
- * Modifica dalla pagina (Version: 3.05).
+ * Modifica dalla pagina (Version: 3.06: blocco «Video o mappa»).
  * Si carica solo se il browser ha il cookie del pannello (vedi Base.astro) e
  * verifica l'utente con /api/users/me. Sito e pannello stanno sullo stesso
  * indirizzo, quindi le chiamate usano il cookie di accesso di Payload.
@@ -1056,6 +1056,7 @@ function avvia(utente: Json) {
     ['citazione', 'Citazione', () => ({ testo: IT ? 'Testo della citazione' : 'Quote text', autore: IT ? 'Autore' : 'Author' })],
     ['domande', 'Domande e risposte', () => ({ titolo: IT ? 'Domande frequenti' : 'Frequently asked questions', voci: [{ domanda: IT ? 'Domanda' : 'Question', risposta: IT ? 'Risposta' : 'Answer' }] })],
     ['invito', 'Invito all\'azione', () => ({ titolo: IT ? 'Titolo dell\'invito' : 'Call to action title', pulsante: IT ? 'Contattaci' : 'Contact us', link: '/#listino', sfondo: 'scuro' })],
+    ['incorporato', 'Video o mappa', () => ({ titolo: IT ? 'Titolo del video' : 'Video title', url: '', formato: 'largo' })],
   ]
 
   async function salvaBlocchi(cambia: (b: Json[]) => Json[] | void, messaggio: string) {
@@ -1139,7 +1140,7 @@ function avvia(utente: Json) {
 
   const zona = document.querySelector<HTMLElement>('[data-blocchi]')
   if (zona) {
-    zona.innerHTML = `<button type="button" class="redazione-blocchi__aggiungi">+ Aggiungi blocco</button><span>Testo, immagine e testo, slider di foto, elenco di prodotti, citazione, domande e risposte, invito.</span>`
+    zona.innerHTML = `<button type="button" class="redazione-blocchi__aggiungi">+ Aggiungi blocco</button><span>Testo, immagine e testo, slider di foto, elenco di prodotti, citazione, domande e risposte, invito, video o mappa.</span>`
     zona.querySelector('button')!.addEventListener('click', nuovoBlocco)
   }
   document.querySelectorAll<HTMLElement>('[data-blocco]').forEach((sezione) => {

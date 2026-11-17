@@ -82,6 +82,7 @@ export interface Config {
     'spazi-foto': SpaziFoto;
     richieste: Richieste;
     'iscritti-newsletter': IscrittiNewsletter;
+    'registro-consensi': RegistroConsensi;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -105,6 +106,7 @@ export interface Config {
     'spazi-foto': SpaziFotoSelect<false> | SpaziFotoSelect<true>;
     richieste: RichiesteSelect<false> | RichiesteSelect<true>;
     'iscritti-newsletter': IscrittiNewsletterSelect<false> | IscrittiNewsletterSelect<true>;
+    'registro-consensi': RegistroConsensiSelect<false> | RegistroConsensiSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -125,6 +127,7 @@ export interface Config {
     'pagina-journal': PaginaJournal;
     'pagina-heritage': PaginaHeritage;
     impostazioni: Impostazioni;
+    'privacy-cookies': PrivacyCooky;
     moduli: Moduli;
     ai: Ai;
   };
@@ -138,6 +141,7 @@ export interface Config {
     'pagina-journal': PaginaJournalSelect<false> | PaginaJournalSelect<true>;
     'pagina-heritage': PaginaHeritageSelect<false> | PaginaHeritageSelect<true>;
     impostazioni: ImpostazioniSelect<false> | ImpostazioniSelect<true>;
+    'privacy-cookies': PrivacyCookiesSelect<false> | PrivacyCookiesSelect<true>;
     moduli: ModuliSelect<false> | ModuliSelect<true>;
     ai: AiSelect<false> | AiSelect<true>;
   };
@@ -524,6 +528,26 @@ export interface Prodotti {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -768,6 +792,26 @@ export interface Designer {
             id?: string | null;
             blockName?: string | null;
             blockType: 'invito';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
           }
       )[]
     | null;
@@ -1029,6 +1073,26 @@ export interface Categorie {
             id?: string | null;
             blockName?: string | null;
             blockType: 'invito';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
           }
       )[]
     | null;
@@ -1377,6 +1441,26 @@ export interface CaseHistory {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -1570,6 +1654,26 @@ export interface Spunti {
             id?: string | null;
             blockName?: string | null;
             blockType: 'invito';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
           }
       )[]
     | null;
@@ -1808,6 +1912,26 @@ export interface Materiali {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -1999,6 +2123,26 @@ export interface Articoli {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -2188,6 +2332,26 @@ export interface Pagine {
             id?: string | null;
             blockName?: string | null;
             blockType: 'invito';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
           }
       )[]
     | null;
@@ -2507,6 +2671,26 @@ export interface Contract {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -2755,6 +2939,26 @@ export interface PagineHeritage {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -2823,6 +3027,33 @@ export interface IscrittiNewsletter {
   ip?: string | null;
   disiscrittoIl?: string | null;
   token?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Prova dei consensi ai cookie. Per cercare la scelta di un visitatore usare l’identificativo del consenso (lo trova nel cookie cmp_consent del suo browser). Sola lettura.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registro-consensi".
+ */
+export interface RegistroConsensi {
+  id: number;
+  consentUuid: string;
+  azione: 'accept_all' | 'reject_all' | 'close_x' | 'custom' | 'revoke';
+  policyVersione?: string | null;
+  stato?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fonteUrl?: string | null;
+  lingua?: string | null;
+  ipHash?: string | null;
+  userAgent?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2936,6 +3167,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'iscritti-newsletter';
         value: number | IscrittiNewsletter;
+      } | null)
+    | ({
+        relationTo: 'registro-consensi';
+        value: number | RegistroConsensi;
       } | null)
     | ({
         relationTo: 'users';
@@ -3211,6 +3446,18 @@ export interface ProdottiSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -3336,6 +3583,18 @@ export interface CategorieSelect<T extends boolean = true> {
               testo?: T;
               pulsante?: T;
               link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
               sfondo?: T;
               id?: T;
               blockName?: T;
@@ -3560,6 +3819,18 @@ export interface CaseHistorySelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -3689,6 +3960,18 @@ export interface SpuntiSelect<T extends boolean = true> {
               testo?: T;
               pulsante?: T;
               link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
               sfondo?: T;
               id?: T;
               blockName?: T;
@@ -3849,6 +4132,18 @@ export interface MaterialiSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -3996,6 +4291,18 @@ export interface ArticoliSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -4124,6 +4431,18 @@ export interface PagineSelect<T extends boolean = true> {
               testo?: T;
               pulsante?: T;
               link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
               sfondo?: T;
               id?: T;
               blockName?: T;
@@ -4334,6 +4653,18 @@ export interface ContractSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -4496,6 +4827,18 @@ export interface PagineHeritageSelect<T extends boolean = true> {
               testo?: T;
               pulsante?: T;
               link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
               sfondo?: T;
               id?: T;
               blockName?: T;
@@ -4666,6 +5009,18 @@ export interface DesignerSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -4788,6 +5143,22 @@ export interface IscrittiNewsletterSelect<T extends boolean = true> {
   ip?: T;
   disiscrittoIl?: T;
   token?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registro-consensi_select".
+ */
+export interface RegistroConsensiSelect<T extends boolean = true> {
+  consentUuid?: T;
+  azione?: T;
+  policyVersione?: T;
+  stato?: T;
+  fonteUrl?: T;
+  lingua?: T;
+  ipHash?: T;
+  userAgent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5169,6 +5540,26 @@ export interface Home {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -5352,6 +5743,26 @@ export interface PaginaCatalogo {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -5534,6 +5945,26 @@ export interface PaginaDesigner {
             id?: string | null;
             blockName?: string | null;
             blockType: 'invito';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
           }
       )[]
     | null;
@@ -5738,6 +6169,26 @@ export interface PaginaInstallazioni {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -5924,6 +6375,26 @@ export interface PaginaSpunti {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -6107,6 +6578,26 @@ export interface PaginaMateriali {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -6276,6 +6767,26 @@ export interface PaginaJournal {
             id?: string | null;
             blockName?: string | null;
             blockType: 'invito';
+          }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
           }
       )[]
     | null;
@@ -6627,6 +7138,26 @@ export interface PaginaHeritage {
             blockName?: string | null;
             blockType: 'invito';
           }
+        | {
+            kicker?: string | null;
+            /**
+             * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+             */
+            titolo?: string | null;
+            /**
+             * YouTube (watch o youtu.be), Vimeo, oppure l’indirizzo «Incorpora una mappa» di Google Maps (https://www.google.com/maps/embed?…). Si apre solo dopo il consenso ai cookie della categoria indicata in Impostazioni > Privacy e cookies.
+             */
+            url?: string | null;
+            /**
+             * Es. «Video: la produzione a rotazione nello stabilimento di Biella».
+             */
+            descrizione?: string | null;
+            formato?: ('largo' | 'classico' | 'panoramico') | null;
+            sfondo?: ('chiaro' | 'carta' | 'scuro') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'incorporato';
+          }
       )[]
     | null;
   /**
@@ -6833,14 +7364,108 @@ export interface Impostazioni {
    * Utile per il pubblico B2B. Solo il numero.
    */
   linkedinInsight?: string | null;
-  /**
-   * Vuoto = testo predefinito nella lingua della pagina: «Usiamo cookie tecnici necessari al sito e, solo con il vostro consenso, cookie di statistica e di marketing…»
-   */
   cookieTesto?: string | null;
+  cookieLink?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.00. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "privacy-cookies".
+ */
+export interface PrivacyCooky {
+  id: number;
+  /**
+   * Con soli cookie tecnici il Garante non richiede il banner: resta il link «Gestisci preferenze cookie» nel footer.
+   */
+  quandoBanner?: ('auto' | 'sempre') | null;
+  /**
+   * Es. 1.00, 1.01. Cambiandola, il banner ricompare a tutti e il nuovo consenso si registra con la nuova versione.
+   */
+  versionePolicy?: string | null;
+  /**
+   * Massimo 180 giorni (6 mesi), sia per l’accettazione sia per il rifiuto.
+   */
+  durataGiorni?: number | null;
+  /**
+   * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+   */
+  privacyLink?: string | null;
   /**
    * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
    */
   cookieLink?: string | null;
+  /**
+   * Vuoto = testo predefinito nella lingua della pagina. Testo sempre nero, almeno 14px.
+   */
+  testi?: {
+    titolo?: string | null;
+    /**
+     * Predefinito: «Usiamo cookie tecnici necessari al funzionamento del sito. Con il vostro consenso…». I link a Privacy e Cookie Policy si aggiungono da soli.
+     */
+    testo?: string | null;
+    /**
+     * Predefinito: «Scegliete quali categorie di cookie consentire…»
+     */
+    pannello?: string | null;
+    necessari?: string | null;
+    preferenze?: string | null;
+    statistiche?: string | null;
+    marketing?: string | null;
+  };
+  /**
+   * Spenta (base, consigliata dal Garante): i tag Google non si caricano finché il visitatore non accetta. Accesa: i tag Google si caricano subito con consenso «negato» e inviano solo segnali senza cookie, che Google usa per stimare le conversioni.
+   */
+  googleAvanzata?: boolean | null;
+  /**
+   * Invia a Meta il segnale di uso limitato dei dati. Il Pixel parte comunque solo con il consenso Marketing.
+   */
+  metaLdu?: boolean | null;
+  /**
+   * Servizi usati con il blocco «Video o mappa»: compaiono nella cookie policy e nel banner. Nelle pagine il contenuto resta bloccato con un riquadro «Accetta e mostra» finché il visitatore non dà il consenso.
+   */
+  incorporati?: ('youtube' | 'vimeo' | 'maps')[] | null;
+  fornitori?:
+    | {
+        nome: string;
+        societa?: string | null;
+        categoria: 'necessari' | 'preferenze' | 'statistiche' | 'marketing';
+        finalita?: string | null;
+        privacy?: string | null;
+        cookie?:
+          | {
+              nome: string;
+              dominio?: string | null;
+              durata?: string | null;
+              finalita?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Si inseriscono nella pagina come type="text/plain" e partono solo dopo il consenso alla categoria. Il dominio di uno script esterno va aggiunto anche alla Content-Security-Policy (proxy/Caddyfile), altrimenti il browser lo blocca.
+   */
+  script?:
+    | {
+        nome: string;
+        categoria: 'preferenze' | 'statistiche' | 'marketing';
+        attivo?: boolean | null;
+        /**
+         * Oppure lasciare vuoto e scrivere il codice qui sotto.
+         */
+        src?: string | null;
+        codice?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Vuoto = il registro non si cancella. Con un numero, le righe più vecchie si eliminano da sole. Da stabilire con il consulente privacy.
+   */
+  conservaMesi?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -7200,6 +7825,18 @@ export interface HomeSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -7325,6 +7962,18 @@ export interface PaginaCatalogoSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -7446,6 +8095,18 @@ export interface PaginaDesignerSelect<T extends boolean = true> {
               testo?: T;
               pulsante?: T;
               link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
               sfondo?: T;
               id?: T;
               blockName?: T;
@@ -7586,6 +8247,18 @@ export interface PaginaInstallazioniSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -7707,6 +8380,18 @@ export interface PaginaSpuntiSelect<T extends boolean = true> {
               testo?: T;
               pulsante?: T;
               link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
               sfondo?: T;
               id?: T;
               blockName?: T;
@@ -7836,6 +8521,18 @@ export interface PaginaMaterialiSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -7948,6 +8645,18 @@ export interface PaginaJournalSelect<T extends boolean = true> {
               testo?: T;
               pulsante?: T;
               link?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
               sfondo?: T;
               id?: T;
               blockName?: T;
@@ -8194,6 +8903,18 @@ export interface PaginaHeritageSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        incorporato?:
+          | T
+          | {
+              kicker?: T;
+              titolo?: T;
+              url?: T;
+              descrizione?: T;
+              formato?: T;
+              sfondo?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   seo?:
     | T
@@ -8325,6 +9046,64 @@ export interface ImpostazioniSelect<T extends boolean = true> {
   linkedinInsight?: T;
   cookieTesto?: T;
   cookieLink?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "privacy-cookies_select".
+ */
+export interface PrivacyCookiesSelect<T extends boolean = true> {
+  quandoBanner?: T;
+  versionePolicy?: T;
+  durataGiorni?: T;
+  privacyLink?: T;
+  cookieLink?: T;
+  testi?:
+    | T
+    | {
+        titolo?: T;
+        testo?: T;
+        pannello?: T;
+        necessari?: T;
+        preferenze?: T;
+        statistiche?: T;
+        marketing?: T;
+      };
+  googleAvanzata?: T;
+  metaLdu?: T;
+  incorporati?: T;
+  fornitori?:
+    | T
+    | {
+        nome?: T;
+        societa?: T;
+        categoria?: T;
+        finalita?: T;
+        privacy?: T;
+        cookie?:
+          | T
+          | {
+              nome?: T;
+              dominio?: T;
+              durata?: T;
+              finalita?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  script?:
+    | T
+    | {
+        nome?: T;
+        categoria?: T;
+        attivo?: T;
+        src?: T;
+        codice?: T;
+        id?: T;
+      };
+  conservaMesi?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

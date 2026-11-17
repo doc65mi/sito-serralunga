@@ -22,6 +22,7 @@ import { importaCatalogo } from './catalogo'
 import { contractDati, conIdRighe } from './contract'
 import { SEZIONI_CONTRACT } from '../collections/Contract'
 import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
+import { completaPagineLegali } from './legali'
 import { COLONNE, homeDati, impostazioniDati, MENU, MENU_SUPERIORE, PAGINE, SOCIAL, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
 import { rigeneraFormati } from './immagini'
 import { completaHeritage } from './heritage'
@@ -432,6 +433,7 @@ if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer'
   }, log)
   await fase('ritratti-e-creazioni', completaDesigner, log)
   await fase('pagine-e-menu', completaPagine, log)
+  await fase('pagine-legali', () => completaPagineLegali(payload, cambiaStruttura, log), log)
   await fase('heritage', () => completaHeritage(payload, media, log), log)
   await fase('contract', completaContract, log)
   await fase('materiali', () => completaMateriali(payload, media, log), log)
@@ -493,6 +495,7 @@ log('aggiornata la home')
 await payload.updateGlobal({ slug: 'pagina-designer', data: (await paginaDesignerDati()) as never })
 log('aggiornata la pagina designer')
 await completaPagine()
+await completaPagineLegali(payload, cambiaStruttura, log)
 await completaHeritage(payload, media, log)
 await completaContract()
 await completaMateriali(payload, media, log)

@@ -1,0 +1,101 @@
+---
+/**
+ * Version: 1.00
+ * CMP Serralunga (sostituisce BannerCookie 1.00). Linee guida del Garante, provv. 231/2021:
+ * - primo livello: banner non bloccante (niente cookie wall, niente consenso con lo scorrimento),
+ *   «X» in alto a destra = rifiuto, «Rifiuta tutti» e «Accetta tutti» identici per dimensione,
+ *   colore e peso, «Personalizza», link a Privacy Policy e Cookie Policy;
+ * - secondo livello: interruttori per categoria (spenti, tranne Necessari) ed elenco dei fornitori
+ *   con nome del cookie, dominio, finalità, durata e privacy del fornitore; «Salva preferenze»,
+ *   «Accetta tutti», «Rifiuta tutti»;
+ * - si riapre da «Gestisci preferenze cookie» nel footer di ogni pagina.
+ * Logica: scripts/consenso.ts. Impostazioni: pannello > Impostazioni > Privacy e cookies.
+ */
+import type { Doc } from '../lib/cms'
+import { CHIAVE, configCmp, fornitoreEmbed, NOME_CATEGORIA, privacyCookies } from '../lib/cmp'
+import { percorso, traduttore } from '../lib/lingua'
+import TabellaFornitori from './TabellaFornitori.astro'
+interface Props { imp: Doc; blocchi?: Doc[] | null }
+const { imp, blocchi } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const embed = (blocchi || []).filter((b) => b?.blockType === 'incorporato').map((b) => fornitoreEmbed(String(b.url || ''))?.id).filter(Boolean) as string[]
+const cmp = configCmp(imp, await privacyCookies(L), L, embed)
+const config = JSON.stringify({
+  v: cmp.versione,
+  g: cmp.giorni,
+  mostra: cmp.mostraBanner,
+  lingua: L,
+  codici: cmp.codici,
+  googleAvanzata: cmp.googleAvanzata,
+  metaLdu: cmp.metaLdu,
+}).replace(/</g, '\\u003c')
+const privacy = percorso(L, cmp.privacyLink)
+const cookie = percorso(L, cmp.cookieLink)
+const descr = (k: string) => cmp.testi[k as keyof typeof cmp.testi]
+---
+<section class="cmp" data-cmp-banner data-cmp-config={config} hidden aria-labelledby="cmp-titolo" role="region">
+  <button type="button" class="cmp__x" data-cmp="chiudi" aria-label={t('Chiudi: continua senza accettare')}>
+    <span aria-hidden="true">×</span>
+  </button>
+  <h2 class="cmp__titolo" id="cmp-titolo">{cmp.testi.titolo}</h2>
+  <p class="cmp__testo">{cmp.testi.testo}</p>
+  <p class="cmp__link">
+    <a href={privacy}>{t('Privacy Policy')}</a>
+    <a href={cookie}>{t('Cookie Policy')}</a>
+  </p>
+  <div class="cmp__pulsanti">
+    <button type="button" class="cmp__scelta" data-cmp="rifiuta">{t('Rifiuta tutti')}</button>
+    <button type="button" class="cmp__scelta" data-cmp="accetta">{t('Accetta tutti')}</button>
+    <button type="button" class="cmp__personalizza" data-cmp="personalizza" aria-haspopup="dialog">{t('Personalizza')}</button>
+  </div>
+</section>
+
+<dialog class="finestra cmp-pannello" data-cmp-pannello aria-labelledby="cmp-pannello-titolo">
+  <div class="finestra__corpo">
+    <button type="button" class="finestra__chiudi" data-cmp="chiudi-pannello" aria-label={t('Chiudi')}>×</button>
+    <h2 class="cmp__titolo" id="cmp-pannello-titolo">{t('Preferenze cookie')}</h2>
+    <p class="cmp__testo">{cmp.testi.pannello}</p>
+    <p class="cmp__link">
+      <a href={privacy}>{t('Privacy Policy')}</a>
+      <a href={cookie}>{t('Cookie Policy')}</a>
+    </p>
+    {cmp.categorie.map((k) => {
+      const fornitori = cmp.fornitori.filter((f) => f.categoria === k)
+      const nCookie = fornitori.reduce((n, f) => n + f.cookie.length, 0)
+      const id = `cmp-cat-${CHIAVE[k]}`
+      return (
+        <section class="cmp-cat" aria-labelledby={`${id}-t`}>
+          <div class="cmp-cat__testa">
+            <h3 class="cmp-cat__titolo" id={`${id}-t`}>{t(NOME_CATEGORIA[k])}</h3>
+            <label class="cmp-interruttore" for={id}>
+              <input type="checkbox" role="switch" id={id} data-cmp-cat={CHIAVE[k]} checked={k === 'necessari'} disabled={k === 'necessari'} aria-describedby={`${id}-d`} />
+              <span class="cmp-interruttore__testo">{k === 'necessari' ? t('Sempre attivi') : t('Consenti')}</span>
+            </label>
+          </div>
+          <p class="cmp-cat__descr" id={`${id}-d`}>{descr(k)}</p>
+          {fornitori.length > 0 && (
+            <details class="cmp-cat__dettagli">
+              <summary>{t('Fornitori e cookie')} ({fornitori.length} · {nCookie} {t('cookie')})</summary>
+              <TabellaFornitori fornitori={fornitori} />
+            </details>
+          )}
+          {cmp.script.some((s) => s.categoria === k) && (
+            <p class="cmp-cat__descr">{t('Altri script')}: {cmp.script.filter((s) => s.categoria === k).map((s) => s.nome).join(', ')}</p>
+          )}
+        </section>
+      )
+    })}
+    <div class="cmp__pulsanti">
+      <button type="button" class="cmp__scelta" data-cmp="rifiuta">{t('Rifiuta tutti')}</button>
+      <button type="button" class="cmp__scelta" data-cmp="accetta">{t('Accetta tutti')}</button>
+      <button type="button" class="cmp__personalizza" data-cmp="salva">{t('Salva preferenze')}</button>
+    </div>
+  </div>
+</dialog>
+
+{cmp.script.map((s) => (
+  s.src
+    ? <script is:inline type="text/plain" data-cmp-category={CHIAVE[s.categoria]} data-cmp-nome={s.nome} src={s.src}></script>
+    : <script is:inline type="text/plain" data-cmp-category={CHIAVE[s.categoria]} data-cmp-nome={s.nome} set:html={s.codice.replace(/<\/script/gi, '<\\/script')}></script>
+))}

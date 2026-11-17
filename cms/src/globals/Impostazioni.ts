@@ -4,7 +4,7 @@ import { pubblico, soloRedazione } from '../access'
 import { area, immagine, link, testo } from '../fields'
 import { campoSegreto } from '../fields/segreto'
 
-/** Header, footer, dati del cliente (fonte: file-md/cliente.md), social e barra mobile, sicurezza e tracciamento. Version: 2.02 */
+/** Header, footer, dati del cliente (fonte: file-md/cliente.md), social e barra mobile, sicurezza e tracciamento. Version: 2.03 */
 export const Impostazioni: GlobalConfig = {
   slug: 'impostazioni',
   label: 'Impostazioni del sito',
@@ -244,7 +244,7 @@ export const Impostazioni: GlobalConfig = {
         {
           label: 'Sicurezza e tracciamento',
           description:
-            'Codici di Google, Microsoft, Meta e LinkedIn. Si scrive solo l’identificativo (es. G-XXXXXXXXXX), mai il codice completo: il sito inserisce da sé gli script giusti. Statistiche e marketing partono solo dopo il consenso del visitatore nel banner dei cookie (Google Consent Mode v2).',
+            'Codici di Google, Microsoft, Meta e LinkedIn. Si scrive solo l’identificativo (es. G-XXXXXXXXXX), mai il codice completo: il sito inserisce da sé gli script giusti. Statistiche e marketing partono solo dopo il consenso del visitatore nel banner dei cookie (Google Consent Mode v2): banner, testi, fornitori e registro dei consensi sono in Impostazioni > Privacy e cookies.',
           fields: [
             {
               type: 'collapsible',
@@ -343,17 +343,10 @@ export const Impostazioni: GlobalConfig = {
                 },
               ],
             },
-            {
-              type: 'collapsible',
-              label: 'Banner dei cookie',
-              admin: { description: 'Compare solo se è attivo almeno un codice di statistiche o marketing. Il visitatore sceglie: solo necessari, accetta tutti, o per categoria; la scelta si riapre dal link «Preferenze cookie» nel footer.' },
-              fields: [
-                testo('cookieTesto', 'Testo del banner', {
-                  admin: { description: 'Vuoto = testo predefinito nella lingua della pagina: «Usiamo cookie tecnici necessari al sito e, solo con il vostro consenso, cookie di statistica e di marketing…»' },
-                }),
-                link('cookieLink', 'Pagina della cookie policy'),
-              ],
-            },
+            // Banner dei cookie spostato in Impostazioni > Privacy e cookies (CMP 1.00): campi nascosti, il testo
+            // già scritto resta come ripiego del testo del banner.
+            testo('cookieTesto', 'Testo del banner (vecchio)', { admin: { hidden: true } }),
+            { ...link('cookieLink', 'Pagina della cookie policy (vecchio)'), admin: { hidden: true } } as Field,
             {
               name: 'collegamenti',
               type: 'ui',

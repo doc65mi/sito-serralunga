@@ -1,6 +1,8 @@
 ---
 /**
- * Pagine di servizio (Version: 1.00): Contatti, Listino, FAQ, pagine legali.
+ * Pagine di servizio (Version: 1.01): Contatti, Listino, FAQ, pagine legali.
+ * 1.01 (CMP): paragrafi che iniziano con «## » diventano titoli h2; la Cookie Policy elenca da sola
+ * fornitori e cookie attivi (lib/cmp.ts) con il pulsante «Gestisci preferenze cookie».
  * Contenuto dalla collezione "pagine" del pannello; le domande frequenti arrivano dal blocco
  * "Domande e risposte" (dati strutturati FAQPage in Base.astro).
  */
@@ -12,6 +14,8 @@ import { impostazioni, perSlug, type Doc } from '../lib/cms'
 import { isMedia } from '../lib/media'
 import { piatto } from '../lib/testo'
 import { traduttore } from '../lib/lingua'
+import TabellaFornitori from '../components/TabellaFornitori.astro'
+import { configCmp, NOME_CATEGORIA, privacyCookies } from '../lib/cmp'
 
 const L = Astro.locals.lingua
 const t = traduttore(L)
@@ -21,6 +25,15 @@ const imp = await impostazioni(L)
 const a = imp.azienda || {}
 const tel = (a.telefono || '').replace(/[^+\d]/g, '')
 const contatti = p.mostraContatti
+// Pagine legali (CMP 1.00): la Cookie Policy mostra da sola fornitori e cookie attivi sul sito.
+const pc = await privacyCookies(L)
+const cmp = configCmp(imp, pc, L)
+const slugDi = (l: string) => l.replace(/^\/(en\/)?/, '').replace(/\/$/, '')
+const cookiePolicy = p.slug === slugDi(cmp.cookieLink)
+const legale = cookiePolicy || p.slug === slugDi(cmp.privacyLink)
+const aggiornata = legale && p.updatedAt ? new Date(p.updatedAt).toLocaleDateString(L === 'en' ? 'en-GB' : 'it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
+// Nei paragrafi, una riga che inizia con «## » è un titolo (h2).
+const titoloDi = (x: string) => (typeof x === 'string' && x.startsWith('## ') ? x.slice(3).trim() : '')
 ---
 <Base
   titolo={p.seo?.titolo || `${piatto(p.titolo)} | Serralunga`}
@@ -52,7 +65,8 @@ const contatti = p.mostraContatti
         <div class="wrap pagina-servizio">
           {(p.paragrafi || []).length > 0 && (
             <div class="pagina-servizio__testo">
-              {p.paragrafi.map((x: Doc, k: number) => <Testo class="testo testo--forte" campo={`paragrafi.${k}.testo`} t={x.testo} />)}
+              {p.paragrafi.map((x: Doc, k: number) => titoloDi(x.testo) ? <h2>{titoloDi(x.testo)}</h2> : <Testo class="testo testo--forte" campo={`paragrafi.${k}.testo`} t={x.testo} />)}
+              {aggiornata && <p class="pagina-legale__aggiornata">{t('Versione')} {cmp.versione} · {t('ultimo aggiornamento')}: <time datetime={p.updatedAt}>{aggiornata}</time></p>}
             </div>
           )}
           {contatti && (
@@ -64,6 +78,24 @@ const contatti = p.mostraContatti
               {a.piva && <span>{t('P.IVA')} {a.piva}{a.rea ? ` · REA ${a.rea}` : ''}</span>}
             </address>
           )}
+        </div>
+      </section>
+    )}
+
+    {cookiePolicy && (
+      <section class="sez-int pad pagina-legale__cookie" id="cookie-elenco" aria-labelledby="cookie-elenco-titolo">
+        <div class="wrap">
+          <h2 class="titolo titolo--l" id="cookie-elenco-titolo">{t('Cookie e fornitori usati su questo sito')}</h2>
+          <p class="testo">{t('Elenco aggiornato automaticamente in base ai servizi attivi. Le categorie diverse da «Necessari» si attivano solo con il vostro consenso.')}</p>
+          <p><button type="button" class="btn btn--scuro" data-cookie-preferenze aria-haspopup="dialog">{t('Gestisci preferenze cookie')}</button></p>
+          {cmp.categorie.map((k) => (
+            <>
+              <h3>{t(NOME_CATEGORIA[k])}</h3>
+              <p class="testo">{cmp.testi[k]}</p>
+              <TabellaFornitori fornitori={cmp.fornitori.filter((f) => f.categoria === k)} />
+              {cmp.script.some((x) => x.categoria === k) && <p class="testo">{t('Altri script')}: {cmp.script.filter((x) => x.categoria === k).map((x) => x.nome).join(', ')}</p>}
+            </>
+          ))}
         </div>
       </section>
     )}

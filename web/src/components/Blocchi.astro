@@ -1,12 +1,13 @@
 ---
 /**
- * Version: 1.00
+ * Version: 1.01
  * Blocchi aggiuntivi di una pagina (campo "blocchi" del CMS): testo, immagine e testo,
- * slider di foto, elenco di prodotti, citazione, domande e risposte, invito.
+ * slider di foto, elenco di prodotti, citazione, domande e risposte, invito, video o mappa (dietro consenso).
  * Markup fisso e semantico: una <section> per blocco, titoli h2, elenchi veri.
  */
 import Img from './Img.astro'
 import Testo from './Testo.astro'
+import Incorporato from './Incorporato.astro'
 import type { Doc } from '../lib/cms'
 import { isMedia } from '../lib/media'
 import { percorso, traduttore } from '../lib/lingua'
@@ -125,6 +126,14 @@ const RAPPORTI: Record<string, string> = { largo: 'r-169', panoramico: 'r-219', 
         <Testo as="h2" class="titolo titolo--cta" campo={c('titolo')} t={b.titolo} />
         <Testo class="testo" campo={c('testo')} t={b.testo} />
         {b.pulsante && <a href={u(b.link) || '#'} class:list={['btn', b.sfondo === 'scuro' ? 'btn--chiaro' : 'btn--scuro']} data-campo={c('pulsante')} data-campo-link={c('link')} data-link={b.link || ''}>{b.pulsante}</a>}
+      </div>
+    </section>
+  )
+  if (b.blockType === 'incorporato') return (
+    <section {...comuni}>
+      <div class="wrap">
+        {testata}
+        <Incorporato url={b.url || ''} titolo={b.descrizione || ''} formato={b.formato} />
       </div>
     </section>
   )

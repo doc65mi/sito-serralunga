@@ -1,35 +1,49 @@
 ---
 /**
- * Version: 1.00
+ * Version: 2.00 (CMP)
  * Nel <head>: meta di verifica (Search Console, Bing, altre), chiave reCAPTCHA per i moduli e
- * consenso predefinito «negato» di Google Consent Mode v2. Gli script di statistica e marketing
- * (GA4, GTM, Ads, Clarity, Meta, LinkedIn) si caricano solo dopo il consenso nel banner
- * (scripts/consenso.ts). Codici: pannello > Impostazioni del sito > Sicurezza e tracciamento.
+ * avvio sincrono della CMP: Google Consent Mode v2 «negato» prima di qualunque tag e, se il cookie
+ * cmp_consent è valido (stessa versione dell'informativa, meno di 180 giorni), aggiornamento immediato.
+ * Gli script di statistica e marketing (GA4, GTM, Ads, Clarity, Meta, LinkedIn) si caricano solo
+ * dopo il consenso (scripts/consenso.ts). Codici: Impostazioni del sito > Sicurezza e tracciamento;
+ * banner e regole: Impostazioni > Privacy e cookies.
  */
 import type { Doc } from '../lib/cms'
 import { recaptcha } from '../lib/moduli'
-import { codiciTracciamento, tracciamentoAttivo } from '../lib/tracciamento'
+import { configCmp, privacyCookies } from '../lib/cmp'
 interface Props { imp: Doc }
 const { imp } = Astro.props
 const L = Astro.locals.lingua
-const codici = codiciTracciamento(imp)
-const attivo = tracciamentoAttivo(imp)
+const cmp = configCmp(imp, await privacyCookies(L), L)
+const testa = JSON.stringify({ v: cmp.versione, g: cmp.giorni })
 const rc = recaptcha(imp)
 const verifica = (v: unknown) => (typeof v === 'string' ? v.trim().replace(/^.*content=["']?([^"'\s>]+).*$/i, '$1').slice(0, 200) : '')
 const altre = (imp.altreVerifiche || [])
   .map((v: Doc) => ({ nome: String(v.nome || '').trim(), valore: verifica(v.valore) }))
   .filter((v: { nome: string; valore: string }) => /^[a-z0-9:._-]{2,60}$/i.test(v.nome) && v.valore)
-const config = JSON.stringify({ ...codici, lingua: L }).replace(/</g, '\\u003c')
 ---
 {verifica(imp.googleSearchConsole) && <meta name="google-site-verification" content={verifica(imp.googleSearchConsole)} />}
 {verifica(imp.bingWebmaster) && <meta name="msvalidate.01" content={verifica(imp.bingWebmaster)} />}
 {altre.map((v: { nome: string; valore: string }) => <meta name={v.nome} content={v.valore} />)}
 {rc && <meta name="recaptcha" content={rc.chiave} data-tipo={rc.tipo} data-lingua={L} />}
-{attivo && (
-  <script is:inline data-tracciamento={config}>
+{/* CMP: consenso predefinito «negato» prima di qualunque tag; scelta valida ripristinata subito. */}
+<script is:inline data-cmp-testa={testa}>
+  (function () {
+    var c = JSON.parse(document.currentScript.getAttribute('data-cmp-testa'));
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied', functionality_storage: 'granted', security_storage: 'granted', wait_for_update: 500 });
+    window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+    gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied', personalization_storage: 'denied', functionality_storage: 'granted', security_storage: 'granted', wait_for_update: 500 });
     gtag('set', 'ads_data_redaction', true);
-  </script>
-)}
+    var s = null;
+    try {
+      var m = document.cookie.match(/(?:^|;\s*)cmp_consent=([^;]+)/);
+      s = m ? JSON.parse(decodeURIComponent(m[1])) : null;
+      if (!s || s.policy_version !== c.v || !s.categories || !(Date.now() - Date.parse(s.timestamp) < c.g * 864e5)) s = null;
+    } catch (e) { s = null; }
+    window.__cmpStato = s;
+    if (s) {
+      var k = s.categories, v = function (x) { return x ? 'granted' : 'denied'; };
+      gtag('consent', 'update', { analytics_storage: v(k.analytics), ad_storage: v(k.marketing), ad_user_data: v(k.marketing), ad_personalization: v(k.marketing), personalization_storage: v(k.preferences) });
+    }
+  })();
+</script>

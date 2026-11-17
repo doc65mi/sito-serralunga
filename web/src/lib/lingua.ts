@@ -1,5 +1,5 @@
 /**
- * Lingue del sito e testi fissi dell'interfaccia (Version: 1.01: testi della ricerca).
+ * Lingue del sito e testi fissi dell'interfaccia (Version: 1.02: testi della CMP privacy e cookie).
  * I contenuti stanno nel CMS (un campo per lingua); qui solo le parole scritte nel codice.
  * La chiave è il testo italiano: se manca la traduzione resta l'italiano.
  */
@@ -71,6 +71,38 @@ const EN: Record<string, string> = {
   Rifiuta: 'Reject',
   Personalizza: 'Customise',
   'Salva le scelte': 'Save choices',
+  // CMP privacy e cookie (1.00)
+  Preferenze: 'Preferences',
+  'Rifiuta tutti': 'Reject all',
+  'Salva preferenze': 'Save preferences',
+  'Chiudi: continua senza accettare': 'Close: continue without accepting',
+  'Privacy Policy': 'Privacy Policy',
+  'Cookie Policy': 'Cookie Policy',
+  'Gestisci preferenze cookie': 'Manage cookie preferences',
+  'Sempre attivi': 'Always active',
+  Consenti: 'Allow',
+  'Fornitori e cookie': 'Providers and cookies',
+  cookie: 'cookies',
+  'Altri script': 'Other scripts',
+  'questo sito': 'this site',
+  'Cookie di': 'Cookies of',
+  Nome: 'Name',
+  Dominio: 'Domain',
+  Finalità: 'Purpose',
+  Durata: 'Duration',
+  'Nessun cookie proprio.': 'No cookies of its own.',
+  'Privacy policy di': 'Privacy policy of',
+  Video: 'Video',
+  Mappa: 'Map',
+  'Contenuto bloccato': 'Content blocked',
+  'Per vederlo accettate i cookie della categoria': 'To view it, please accept cookies in the category',
+  'Accetta e mostra': 'Accept and show',
+  'Apri su': 'Open on',
+  Versione: 'Version',
+  'ultimo aggiornamento': 'last updated',
+  'Cookie e fornitori usati su questo sito': 'Cookies and providers used on this site',
+  'Elenco aggiornato automaticamente in base ai servizi attivi. Le categorie diverse da «Necessari» si attivano solo con il vostro consenso.':
+    'This list is updated automatically according to the services in use. Categories other than “Necessary” are only enabled with your consent.',
   'Accetta tutti': 'Accept all',
   'Confermate l’iscrizione': 'Confirm your subscription',
   'Annullare l’iscrizione?': 'Unsubscribe?',

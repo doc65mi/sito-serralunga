@@ -20,7 +20,7 @@ import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
 import Blocchi from '../components/Blocchi.astro'
 import Tracciamento from '../components/Tracciamento.astro'
-import BannerCookie from '../components/BannerCookie.astro'
+import Cmp from '../components/Cmp.astro'
 import Ricerca from '../components/Ricerca.astro'
 import BarraSocial from '../components/BarraSocial.astro'
 import BarraMobile from '../components/BarraMobile.astro'
@@ -200,7 +200,7 @@ const accento = imp.accento || '#A08A5F'
     <Ricerca />
     <BarraSocial imp={imp} />
     <BarraMobile imp={imp} />
-    <BannerCookie imp={imp} />
+    <Cmp imp={imp} blocchi={blocchi} />
     <script src="../scripts/site.ts"></script>
     <script src="../scripts/consenso.ts"></script>
   </body>

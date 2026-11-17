@@ -24,7 +24,7 @@
  *   segnala nel pannello e aspetta una scelta.
  *
  * Restano di ciascun sito, mai su GitHub: utenti e accessi, preferenze del pannello, richieste dei
- * clienti, iscritti alla newsletter, registro delle migrazioni, chiavi e password cifrate (AI,
+ * clienti, iscritti alla newsletter, registro dei consensi ai cookie, registro delle migrazioni, chiavi e password cifrate (AI,
  * reCAPTCHA, SMTP) e dati del server di posta.
  *
  * Accesso a GitHub: token personale con permesso Contents (lettura e scrittura) sul repository,
@@ -57,6 +57,7 @@ const ESCLUSE = new Set([
   'payload_kv',
   'richieste',
   'iscritti_newsletter',
+  'registro_consensi',
 ])
 /**
  * Tabelle con chiavi cifrate (AI, reCAPTCHA, password SMTP): si inviano in chiaro e chi riceve

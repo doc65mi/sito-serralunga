@@ -30,6 +30,9 @@ import { PaginaJournal } from './globals/PaginaJournal'
 import { Richieste } from './collections/Richieste'
 import { IscrittiNewsletter } from './collections/IscrittiNewsletter'
 import { Moduli } from './globals/Moduli'
+import { PrivacyCookies } from './globals/PrivacyCookies'
+import { RegistroConsensi } from './collections/RegistroConsensi'
+import { endpointConsenso } from './moduli/consenso'
 import { endpointModuli } from './moduli/endpoints'
 import { Users } from './collections/Users'
 import { Home } from './globals/Home'
@@ -124,9 +127,9 @@ export default buildConfig({
     fallback: true,
   },
   // Righe degli elenchi chiuse con il proprio nome (fields/etichette.ts) invece di "Voce 01".
-  collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, IscrittiNewsletter, Users].map(conEtichette),
-  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Moduli, Ai].map(conEtichette),
-  endpoints: [...endpointAi, ...endpointStrumenti, ...endpointSincronizza, ...endpointModuli],
+  collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, IscrittiNewsletter, RegistroConsensi, Users].map(conEtichette),
+  globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, PrivacyCookies, Moduli, Ai].map(conEtichette),
+  endpoints: [...endpointAi, ...endpointStrumenti, ...endpointSincronizza, ...endpointModuli, endpointConsenso],
   // Contenuti su GitHub: controllo all'avvio e ogni 10 minuti (strumenti/sincronizza.ts).
   onInit: async (payload) => {
     if (process.env.NEXT_PHASE !== 'phase-production-build') avviaControlloContenuti(payload)
