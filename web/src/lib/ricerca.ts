@@ -1,5 +1,8 @@
 /**
- * Motore di ricerca interno (Version: 1.00).
+ * Motore di ricerca interno (Version: 1.01).
+ * 1.01: anche le pagine di sezione (home, catalogo, designer, installazioni, journal, materiali,
+ *       spunti, heritage); pagine di servizio (contatti, listino, FAQ, privacy, cookie) lette con
+ *       un ordinamento valido (la collezione non ha il campo «ordine»).
  * Indice in memoria di prodotti, categorie, designer, progetti, spunti, journal e pagine,
  * una copia per lingua, ricostruito ogni 5 minuti (le ricerche non aspettano: si usa l'indice
  * precedente finché il nuovo è pronto). Ricerca con MiniSearch:
@@ -10,7 +13,7 @@
  * Legge solo i contenuti pubblicati: le API di Payload, senza accesso, non mostrano le bozze.
  */
 import MiniSearch, { type SearchResult } from 'minisearch'
-import { elenco, type Doc } from './cms'
+import { elenco, globale, type Doc } from './cms'
 import { isMedia, src } from './media'
 import { piatto } from './testo'
 import type { Lingua } from './lingua'
@@ -152,7 +155,8 @@ const ETICHETTE_CONTRACT: Record<string, string> = { principale: 'Contract' }
 const TIPOLOGIA_CASE: Record<Lingua, string> = { it: 'Progetto', en: 'Project' }
 
 async function voci(L: Lingua): Promise<Voce[]> {
-  const nulla = () => [] as Doc[]
+  // Un tipo di contenuto che non si legge non ferma la ricerca, ma resta traccia nel registro del server.
+  const nulla = (e: unknown) => (console.error('[ricerca] lettura non riuscita:', (e as Error)?.message), [] as Doc[])
   const [cats, prodotti, designer, casi, spunti, articoli, pagine, materiali, contract, heritage] = await Promise.all([
     categorie(L),
     elenco('prodotti', { depth: 1, limit: 2000, sort: 'nome', 'where[schedaPubblicata][equals]': 'true' }, L).catch(nulla),
@@ -160,11 +164,14 @@ async function voci(L: Lingua): Promise<Voce[]> {
     elenco('case-history', { depth: 1, limit: 500 }, L).catch(nulla),
     elenco('spunti', { depth: 1, limit: 500 }, L).catch(nulla),
     elenco('articoli', { depth: 1, limit: 500, sort: '-data' }, L).catch(nulla),
-    elenco('pagine', { depth: 1, limit: 200 }, L).catch(nulla),
+    elenco('pagine', { depth: 1, limit: 200, sort: 'titolo' }, L).catch(nulla),
     elenco('materiali', { depth: 1, limit: 200 }, L).catch(nulla),
     elenco('contract', { depth: 1, limit: 50 }, L).catch(nulla),
     elenco('pagine-heritage', { depth: 1, limit: 50 }, L).catch(nulla),
   ])
+  const sezioni = await Promise.all(
+    SEZIONI.map(async (x) => ({ ...x, doc: await globale(x.globale, 1, L).catch(() => null) })),
+  )
   const n = await conteggi(cats, L).catch(() => new Map())
   const en = L === 'en'
   const tutti: Voce[] = []
@@ -215,8 +222,24 @@ async function voci(L: Lingua): Promise<Voce[]> {
       sotto: 'Contract',
     })
   }
+  // Pagine di sezione: titolo fisso nella lingua, testi e foto dal pannello.
+  for (const x of sezioni) {
+    if (!x.doc) continue
+    aggiungi('pagina', { ...x.doc, id: x.globale }, x.url, { titolo: x.nome[L], sotto: en ? 'Section' : 'Sezione', chiavi: [x.nome.it, x.nome.en] })
+  }
   return tutti
 }
+
+const SEZIONI: { globale: string; url: string; nome: Record<Lingua, string> }[] = [
+  { globale: 'home', url: '/', nome: { it: 'Serralunga, home', en: 'Serralunga, home' } },
+  { globale: 'pagina-catalogo', url: '/catalogo/', nome: { it: 'Catalogo', en: 'Catalogue' } },
+  { globale: 'pagina-designer', url: '/designer/', nome: { it: 'Designer', en: 'Designers' } },
+  { globale: 'pagina-installazioni', url: '/installazioni/', nome: { it: 'Installazioni', en: 'Installations' } },
+  { globale: 'pagina-spunti', url: '/spunti-e-idee/', nome: { it: 'Spunti e idee', en: 'Ideas' } },
+  { globale: 'pagina-journal', url: '/journal/', nome: { it: 'Journal', en: 'Journal' } },
+  { globale: 'pagina-materiali', url: '/materiali/', nome: { it: 'Materiali', en: 'Materials' } },
+  { globale: 'pagina-heritage', url: '/heritage/', nome: { it: 'Heritage', en: 'Heritage' } },
+]
 
 type Indice = { ms: MiniSearch<Voce>; voci: Map<string, Voce>; t: number }
 const indici = new Map<Lingua, Indice>()
