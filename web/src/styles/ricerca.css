@@ -1,16 +1,9 @@
 /*
  * ricerca.css — motore di ricerca interno
- * Version: 1.00
+ * Version: 1.01 (lente spostata nella barra laterale: tolte le regole della testata)
  * Finestra di ricerca, campo del catalogo, anteprima dei risultati, pagina /cerca/.
  * Regola del cliente: testi neri, mai sotto i 14px; l'oro solo come decorazione.
  */
-
-/* ---------- Lente in testata ---------- */
-.testa__menu .testa__cerca a { display: inline-flex; align-items: center; gap: 8px; }
-.testa__cerca svg { flex: none; }
-@media (min-width: 1101px) {
-  .testa__cerca-testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-}
 
 /* ---------- Campo ---------- */
 .cerca { position: relative; width: 100%; font-family: var(--sans); color: #000; }
