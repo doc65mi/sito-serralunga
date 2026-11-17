@@ -1,5 +1,7 @@
 /**
- * Catalogo B2B (ex Shop) importato da serralunga.com — Version: 1.00.
+ * Catalogo B2B (ex Shop) importato da serralunga.com — Version: 1.01.
+ * 1.01: tipologie, nomi delle varianti e delle misure passano da correzioni-shop.ts (errori di traduzione
+ *       automatica già presenti su serralunga.com, es. "pentola" al posto di "vaso").
  *
  * - Crea l'albero delle categorie (progetto/Serralunga_Alberatura_B2C_2026, sezione Shop) se manca.
  * - Legge l'elenco pubblico dei prodotti (products.json di Shopify, italiano e inglese) e le
@@ -15,6 +17,7 @@
  */
 import type { Payload } from 'payload'
 
+import { etichettaOpzione, frase, tipologiaEn, tipologiaIt, valoreVariante } from './correzioni-shop'
 import { catalogo, json, type ProdottoShop } from './creazioni'
 import { fatto, segna } from './punto'
 
@@ -300,14 +303,7 @@ export function testoDaHtml(html?: string | null): string {
     .trim()
 }
 
-/** "VERDE PAVONE" → "Verde pavone": solo maiuscole/minuscole, le parole restano quelle del sito. */
-const frase = (s: string) => {
-  const t = s.trim()
-  if (t === t.toLowerCase()) return t.charAt(0).toUpperCase() + t.slice(1)
-  if (t !== t.toUpperCase()) return t
-  const m = t.toLowerCase()
-  return m.charAt(0).toUpperCase() + m.slice(1)
-}
+// frase(): "VERDE PAVONE" → "Verde pavone" (solo maiuscole/minuscole), in correzioni-shop.ts.
 
 const MISURA = /misur|dimension|size|altezz|height|formato|taglia|diametro|diameter/i
 
@@ -329,14 +325,14 @@ function varianti(p: ProdottoShop, lingua: 'it' | 'en') {
   return lista
     .filter((v) => v.title && !/default title/i.test(v.title))
     .slice(0, 80)
-    .map((v) => ({ nome: v.title.split(' / ').map(frase).join(' / '), codice: v.sku || undefined, sku: v.sku || String(v.id) }))
+    .map((v) => ({ nome: valoreVariante(v.title.split(' / ').map(frase).join(' / '), lingua), codice: v.sku || undefined, sku: v.sku || String(v.id) }))
 }
 
 function misure(p: ProdottoShop, lingua: 'it' | 'en') {
   const opz = (lingua === 'en' ? p.opzioniEn : p.options) || []
   return opz
     .filter((o) => MISURA.test(o.name) && o.values?.length)
-    .map((o) => ({ etichetta: frase(o.name), valore: o.values.map(frase).join(' · ') }))
+    .map((o) => ({ etichetta: etichettaOpzione(o.name, lingua), valore: o.values.map(frase).join(' · ') }))
 }
 
 const ritaglia = (s: string, n: number) => (s.length <= n ? s : `${s.slice(0, n - 1).replace(/\s+\S*$/, '')}…`)
@@ -463,7 +459,8 @@ export async function importaCatalogo(payload: Payload, media: Media, log: (m: s
       .filter((id) => !padreDi.get(id) && !trasversali.has(id))
       .sort((a, b) => (ordineCat.get(a) ?? 999) - (ordineCat.get(b) ?? 999))[0]
     const dis = p.tags.map((t) => designerPer.get(norm(t))).find(Boolean)
-    const tipologia = frase(p.product_type || '')
+    // Tipologia corretta: su serralunga.com "pot" è tradotto "pentola" (vedi correzioni-shop.ts).
+    const tipologia = tipologiaIt(p.product_type)
     const finitureIt = varianti(p, 'it')
     const dati = {
       categorie,
@@ -548,7 +545,7 @@ export async function importaCatalogo(payload: Payload, media: Media, log: (m: s
     // Inglese sulle stesse righe: nome, tipologia, descrizione e varianti come su serralunga.com/en.
     const enDoc = (await payload.findByID({ collection: 'prodotti', id, locale: 'en', fallbackLocale: false, depth: 0, draft: true })) as unknown as Record<string, any>
     const en: Record<string, unknown> = {}
-    const tipEn = frase(p.tipoEn || '')
+    const tipEn = tipologiaEn(p.tipoEn)
     if (!esistente || !enDoc.nome) en.nome = p.titoloEn || p.title
     if (!enDoc.tipologia && tipEn) en.tipologia = tipEn
     if (!esistente && tipEn) {

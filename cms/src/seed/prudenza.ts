@@ -1,5 +1,5 @@
 /**
- * Version: 1.02
+ * Version: 1.03
  * Protezione dei contenuti per seed:aggiorna e seed:catalogo.
  *
  * Il sito si modifica dal pannello e dalla pagina: quelle modifiche stanno solo nel database,
@@ -19,6 +19,10 @@
  * Eccezione voluta (riempiVuoti, 1.02): campi NUOVI di un documento esistente (es. disegno quotato e campioni
  * colore della scheda prodotto, colore pieno della cartella colori) si scrivono solo se nel documento sono
  * ancora vuoti: nessuno li ha mai compilati, quindi non si perde nessuna modifica. Copia di sicurezza prima.
+ *
+ * Eccezione voluta (correggi, 1.03): errori noti dei dati importati da serralunga.com (correzioni-shop.ts,
+ * es. tipologia "Pentola" al posto di "Vaso"). Il campo cambia solo se contiene ancora esattamente il
+ * valore sbagliato scritto dall'importazione: nessuno l'ha modificato. Copia di sicurezza prima.
  *
  * Con SEED_APPLICA=1 (pulsante "Applica" nel pannello) le modifiche si applicano, ma prima di
  * ognuna si salva una copia completa (tutte le lingue) del documento in .compiti/copie/<data>/.
@@ -176,6 +180,13 @@ export function proteggi(payload: Payload, compito: string, log: (m: string) => 
     return update({ collection: args.collection as never, id: args.id, locale: (args.locale || 'it') as never, depth: 0, data: data as never })
   }
 
+  /** Vedi l'eccezione in testa al file: copia di sicurezza, poi modifica diretta. */
+  const correggi = async (args: Record<string, unknown>) => {
+    const collection = String(args.collection)
+    copia(`${collection}-${args.id}-correzione`, await payload.findByID({ collection: collection as never, id: args.id as number, depth: 0, locale: 'all' as never, draft: true }))
+    return update(args as never)
+  }
+
   log(applica ? `modalità applica: prima di ogni modifica si salva una copia in ${copie}` : 'modalità prudente: si aggiunge solo ciò che manca, i contenuti esistenti non si toccano')
-  return { applica, proposte, cambiaStruttura, riempiVuoti }
+  return { applica, proposte, cambiaStruttura, riempiVuoti, correggi }
 }

@@ -19,6 +19,7 @@ import config from '@payload-config'
 import { aquaLounger, caseLoge, designerDati, prodottiCard } from './dati'
 import { creazioniDi, type Creazione } from './creazioni'
 import { importaCatalogo } from './catalogo'
+import { correggiImportati } from './correzioni-shop'
 import { contractDati, conIdRighe } from './contract'
 import { SEZIONI_CONTRACT } from '../collections/Contract'
 import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
@@ -43,10 +44,13 @@ let cambiaStruttura: typeof payload.updateGlobal = payload.updateGlobal.bind(pay
 // Senza protezione (seed completo di un sito nuovo) i campi nuovi si scrivono direttamente.
 let riempiVuoti = (a: { collection: string; id: number | string; data: Record<string, unknown>; locale?: string }): Promise<unknown> =>
   payload.update({ collection: a.collection as never, id: a.id, locale: (a.locale || 'it') as never, depth: 0, data: a.data as never })
+// Correzione degli errori noti dei dati di serralunga.com (correzioni-shop.ts): senza protezione si modifica direttamente.
+let correggi = (a: Record<string, unknown>): Promise<unknown> => payload.update(a as never)
 if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer' || process.env.SEED_SOLO === 'catalogo') {
   const prudenza = proteggi(payload, process.env.SEED_SOLO === 'catalogo' ? 'catalogo' : 'aggiorna', log)
   cambiaStruttura = prudenza.cambiaStruttura
   riempiVuoti = prudenza.riempiVuoti
+  correggi = prudenza.correggi
   if (giaFatti()) log(`ripresa dal punto salvato: ${giaFatti()} passaggi già completati`)
 }
 
@@ -400,6 +404,7 @@ async function completaPagine() {
 if (process.env.SEED_SOLO === 'catalogo') {
   await fase('prodotti', () => importaCatalogo(payload, media, log), log)
   await fase('disegni-e-campioni', () => completaSchedeEsempio(payload, riempiVuoti, log), log)
+  await fase('correzioni-shop', () => correggiImportati(payload, log, { aggiorna: correggi }), log)
   await fase('foto-avif', () => rigeneraFormati(payload, log), log)
   const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
   if (saltate.length) log(`${saltate.length} foto non caricate (si possono aggiungere dal pannello Media)`)
@@ -438,6 +443,7 @@ if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer'
   await fase('contract', completaContract, log)
   await fase('materiali', () => completaMateriali(payload, media, log), log)
   await fase('disegni-e-campioni', () => completaSchedeEsempio(payload, riempiVuoti, log), log)
+  await fase('correzioni-shop', () => correggiImportati(payload, log, { aggiorna: correggi }), log)
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
   await fase('segnaposto-designer', () => payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never }), log)
   await fase('testi-inglesi', () => applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer', 'pagine'] }), log)
