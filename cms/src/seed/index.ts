@@ -22,7 +22,7 @@ import { importaCatalogo } from './catalogo'
 import { contractDati, conIdRighe } from './contract'
 import { SEZIONI_CONTRACT } from '../collections/Contract'
 import { designerAltri, designerFonti, GIA_PRESENTI, RITRATTO_MIN } from './designer-altri'
-import { COLONNE, homeDati, impostazioniDati, MENU, MENU_SUPERIORE, PAGINE, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
+import { COLONNE, homeDati, impostazioniDati, MENU, MENU_SUPERIORE, PAGINE, SOCIAL, paginaDesignerDati, paginaInstallazioniDati, paginaSpuntiDati } from './globali'
 import { rigeneraFormati } from './immagini'
 import { completaHeritage } from './heritage'
 import { applicaInglese } from './inglese'
@@ -283,6 +283,14 @@ async function completaPagine() {
     // Il doppio menu non c'è mai stato su questo sito: si applica anche in modalità prudente (con copia).
     await cambiaStruttura({ slug: 'impostazioni', data: { menuSuperiore: MENU_SUPERIORE, menu: MENU, colonne: COLONNE } as never })
     log('navigazione: menu superiore, menu inferiore con tendine e colonne del footer')
+  }
+  // Social 1.00: profili ufficiali Instagram e Facebook, una volta sola finché l'elenco è vuoto (poi si cambia dal pannello).
+  {
+    const imp3 = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { social?: unknown[] }
+    if (!imp3.social?.length) {
+      await cambiaStruttura({ slug: 'impostazioni', data: { social: SOCIAL } as never })
+      log('social: Instagram e Facebook ufficiali')
+    }
   }
   // Navigazione 2.01/2.02: Installazioni e Spunti e idee sotto Progetti, Designer voce a sé dopo Catalogo
   // (richiesta dell'utente 2026-11-16). Si aggiungono solo le voci mancanti, il resto del menu non cambia.

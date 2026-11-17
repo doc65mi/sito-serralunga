@@ -7,6 +7,12 @@ const S = 'https://serralunga.com/cdn/shop'
  * Navigazione (Version: 2.02, alberatura del 2026-11-16): menu superiore di servizio e menu
  * inferiore principale, entrambi allineati a destra; footer con tre colonne.
  */
+/** Profili social ufficiali forniti dal cliente (2026-11-17). Gli altri si aggiungono dal pannello. */
+export const SOCIAL = [
+  { rete: 'instagram', indirizzo: 'https://www.instagram.com/serralunga.official/', attivo: true },
+  { rete: 'facebook', indirizzo: 'https://www.facebook.com/SerralungaOfficial', attivo: true },
+]
+
 export const MENU_SUPERIORE = [
   { etichetta: 'Contatti', link: '/contatti/' },
   { etichetta: 'Richiedi catalogo', link: '/contract/cataloghi/' },
@@ -156,6 +162,7 @@ export const impostazioniDati = async (m: Media) => ({
   },
   menuSuperiore: MENU_SUPERIORE,
   menu: MENU,
+  social: SOCIAL,
   descrizione:
     'Mobili, illuminazione, fioriere e oggetti di design 100% made in Italy per interni ed esterni, hospitality e contract.',
   colonne: COLONNE,
