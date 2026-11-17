@@ -24,6 +24,8 @@ export const GET: APIRoute = async () => {
     giorni: cmp.giorni,
     mostraBanner: cmp.mostraBanner,
     googleAvanzata: cmp.googleAvanzata,
+    privacyLink: cmp.privacyLink,
+    cookieLink: cmp.cookieLink,
     categorie: cmp.categorie,
     fornitori: cmp.fornitori.map((f) => ({
       id: f.id,

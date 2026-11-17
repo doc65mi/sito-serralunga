@@ -78,8 +78,8 @@ export const Moduli: GlobalConfig = {
         {
           label: 'Privacy e consensi',
           fields: [
-            link('privacyLink', 'Pagina dell’informativa privacy'),
-            vuoto('privacyEtichetta', 'Testo della casella privacy (obbligatoria)', TESTI_MODULI.it.privacyEtichetta, 'Le parole «informativa privacy» diventano il link alla pagina indicata sopra.'),
+            { ...link('privacyLink', 'Pagina dell’informativa privacy (vecchio)'), admin: { hidden: true } } as Field, // ora in Impostazioni › Privacy e cookies
+            vuoto('privacyEtichetta', 'Testo della casella privacy (obbligatoria)', TESTI_MODULI.it.privacyEtichetta, 'Le parole «informativa privacy» diventano il link alla Privacy Policy scelta in Impostazioni › Privacy e cookies; sotto la casella compaiono sempre i link a Privacy Policy e Cookie Policy.'),
             { name: 'newsletterNeiModuli', type: 'checkbox', label: 'Mostra nei moduli la casella facoltativa per la newsletter', defaultValue: true },
             vuoto('newsletterEtichetta', 'Testo della casella newsletter (facoltativa)', TESTI_MODULI.it.newsletterEtichetta),
             vuoto('privacyNewsletter', 'Testo della casella privacy nell’iscrizione alla newsletter', TESTI_MODULI.it.privacyNewsletter),

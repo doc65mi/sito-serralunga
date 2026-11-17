@@ -320,7 +320,8 @@ export function configCmp(imp: Doc, pc: Doc, L: Lingua, embed: string[] = []) {
   ) as TestiCmp
   // Il banner serve solo se c'è qualcosa che richiede il consenso (o se il pannello lo vuole sempre).
   const conConsenso = fornitori.some((f) => f.categoria !== 'necessari' && !['youtube', 'vimeo', 'maps'].includes(f.id)) || script.length > 0
-  const mostraBanner = pc.quandoBanner === 'sempre' || conConsenso
+  // Predefinito «sempre» (scelta dell'utente 2026-11-17): con «auto» solo se servono consensi.
+  const mostraBanner = pc.quandoBanner !== 'auto' || conConsenso
   const categoriePresenti = CATEGORIE.filter((k) => k === 'necessari' || fornitori.some((f) => f.categoria === k) || script.some((s) => s.categoria === k))
   return {
     versione,

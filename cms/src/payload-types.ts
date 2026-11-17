@@ -7593,7 +7593,7 @@ export interface Impostazioni {
   createdAt?: string | null;
 }
 /**
- * Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.01. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.
+ * Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.02. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "privacy-cookies".
@@ -7603,7 +7603,7 @@ export interface PrivacyCooky {
   /**
    * Con soli cookie tecnici il Garante non richiede il banner: resta il link «Gestisci preferenze cookie» nel footer.
    */
-  quandoBanner?: ('auto' | 'sempre') | null;
+  quandoBanner?: ('sempre' | 'auto') | null;
   /**
    * Es. 1.00, 1.01. Cambiandola, il banner ricompare a tutti e il nuovo consenso si registra con la nuova versione.
    */
@@ -7613,11 +7613,11 @@ export interface PrivacyCooky {
    */
   durataGiorni?: number | null;
   /**
-   * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+   * Usata dal banner, dal pannello delle preferenze, da tutti i moduli (contatti, catalogo, listino, Contract, schede prodotto, newsletter) e dal footer. In inglese diventa /en/… da sola.
    */
   privacyLink?: string | null;
   /**
-   * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
+   * Usata dal banner, dal pannello delle preferenze, da tutti i moduli e dal footer. Questa pagina mostra da sola l’elenco dei cookie attivi.
    */
   cookieLink?: string | null;
   /**
@@ -7700,12 +7700,9 @@ export interface PrivacyCooky {
  */
 export interface Moduli {
   id: number;
-  /**
-   * Percorso relativo (/designer/), ancora (/#listino) o indirizzo completo.
-   */
   privacyLink?: string | null;
   /**
-   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio). Le parole «informativa privacy» diventano il link alla pagina indicata sopra.
+   * Vuoto = testo predefinito nella lingua della pagina (quello in grigio). Le parole «informativa privacy» diventano il link alla Privacy Policy scelta in Impostazioni › Privacy e cookies; sotto la casella compaiono sempre i link a Privacy Policy e Cookie Policy.
    */
   privacyEtichetta?: string | null;
   newsletterNeiModuli?: boolean | null;

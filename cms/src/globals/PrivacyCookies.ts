@@ -1,10 +1,10 @@
-import type { GlobalConfig } from 'payload'
+import type { Field, GlobalConfig } from 'payload'
 
 import { pubblico, soloRedazione } from '../access'
 import { link } from '../fields'
 
 /**
- * Version: 1.01 (scheda «Servizi rilevati»: elenco letto da Sicurezza e tracciamento)
+ * Version: 1.02 (pagine Privacy e Cookie Policy collegate a banner, moduli e footer)
  * Impostazioni > Privacy e cookies: la piattaforma di gestione del consenso (CMP) del sito.
  * GDPR (UE 2016/679), art. 122 Codice privacy, Linee guida del Garante (provv. 231/2021),
  * Google Consent Mode v2. I codici di Google, Microsoft, Meta e LinkedIn restano in
@@ -27,7 +27,7 @@ export const PrivacyCookies: GlobalConfig = {
   admin: {
     group: 'Impostazioni',
     description:
-      'Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.01. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.',
+      'Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.02. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.',
   },
   access: { read: pubblico, update: soloRedazione },
   fields: [
@@ -49,10 +49,10 @@ export const PrivacyCookies: GlobalConfig = {
                   name: 'quandoBanner',
                   type: 'select',
                   label: 'Quando mostrare il banner',
-                  defaultValue: 'auto',
+                  defaultValue: 'sempre',
                   options: [
+                    { label: 'Sempre (consigliato)', value: 'sempre' },
                     { label: 'Solo se servono consensi (codici di statistica o marketing, script, fornitori aggiunti)', value: 'auto' },
-                    { label: 'Sempre', value: 'sempre' },
                   ],
                   admin: { description: 'Con soli cookie tecnici il Garante non richiede il banner: resta il link «Gestisci preferenze cookie» nel footer.' },
                 },
@@ -77,8 +77,8 @@ export const PrivacyCookies: GlobalConfig = {
             {
               type: 'row',
               fields: [
-                link('privacyLink', 'Pagina Privacy Policy'),
-                link('cookieLink', 'Pagina Cookie Policy'),
+                { ...link('privacyLink', 'Pagina Privacy Policy'), defaultValue: '/privacy-policy/', admin: { description: 'Usata dal banner, dal pannello delle preferenze, da tutti i moduli (contatti, catalogo, listino, Contract, schede prodotto, newsletter) e dal footer. In inglese diventa /en/… da sola.' } } as Field,
+                { ...link('cookieLink', 'Pagina Cookie Policy'), defaultValue: '/cookie-policy/', admin: { description: 'Usata dal banner, dal pannello delle preferenze, da tutti i moduli e dal footer. Questa pagina mostra da sola l’elenco dei cookie attivi.' } } as Field,
               ],
             },
             {

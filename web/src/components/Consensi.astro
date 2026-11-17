@@ -1,6 +1,6 @@
 ---
 /**
- * Version: 1.01 (link predefinito alla pagina /privacy-policy/)
+ * Version: 1.02 (link a Privacy Policy e Cookie Policy scelti in Impostazioni › Privacy e cookies, in ogni modulo)
  * Consensi in fondo a ogni modulo: casella privacy (obbligatoria, con link all'informativa),
  * casella newsletter (facoltativa, spenta in partenza) e spazio per reCAPTCHA v2.
  * Con reCAPTCHA v3 non si vede nulla: il token si chiede a Google al momento dell'invio
@@ -9,15 +9,18 @@
 import { impostazioni } from '../lib/cms'
 import { percorso, traduttore } from '../lib/lingua'
 import { moduli, recaptcha } from '../lib/moduli'
+import { privacyCookies } from '../lib/cmp'
 /** newsletter=false: modulo di iscrizione alla newsletter (consenso specifico, niente casella facoltativa). */
 interface Props { newsletter?: boolean; tono?: 'chiaro' | 'scuro' }
 const { newsletter = true, tono = 'chiaro' } = Astro.props
 const L = Astro.locals.lingua
 const t = traduttore(L)
-const [m, imp] = await Promise.all([moduli(L), impostazioni(L)])
+const [m, imp, pc] = await Promise.all([moduli(L), impostazioni(L), privacyCookies(L)])
 const rc = recaptcha(imp)
-// Senza un link nel pannello si usa la pagina Privacy Policy del sito.
-const linkPrivacy = percorso(L, m.privacyLink || '/privacy-policy/')
+// Pagine legali: quelle scelte in Impostazioni › Privacy e cookies (le stesse del banner dei cookie);
+// in mancanza il vecchio link di «Moduli, newsletter ed email», poi le pagine del sito.
+const linkPrivacy = percorso(L, pc.privacyLink || m.privacyLink || '/privacy-policy/')
+const linkCookie = percorso(L, pc.cookieLink || imp.cookieLink || '/cookie-policy/')
 // «informativa privacy» / «privacy policy» diventa il link alla pagina dell'informativa.
 const etichetta = newsletter ? m.testi.privacyEtichetta : m.testi.privacyNewsletter
 const parola = L === 'en' ? /privacy policy/i : /informativa privacy/i
@@ -33,6 +36,11 @@ const id = `c${Math.random().toString(36).slice(2, 8)}`
       {prima}{pezzo && <a href={linkPrivacy} target="_blank" rel="noopener">{pezzo[0]}</a>}{dopo}
     </span>
   </label>
+  <p class="consensi__nota consensi__legali">
+    <a href={linkPrivacy} target="_blank" rel="noopener">{t('Privacy Policy')}</a>
+    <span aria-hidden="true"> · </span>
+    <a href={linkCookie} target="_blank" rel="noopener">{t('Cookie Policy')}</a>
+  </p>
   {newsletter && m.newsletterNeiModuli !== false && (
     <label class="consenso" for={`${id}-n`}>
       <input type="checkbox" id={`${id}-n`} name="newsletter" value="1" />

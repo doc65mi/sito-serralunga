@@ -1,5 +1,5 @@
 /**
- * Version: 1.00
+ * Version: 1.01 (collega le pagine anche in Impostazioni › Privacy e cookies)
  * Pagine Privacy Policy e Cookie Policy (CMP 1.00), in italiano e inglese.
  *
  * Fonti: le pagine https://serralunga.com/pages/privacy-policy e /pages/cookie-policy-1 (testi
@@ -231,5 +231,12 @@ export async function completaPagineLegali(
   if (cambiato) {
     await cambiaStruttura({ slug: 'impostazioni', locale: 'it', data: { legali } as never })
     log('footer: link legali a Privacy Policy e Cookie Policy')
+  }
+
+  // Impostazioni › Privacy e cookies: le due pagine, una volta sola finché i campi sono vuoti.
+  const pc = (await payload.findGlobal({ slug: 'privacy-cookies', depth: 0 })) as unknown as { privacyLink?: string | null; cookieLink?: string | null }
+  if (!pc.privacyLink || !pc.cookieLink) {
+    await cambiaStruttura({ slug: 'privacy-cookies', data: { privacyLink: pc.privacyLink || '/privacy-policy/', cookieLink: pc.cookieLink || '/cookie-policy/', quandoBanner: 'sempre' } as never })
+    log('privacy e cookies: collegate le pagine Privacy Policy e Cookie Policy')
   }
 }

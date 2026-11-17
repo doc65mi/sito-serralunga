@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Version: 1.00
+ * Version: 1.01 (mostra le pagine Privacy e Cookie Policy collegate)
  * Riquadro «Servizi rilevati» in Impostazioni > Privacy e cookies: la CMP legge da sola i codici
  * di Impostazioni del sito > Sicurezza e tracciamento (Google Analytics 4, Tag Manager, Ads, Clarity,
  * Meta Pixel, LinkedIn, reCAPTCHA) e i servizi di questa pagina, li mette nella categoria giusta e
@@ -11,7 +11,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
 type Servizio = { id: string; nome: string; societa: string; categoria: string; origine: string; codice: string; cookie: string[] }
-type Dati = { versione: string; giorni: number; mostraBanner: boolean; googleAvanzata: boolean; categorie: string[]; fornitori: Servizio[]; script: { nome: string; categoria: string }[] }
+type Dati = { privacyLink: string; cookieLink: string; versione: string; giorni: number; mostraBanner: boolean; googleAvanzata: boolean; categorie: string[]; fornitori: Servizio[]; script: { nome: string; categoria: string }[] }
 
 const NOMI: Record<string, string> = { necessari: 'Necessari (sempre attivi)', preferenze: 'Preferenze', statistiche: 'Statistiche', marketing: 'Marketing' }
 const riquadro: React.CSSProperties = { border: '1px solid #d8d2c4', background: '#faf8f3', color: '#111', fontSize: 14, lineHeight: 1.6, padding: '18px 22px', margin: '8px 0 24px', borderRadius: 4 }
@@ -48,6 +48,11 @@ export const ServiziCmp: React.FC = () => {
           <p style={{ margin: '0 0 12px' }}>
             Versione dell’informativa <strong>{dati.versione}</strong> · scelta valida {dati.giorni} giorni · banner{' '}
             <strong>{dati.mostraBanner ? 'attivo' : 'non necessario (solo cookie tecnici)'}</strong> · Consent Mode {dati.googleAvanzata ? 'avanzata' : 'base'}
+          </p>
+          <p style={{ margin: '0 0 12px' }}>
+            Pagine collegate a banner, pannello delle preferenze, footer e a tutti i moduli: Privacy Policy{' '}
+            <a style={a} href={dati.privacyLink} target="_blank" rel="noopener">{dati.privacyLink}</a> (<a style={a} href={`/en${dati.privacyLink}`} target="_blank" rel="noopener">EN</a>) · Cookie Policy{' '}
+            <a style={a} href={dati.cookieLink} target="_blank" rel="noopener">{dati.cookieLink}</a> (<a style={a} href={`/en${dati.cookieLink}`} target="_blank" rel="noopener">EN</a>). Si cambiano nella scheda «Banner».
           </p>
           {dati.categorie.map((c) => {
             const elenco = dati.fornitori.filter((f) => f.categoria === c)
