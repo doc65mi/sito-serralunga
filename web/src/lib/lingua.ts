@@ -144,6 +144,11 @@ const EN: Record<string, string> = {
   // prodotto
   Prodotti: 'Products',
   Vista: 'View',
+  'Foto del prodotto': 'Product photos',
+  'Foto precedente': 'Previous photo',
+  'Foto successiva': 'Next photo',
+  'Ferma lo scorrimento delle foto': 'Pause the photo slideshow',
+  'Ingrandisci la foto': 'Enlarge the photo',
   'Disegno di': 'Design by',
   'Cartella colori': 'Colour chart',
   'Colori disponibili': 'Available colours',

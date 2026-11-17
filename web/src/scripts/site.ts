@@ -1,5 +1,6 @@
 /**
- * site.ts — comportamenti condivisi (Version: 1.03: barra rapida su telefono; 1.02: reCAPTCHA, newsletter, conversioni)
+ * site.ts — comportamenti condivisi (Version: 1.04: lightbox con miniature e swipe, slider a dissolvenza
+ * nella scheda prodotto; 1.03: barra rapida su telefono; 1.02: reCAPTCHA, newsletter, conversioni)
  * Ricavati dai template (classe Component di ogni .dc.html): slide della home,
  * caroselli, galleria prodotto, comparsa allo scorrimento, video, modulo richieste.
  */
@@ -123,8 +124,8 @@ const FRECCIA = (dir: number) =>
   `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" d="${dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}"/></svg>`
 const it = document.documentElement.lang.startsWith('it')
 const PAROLE = it
-  ? { prima: 'Foto precedente', dopo: 'Foto successiva', chiudi: 'Chiudi', apri: 'Apri la foto a tutto schermo', di: 'di' }
-  : { prima: 'Previous photo', dopo: 'Next photo', chiudi: 'Close', apri: 'Open the photo full screen', di: 'of' }
+  ? { prima: 'Foto precedente', dopo: 'Foto successiva', chiudi: 'Chiudi', apri: 'Apri la foto a tutto schermo', di: 'di', foto: 'Foto', galleria: 'Galleria a tutto schermo', pausa: 'Ferma lo scorrimento delle foto', avvia: 'Riprendi lo scorrimento delle foto' }
+  : { prima: 'Previous photo', dopo: 'Next photo', chiudi: 'Close', apri: 'Open the photo full screen', di: 'of', foto: 'Photo', galleria: 'Full-screen gallery', pausa: 'Pause the photo slideshow', avvia: 'Resume the photo slideshow' }
 
 /** Indirizzo della versione più grande dichiarata nel srcset della foto. */
 function piuGrande(img: HTMLImageElement): string {
@@ -133,41 +134,117 @@ function piuGrande(img: HTMLImageElement): string {
   return ultima || img.currentSrc || img.src
 }
 
+/*
+ * Lightbox a tutto schermo: frecce, tastiera (← → Home Fine Esc), swipe col dito, dissolvenza
+ * fra le foto, striscia di miniature che scorre e segue la foto aperta. La foto è la versione
+ * più grande del srcset (AVIF). `alCambio` avvisa chi l'ha aperta (es. la galleria prodotto).
+ */
 let lightbox: HTMLDialogElement | null = null
-function apriLightbox(foto: HTMLImageElement[], da: number) {
+let lbChiusura: (() => void) | null = null
+function apriLightbox(foto: HTMLImageElement[], da: number, alCambio?: (k: number) => void) {
   if (!lightbox) {
     lightbox = document.createElement('dialog')
     lightbox.className = 'lightbox'
+    lightbox.setAttribute('aria-label', PAROLE.galleria)
     lightbox.innerHTML = `
       <button type="button" class="lightbox__chiudi" aria-label="${PAROLE.chiudi}">×</button>
       <button type="button" class="lightbox__freccia lightbox__freccia--prima" aria-label="${PAROLE.prima}">${FRECCIA(-1)}</button>
-      <figure class="lightbox__figura"><img alt="" /><figcaption></figcaption></figure>
-      <button type="button" class="lightbox__freccia lightbox__freccia--dopo" aria-label="${PAROLE.dopo}">${FRECCIA(1)}</button>`
+      <figure class="lightbox__figura"><img alt="" decoding="async" /><figcaption aria-live="polite"></figcaption></figure>
+      <button type="button" class="lightbox__freccia lightbox__freccia--dopo" aria-label="${PAROLE.dopo}">${FRECCIA(1)}</button>
+      <div class="lightbox__miniature"></div>`
     document.body.append(lightbox)
     lightbox.addEventListener('click', (e) => {
       if (e.target === lightbox || (e.target as HTMLElement).closest('.lightbox__chiudi')) lightbox!.close()
     })
+    lightbox.addEventListener('close', () => {
+      document.documentElement.classList.remove('lightbox-aperta')
+      lbChiusura?.()
+      lbChiusura = null
+    })
   }
   const box = lightbox
-  const img = box.querySelector('img')!
+  const figura = box.querySelector<HTMLElement>('.lightbox__figura')!
+  const img = figura.querySelector('img')!
   const nota = box.querySelector('figcaption')!
   const frecce = $$<HTMLButtonElement>('.lightbox__freccia', box)
+  const strip = box.querySelector<HTMLElement>('.lightbox__miniature')!
+  const n = foto.length
+  // Miniature: solo con più di una foto
+  strip.hidden = n < 2
+  strip.innerHTML = ''
+  const mini = n < 2 ? [] : foto.map((f, j) => {
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.setAttribute('aria-label', `${PAROLE.foto} ${j + 1} ${PAROLE.di} ${n}`)
+    const t = document.createElement('img')
+    t.src = f.currentSrc || f.src
+    t.alt = ''
+    t.loading = 'lazy'
+    t.decoding = 'async'
+    b.append(t)
+    b.onclick = () => mostra(j)
+    strip.append(b)
+    return b
+  })
   let k = da
-  const mostra = (n: number) => {
-    k = (n + foto.length) % foto.length
-    img.src = piuGrande(foto[k])
-    img.alt = foto[k].alt
-    nota.textContent = foto.length > 1 ? `${foto[k].alt}${foto[k].alt ? ' · ' : ''}${k + 1} ${PAROLE.di} ${foto.length}` : foto[k].alt
+  const carica = (j: number) => {
+    const x = new Image()
+    x.decoding = 'async'
+    x.src = piuGrande(foto[(j + n) % n])
   }
-  frecce.forEach((f) => (f.hidden = foto.length < 2))
+  function mostra(j: number) {
+    const nuovo = (j + n) % n
+    const cambia = nuovo !== k || !img.getAttribute('src')
+    k = nuovo
+    const vai = () => {
+      img.src = piuGrande(foto[k])
+      img.alt = foto[k].alt
+      nota.textContent = n > 1 ? `${foto[k].alt}${foto[k].alt ? ' · ' : ''}${k + 1} ${PAROLE.di} ${n}` : foto[k].alt
+      const vedi = () => img.classList.remove('lightbox__img--via')
+      if (img.complete) requestAnimationFrame(vedi)
+      else {
+        img.addEventListener('load', vedi, { once: true })
+        img.addEventListener('error', vedi, { once: true })
+      }
+    }
+    if (cambia && !riduciMovimento && box.open) {
+      img.classList.add('lightbox__img--via')
+      window.setTimeout(vai, 160)
+    } else vai()
+    mini.forEach((b, i) => b.setAttribute('aria-current', String(i === k)))
+    mini[k]?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: riduciMovimento || !box.open ? 'auto' : 'smooth' })
+    if (n > 1) { carica(k + 1); carica(k - 1) }
+    alCambio?.(k)
+  }
+  frecce.forEach((f) => (f.hidden = n < 2))
   frecce[0].onclick = () => mostra(k - 1)
   frecce[1].onclick = () => mostra(k + 1)
   box.onkeydown = (e) => {
     if (e.key === 'ArrowLeft') mostra(k - 1)
-    if (e.key === 'ArrowRight') mostra(k + 1)
+    else if (e.key === 'ArrowRight') mostra(k + 1)
+    else if (e.key === 'Home') mostra(0)
+    else if (e.key === 'End') mostra(n - 1)
+    else return
+    e.preventDefault()
   }
+  // Swipe col dito sulla foto
+  let x0: number | null = null
+  let y0 = 0
+  figura.onpointerdown = (e) => {
+    x0 = e.pointerType === 'mouse' ? null : e.clientX
+    y0 = e.clientY
+  }
+  figura.onpointerup = (e) => {
+    if (x0 !== null && n > 1 && Math.abs(e.clientX - x0) > 44 && Math.abs(e.clientX - x0) > Math.abs(e.clientY - y0)) mostra(k + (e.clientX < x0 ? 1 : -1))
+    x0 = null
+  }
+  figura.onpointercancel = () => (x0 = null)
+  img.removeAttribute('src')
+  k = -1
   mostra(da)
+  document.documentElement.classList.add('lightbox-aperta')
   box.showModal()
+  return (fn: () => void) => (lbChiusura = fn)
 }
 
 for (const prima of $$<HTMLElement>('picture[data-spazio]')) {
@@ -222,17 +299,147 @@ for (const prima of $$<HTMLElement>('picture[data-spazio]')) {
   }
 }
 
-/* Galleria della scheda prodotto */
+/*
+ * Galleria della scheda prodotto (SchedaProdotto.astro 1.02): foto in evidenza a dissolvenza,
+ * cambio automatico ogni data-intervallo ms (fermo con «riduci movimento», mentre il puntatore
+ * o il fuoco sono sulla galleria, a pagina nascosta, in modifica o col pulsante pausa),
+ * frecce, miniature che scorrono, swipe, tastiera; clic sulla foto o sulla lente = lightbox.
+ */
 for (const gal of $$('[data-galleria]')) {
-  const foto = $$('[data-vista]', gal)
+  const palco = gal.querySelector<HTMLElement>('[data-palco]')
+  const foto = $$<HTMLImageElement>('img[data-vista]', gal)
   const mini = $$<HTMLButtonElement>('[data-mini]', gal)
-  mini.forEach((m, k) =>
-    m.addEventListener('click', () => {
-      foto.forEach((f, j) => f.classList.toggle('attiva', j === k))
-      mini.forEach((b, j) => b.setAttribute('aria-current', String(j === k)))
-    }),
-  )
+  const conto = gal.querySelector('[data-conto]')
+  const pausa = gal.querySelector<HTMLButtonElement>('[data-pausa]')
+  const n = foto.length
+  if (!palco || !n) continue
+  let k = 0
+  let timer = 0
+  let fermo = riduciMovimento // fermato da chi visita (pulsante) o dalle preferenze
+  let sopra = false
+  let inLightbox = false
+  const mostra = (j: number) => {
+    k = (j + n) % n
+    foto.forEach((f, i) => {
+      f.classList.toggle('attiva', i === k)
+      if (i === k) f.removeAttribute('aria-hidden')
+      else f.setAttribute('aria-hidden', 'true')
+    })
+    mini.forEach((b, i) => b.setAttribute('aria-current', String(i === k)))
+    const m = mini[k]
+    const riga = m?.parentElement
+    if (m && riga && riga.scrollWidth > riga.clientWidth) {
+      riga.scrollTo({ left: m.offsetLeft - (riga.clientWidth - m.offsetWidth) / 2, behavior: riduciMovimento ? 'auto' : 'smooth' })
+    }
+    if (conto) conto.textContent = `${k + 1} / ${n}`
+  }
+  const ferma = () => window.clearInterval(timer)
+  const avvia = () => {
+    ferma()
+    if (n < 2 || fermo || sopra || inLightbox || document.hidden) return
+    timer = window.setInterval(() => {
+      if (!document.documentElement.classList.contains('in-modifica')) mostra(k + 1)
+    }, Number(gal.dataset.intervallo) || 5000)
+  }
+  const vai = (j: number) => {
+    mostra(j)
+    avvia() // riparte il conto dopo un cambio a mano
+  }
+  mini.forEach((m, j) => m.addEventListener('click', () => vai(j)))
+  gal.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-verso]')
+    if (b) vai(k + Number(b.dataset.verso))
+  })
+  if (pausa && n > 1 && !riduciMovimento) {
+    pausa.hidden = false
+    const aggiorna = () => {
+      pausa.setAttribute('aria-pressed', String(fermo))
+      pausa.setAttribute('aria-label', fermo ? PAROLE.avvia : PAROLE.pausa)
+      pausa.classList.toggle('ferma', fermo)
+    }
+    pausa.addEventListener('click', () => {
+      fermo = !fermo
+      aggiorna()
+      avvia()
+    })
+    aggiorna()
+  }
+  // Tastiera: frecce quando il fuoco è dentro la galleria
+  gal.addEventListener('keydown', (e) => {
+    if (n < 2 || (e.target as HTMLElement).closest('dialog')) return
+    if (e.key === 'ArrowLeft') vai(k - 1)
+    else if (e.key === 'ArrowRight') vai(k + 1)
+    else return
+    e.preventDefault()
+  })
+  // Pausa mentre il visitatore guarda o usa la galleria
+  gal.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { sopra = true; ferma() } })
+  gal.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { sopra = false; avvia() } })
+  gal.addEventListener('focusin', () => { sopra = true; ferma() })
+  gal.addEventListener('focusout', (e) => {
+    if (!gal.contains(e.relatedTarget as Node)) { sopra = false; avvia() }
+  })
+  document.addEventListener('visibilitychange', avvia)
+  // Swipe col dito sulla foto in evidenza
+  let x0: number | null = null
+  let y0 = 0
+  palco.addEventListener('pointerdown', (e) => {
+    x0 = e.pointerType === 'mouse' ? null : e.clientX
+    y0 = e.clientY
+  })
+  palco.addEventListener('pointerup', (e) => {
+    if (x0 === null || n < 2) return
+    const dx = e.clientX - x0
+    if (Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(e.clientY - y0)) {
+      palco.dataset.swipe = String(Date.now()) // l'eventuale clic subito dopo non apre la lightbox
+      vai(k + (dx < 0 ? 1 : -1))
+    }
+    x0 = null
+  })
+  palco.addEventListener('pointercancel', () => (x0 = null))
+  // Lightbox: tutte le foto della scheda (viste, disegno, ambientazioni) a partire da quella visibile
+  const apri = () => {
+    if (document.documentElement.classList.contains('in-modifica')) return
+    const tutte = gruppoLightbox('prodotto')
+    const i = Math.max(0, tutte.indexOf(foto[k]))
+    inLightbox = true
+    ferma()
+    const chiusa = apriLightbox(tutte, i, (j) => {
+      const q = foto.indexOf(tutte[j])
+      if (q >= 0 && q !== k) mostra(q)
+    })
+    chiusa(() => {
+      inLightbox = false
+      avvia()
+    })
+  }
+  palco.addEventListener('click', (e) => {
+    const el = e.target as HTMLElement
+    const sw = Number(palco.dataset.swipe || 0)
+    delete palco.dataset.swipe
+    if (Date.now() - sw < 400) return
+    if (el.closest('.galleria__comandi')) return
+    if (el.closest('[data-zoom]') || el instanceof HTMLImageElement) apri()
+  })
+  mostra(0)
+  avvia()
 }
+
+/** Foto di un gruppo lightbox (attributo data-lb), nell'ordine della pagina; senza segnaposto. */
+function gruppoLightbox(nome: string): HTMLImageElement[] {
+  return $$<HTMLImageElement>(`img[data-lb="${CSS.escape(nome)}"]`)
+}
+
+/* Altre foto di un gruppo (disegno, ambientazioni): clic = lightbox con tutto il gruppo.
+   Se la foto è già uno spazio con la sua lightbox (pannello), decide lo spazio. */
+document.addEventListener('click', (e) => {
+  const el = e.target
+  if (!(el instanceof HTMLImageElement) || !el.dataset.lb || el.hasAttribute('data-vista')) return
+  if (document.documentElement.classList.contains('in-modifica') || el.closest('.spazio--lightbox')) return
+  const tutte = gruppoLightbox(el.dataset.lb)
+  e.preventDefault()
+  apriLightbox(tutte, Math.max(0, tutte.indexOf(el)))
+})
 
 /* Video della home v3: play / pausa */
 for (const btn of $$<HTMLButtonElement>('[data-play]')) {
