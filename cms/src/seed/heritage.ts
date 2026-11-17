@@ -93,9 +93,9 @@ const EN: Record<string, string> = {
   'Nuove laccature': 'New lacquers',
   'I primi a sviluppare tecnologie di laccatura con pattern.': 'The first to develop patterned lacquering technologies.',
   Designer: 'Designers',
-  'Firmati dai grandi nomi\ndel design': 'Signed by the great names\nof design',
-  'I più importanti designer del mondo hanno progettato per Serralunga prodotti che uniscono funzione, estetica e stile.':
-    'The world’s leading designers have created products for Serralunga that combine function, aesthetics and style.',
+  'Firmati da architetti\ne designer': 'Signed by architects\nand designers',
+  'Designer di fama internazionale hanno progettato per Serralunga prodotti che uniscono funzione, forma e qualità costruttiva.':
+    'Internationally renowned designers have created products for Serralunga that combine function, form and build quality.',
   'Tutti i designer': 'All designers',
   Qualità: 'Quality',
   'L’originale\nsi riconosce': 'You can tell\nthe original',
@@ -133,9 +133,9 @@ const EN: Record<string, string> = {
   'Il classico italiano': 'The Italian classic',
   Arredo: 'Furniture',
   'Serralunga dal 1825': 'Serralunga since 1825',
-  'Porta l’originale\nnel tuo progetto': 'Bring the original\ninto your project',
-  'Sfoglia il catalogo o parla con noi: per architetti, hotel e progetti speciali c’è Serralunga Contract.':
-    'Browse the catalogue or talk to us: for architects, hotels and special projects there is Serralunga Contract.',
+  'L’originale\nper il vostro progetto': 'The original\nfor your project',
+  'I cataloghi sono disponibili in PDF; per architetti, interior designer e strutture dell’ospitalità c’è l’ufficio contract.':
+    'The catalogues are available in PDF; for architects, interior designers and hospitality venues there is our contract office.',
   'Richiedi il catalogo': 'Request the catalogue',
   'Serralunga Contract': 'Serralunga Contract',
   'Heritage: 200 anni di Serralunga | Serralunga': 'Heritage: 200 years of Serralunga',
@@ -149,27 +149,27 @@ const EN: Record<string, string> = {
   'Fondata a Biella nel 1825': 'Founded in Biella in 1825',
   'Generazioni di famiglia': 'Generations of the family',
   'L’originale': 'The original',
-  'Prima in Europa a sviluppare la tecnologia dello stampaggio rotazionale. Prima a introdurre il vaso di design e a concepire il vaso fuori scala. Prima a disegnare un vaso illuminato, a esporre un vaso industriale in un museo e a sviluppare nuove tecnologie di laccatura con pattern.\nScegliere Serralunga significa saper riconoscere e apprezzare l’originalità.':
-    'First in Europe to develop rotational moulding technology. First to introduce the design planter and to conceive the oversized planter. First to design an illuminated planter, to exhibit an industrial planter in a museum and to develop new patterned lacquering technologies.\nChoosing Serralunga means recognising and appreciating originality.',
+  'Prima in Europa a sviluppare la tecnologia dello stampaggio rotazionale. Prima a introdurre il vaso di design e a concepire il vaso fuori scala. Prima a disegnare un vaso illuminato, a esporre un vaso industriale in un museo e a sviluppare nuove tecnologie di laccatura con pattern.':
+    'First in Europe to develop rotational moulding technology. First to introduce the design planter and to conceive the oversized planter. First to design an illuminated planter, to exhibit an industrial planter in a museum and to develop new patterned lacquering technologies.',
   'Un’azienda familiare nel cuore': 'A family company at heart',
   'Il patrimonio': 'Our heritage',
   'Serralunga nasce a Biella nel 1825. Serralunga è anche il nome della famiglia che da sei generazioni guida la parte creativa e imprenditoriale dell’azienda.\nNata come conceria, l’azienda ha poi lavorato le pelli per uso industriale. La svolta è arrivata con la lavorazione della plastica e con lo stampaggio rotazionale, tecnica importata dagli Stati Uniti: da lì sono nati oggetti di design italiano, arredi contemporanei e luci per esterni, tutti prodotti in Italia.':
     'Serralunga was founded in Biella in 1825. Serralunga is also the name of the family that, for six generations, has led the creative and entrepreneurial side of the company.\nBorn as a tannery, the company went on to process leather for industrial use. The turning point came with plastics and with rotational moulding, a technique imported from the United States: from there came Italian design objects, contemporary furniture and outdoor lighting, all made in Italy.',
   'Fatto in Italia': 'Made in Italy',
-  'Serralunga mantiene l’eccellenza legata al Made in Italy e propone nuovi modi di vivere, con arredi pensati per riposare e rilassarsi.':
-    'Serralunga upholds the excellence associated with Made in Italy and proposes new ways of living, with furniture designed for rest and relaxation.',
+  'Serralunga progetta e produce in Italia, nello stabilimento di Biella, arredi pensati per il riposo e la vita all’aperto.':
+    'Serralunga designs and manufactures in Italy, at its Biella plant, furniture made for rest and outdoor living.',
   'Innovazione culturale': 'Cultural innovation',
   'Serralunga è nota per aver spinto oltre i confini di materiali, tecnologie ed estetica per creare prodotti innovativi.':
     'Serralunga is known for pushing the boundaries of materials, technology and aesthetics to create innovative products.',
   'Design-oriented': 'Design-oriented',
-  'I più importanti designer del mondo hanno collaborato con Serralunga, creando prodotti che uniscono funzionalità, estetica e stile.':
-    'The world’s leading designers have worked with Serralunga, creating products that combine functionality, aesthetics and style.',
+  'Designer di fama internazionale hanno collaborato con Serralunga, creando prodotti che uniscono funzione, forma e qualità costruttiva.':
+    'Internationally renowned designers have worked with Serralunga, creating products that combine function, form and build quality.',
   'Scopri i designer': 'Discover the designers',
   'Le tappe': 'The milestones',
   'Le tappe di due secoli': 'Two centuries of milestones',
   'Dal 1825 a oggi, la timeline completa è nella pagina Heritage.': 'From 1825 to today, the full timeline is on the Heritage page.',
   'Vedi la timeline': 'See the timeline',
-  'Due secoli di storia\nper il tuo progetto': 'Two centuries of history\nfor your project',
+  'Due secoli di storia\nal servizio del progetto': 'Two centuries of history\nat the service of the project',
   'Architetti, hotel e progetti speciali: l’ufficio contract segue dimensioni, colori e finiture dedicate.':
     'Architects, hotels and special projects: the contract office handles dedicated sizes, colours and finishes.',
   'La nostra storia: Serralunga dal 1825 | Serralunga': 'Our story: Serralunga since 1825',
@@ -199,9 +199,9 @@ const EN: Record<string, string> = {
     'The Furniture collection, signed by international designers, brings Made in Italy to hospitality spaces and outdoor living.',
   'Scopri l’arredo': 'Discover the furniture',
   'Un ambiente da progettare?': 'A space to design?',
-  'Hotel, ristoranti, spa e residenze: costruiamo insieme la selezione di pezzi, colori e finiture.':
-    'Hotels, restaurants, spas and residences: let’s build the selection of pieces, colours and finishes together.',
-  'Parla con il contract': 'Talk to the contract team',
+  'Hotel, ristoranti, spa e residenze: l’ufficio contract vi aiuta a scegliere pezzi, colori e finiture.':
+    'Hotels, restaurants, spas and residences: our contract office helps you choose pieces, colours and finishes.',
+  'Scrivete all’ufficio contract': 'Write to the contract office',
   'Living different: il manifesto Serralunga | Serralunga': 'Living different: the Serralunga manifesto',
   'Living different: abitare lo spazio dentro e fuori con arredi, vasi e luci Serralunga dal carattere scultoreo, pensati per hotel, residenze e spazi pubblici.':
     'Living different: indoor and outdoor living with sculptural Serralunga furniture, planters and lights, designed for hotels, residences and public spaces.',
@@ -237,7 +237,7 @@ const EN: Record<string, string> = {
   Ecologico: 'Eco-friendly',
   'Materie prime inerti e riciclabili.': 'Inert, recyclable raw materials.',
   'Di lunga durata': 'Long-lasting',
-  'Resistente, duraturo, con un buon rapporto qualità/prezzo.': 'Strong, durable and good value for money.',
+  'Resistente e duraturo: oltre 10 anni di vita all’aperto.': 'Strong and durable: over 10 years of outdoor life.',
   'Resistente alle intemperie': 'Weatherproof',
   'Sopporta escursioni da −35 °C a +80 °C, urti e raggi UV.': 'Withstands −35 °C to +80 °C, impacts and UV rays.',
   Leggero: 'Lightweight',
@@ -246,7 +246,7 @@ const EN: Record<string, string> = {
   'Pulizia rapida e semplice.': 'Quick, simple cleaning.',
   'Consideriamo la plastica un materiale prezioso: va usata con attenzione, solo quando ha senso.':
     'We consider plastic a precious material: it should be used with care, only when it makes sense.',
-  'Specifiche per il tuo capitolato': 'Specifications for your tender',
+  'Specifiche per il capitolato': 'Specifications for the tender',
   'Schede tecniche, colori e finiture per progetti contract: l’ufficio contract risponde a progettisti e general contractor.':
     'Technical sheets, colours and finishes for contract projects: the contract office supports designers and general contractors.',
   'Produzione a Biella: stampaggio rotazionale | Serralunga': 'Made in Biella: rotational moulding | Serralunga',
@@ -256,7 +256,7 @@ const EN: Record<string, string> = {
   // I colori
   'Cartella colori': 'Colour chart',
   'I _colori_': 'The _colours_',
-  'Serralunga produce su richiesta: la maggior parte dei prodotti può essere realizzata in qualsiasi colore della cartella. Per un colore che non trovi nella scheda del prodotto, contattaci.':
+  'Serralunga produce su richiesta: la maggior parte dei prodotti può essere realizzata in qualsiasi colore della cartella. Se il colore che vi serve non compare nella scheda del prodotto, contattateci.':
     'Serralunga makes to order: most products can be produced in any colour on the chart. For a colour not shown on the product page, contact us.',
   'Il colore è nel materiale, non in superficie: puro, omogeneo e duraturo, non sbiadisce facilmente.':
     'The colour is in the material, not on the surface: pure, even and lasting, it does not fade easily.',
@@ -264,10 +264,10 @@ const EN: Record<string, string> = {
   'Finiture laccate': 'Lacquered finishes',
   'Dal 2006 la tecnologia di laccatura amplia colori, finiture e possibilità espressive: laccati lucidi, laccati metallizzati lucidi e metallizzati opachi.':
     'Since 2006 lacquering technology has widened colours, finishes and expressive possibilities: gloss lacquers, gloss metallic lacquers and matt metallics.',
-  'Un colore per il tuo progetto': 'A colour for your project',
-  'Per forniture contract valutiamo colori dedicati e campionature: scrivici quantità e prodotti.':
+  'Un colore per il vostro progetto': 'A colour for your project',
+  'Per forniture contract valutiamo colori dedicati e campionature: scriveteci prodotti e quantità.':
     'For contract supplies we consider dedicated colours and samples: tell us the quantities and products.',
-  'Contattaci': 'Contact us',
+  'Contattateci': 'Contact us',
   'I colori Serralunga: cartella colori e laccati | Serralunga': 'Serralunga colours: colour chart and lacquers',
   'La cartella colori Serralunga: colori in massa, laccati lucidi e metallizzati per vasi e arredi in polietilene. Produzione su richiesta per progetti contract.':
     'The Serralunga colour chart: mass colours, gloss lacquers and metallics for polyethylene planters and furniture. Made to order for contract projects.',
@@ -330,8 +330,8 @@ export async function paginaHeritageDati(media: Media): Promise<Dati> {
     },
     designer: {
       kicker: 'Designer',
-      titolo: 'Firmati dai grandi nomi\ndel design',
-      testo: 'I più importanti designer del mondo hanno progettato per Serralunga prodotti che uniscono funzione, estetica e stile.',
+      titolo: 'Firmati da architetti\ne designer',
+      testo: 'Designer di fama internazionale hanno progettato per Serralunga prodotti che uniscono funzione, forma e qualità costruttiva.',
       pulsante: 'Tutti i designer',
     },
     qualita: {
@@ -378,8 +378,8 @@ export async function paginaHeritageDati(media: Media): Promise<Dati> {
     },
     cta: {
       kicker: 'Serralunga dal 1825',
-      titolo: 'Porta l’originale\nnel tuo progetto',
-      testo: 'Sfoglia il catalogo o parla con noi: per architetti, hotel e progetti speciali c’è Serralunga Contract.',
+      titolo: 'L’originale\nper il vostro progetto',
+      testo: 'I cataloghi sono disponibili in PDF; per architetti, interior designer e strutture dell’ospitalità c’è l’ufficio contract.',
       pulsanti: [
         { testo: 'Richiedi il catalogo', link: '/contract/cataloghi/' },
         { testo: 'Serralunga Contract', link: '/contract/' },
@@ -412,7 +412,7 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
           kicker: 'L’originale',
           titolo: 'L’originale',
           testo:
-            'Prima in Europa a sviluppare la tecnologia dello stampaggio rotazionale. Prima a introdurre il vaso di design e a concepire il vaso fuori scala. Prima a disegnare un vaso illuminato, a esporre un vaso industriale in un museo e a sviluppare nuove tecnologie di laccatura con pattern.\nScegliere Serralunga significa saper riconoscere e apprezzare l’originalità.',
+            'Prima in Europa a sviluppare la tecnologia dello stampaggio rotazionale. Prima a introdurre il vaso di design e a concepire il vaso fuori scala. Prima a disegnare un vaso illuminato, a esporre un vaso industriale in un museo e a sviluppare nuove tecnologie di laccatura con pattern.',
           immagine: await foto(media, 'flow'),
         },
         {
@@ -425,7 +425,7 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
         {
           kicker: 'Made in Italy',
           titolo: 'Fatto in Italia',
-          testo: 'Serralunga mantiene l’eccellenza legata al Made in Italy e propone nuovi modi di vivere, con arredi pensati per riposare e rilassarsi.',
+          testo: 'Serralunga progetta e produce in Italia, nello stabilimento di Biella, arredi pensati per il riposo e la vita all’aperto.',
           immagine: await foto(media, 'moleskin'),
         },
         {
@@ -437,7 +437,7 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
         {
           kicker: 'Design-oriented',
           titolo: 'Design-oriented',
-          testo: 'I più importanti designer del mondo hanno collaborato con Serralunga, creando prodotti che uniscono funzionalità, estetica e stile.',
+          testo: 'Designer di fama internazionale hanno collaborato con Serralunga, creando prodotti che uniscono funzione, forma e qualità costruttiva.',
           immagine: await foto(media, 'vasTwo'),
           pulsante: 'Scopri i designer',
           link: '/designer/',
@@ -454,7 +454,7 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
       citazione: { testo: 'Ogni anima ha un luogo di calma.', autore: 'Marco Serralunga' },
       cta: {
         kicker: 'Serralunga Contract',
-        titolo: 'Due secoli di storia\nper il tuo progetto',
+        titolo: 'Due secoli di storia\nal servizio del progetto',
         testo: 'Architetti, hotel e progetti speciali: l’ufficio contract segue dimensioni, colori e finiture dedicate.',
         pulsante: 'Serralunga Contract',
         link: '/contract/',
@@ -510,8 +510,8 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
       cta: {
         kicker: 'Serralunga Contract',
         titolo: 'Un ambiente da progettare?',
-        testo: 'Hotel, ristoranti, spa e residenze: costruiamo insieme la selezione di pezzi, colori e finiture.',
-        pulsante: 'Parla con il contract',
+        testo: 'Hotel, ristoranti, spa e residenze: l’ufficio contract vi aiuta a scegliere pezzi, colori e finiture.',
+        pulsante: 'Scrivete all’ufficio contract',
         link: '/contract/',
       },
       seo: {
@@ -571,7 +571,7 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
         voci: [
           { titolo: 'Sostenibile', testo: 'Nessun solvente inquinante nel processo produttivo.' },
           { titolo: 'Ecologico', testo: 'Materie prime inerti e riciclabili.' },
-          { titolo: 'Di lunga durata', testo: 'Resistente, duraturo, con un buon rapporto qualità/prezzo.' },
+          { titolo: 'Di lunga durata', testo: 'Resistente e duraturo: oltre 10 anni di vita all’aperto.' },
           { titolo: 'Resistente alle intemperie', testo: 'Sopporta escursioni da −35 °C a +80 °C, urti e raggi UV.' },
           { titolo: 'Leggero', testo: 'Facile da movimentare.' },
           { titolo: 'Manutenzione minima', testo: 'Pulizia rapida e semplice.' },
@@ -580,7 +580,7 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
       citazione: { testo: 'Consideriamo la plastica un materiale prezioso: va usata con attenzione, solo quando ha senso.', autore: 'Serralunga' },
       cta: {
         kicker: 'Serralunga Contract',
-        titolo: 'Specifiche per il tuo capitolato',
+        titolo: 'Specifiche per il capitolato',
         testo: 'Schede tecniche, colori e finiture per progetti contract: l’ufficio contract risponde a progettisti e general contractor.',
         pulsante: 'Serralunga Contract',
         link: '/contract/',
@@ -598,7 +598,7 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
       nomeMenu: 'I colori',
       kicker: 'Cartella colori',
       testo:
-        'Serralunga produce su richiesta: la maggior parte dei prodotti può essere realizzata in qualsiasi colore della cartella. Per un colore che non trovi nella scheda del prodotto, contattaci.',
+        'Serralunga produce su richiesta: la maggior parte dei prodotti può essere realizzata in qualsiasi colore della cartella. Se il colore che vi serve non compare nella scheda del prodotto, contattateci.',
       immagine: await foto(media, 'vasTwo'),
       capitoli: [
         {
@@ -617,9 +617,9 @@ export async function sottopagineHeritageDati(media: Media): Promise<Dati[]> {
       ],
       cta: {
         kicker: 'Serralunga Contract',
-        titolo: 'Un colore per il tuo progetto',
-        testo: 'Per forniture contract valutiamo colori dedicati e campionature: scrivici quantità e prodotti.',
-        pulsante: 'Contattaci',
+        titolo: 'Un colore per il vostro progetto',
+        testo: 'Per forniture contract valutiamo colori dedicati e campionature: scriveteci prodotti e quantità.',
+        pulsante: 'Contattateci',
         link: '/contatti/',
       },
       seo: {

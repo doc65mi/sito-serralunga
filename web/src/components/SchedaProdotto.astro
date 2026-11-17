@@ -233,7 +233,7 @@ const jsonld = [{
         {conQuote && <DisegnoQuotato q={q} nome={p.nome} />}
         {finiture.length > 0 && (
           <details class="varianti" open={finiture.length <= 12}>
-            <summary><span class="etichetta">{t('Varianti a listino')}</span> <span class="varianti__n">{finiture.length}</span></summary>
+            <summary><span class="etichetta">{t('Varianti disponibili')}</span> <span class="varianti__n">{finiture.length}</span></summary>
             <table class="varianti__tabella">
               <thead><tr><th scope="col">{t('Variante')}</th><th scope="col">{t('Codice articolo')}</th></tr></thead>
               <tbody>{finiture.map((f) => <tr><td>{f.nome}</td><td>{f.codice || '—'}</td></tr>)}</tbody>
@@ -381,7 +381,7 @@ const jsonld = [{
         <span class="kicker kicker--largo">{p.richiesta?.kicker || t('Documentazione contract')}</span>
         <Testo as="h2" class="titolo" campo="richiesta.titolo" t={p.richiesta?.titolo || t('Scheda tecnica,\ndisegni e campioni')} />
         <Testo class="testo" campo="richiesta.testo" t={p.richiesta?.testo} />
-        <ModuloRichiesta pulsante={t('Richiedi preventivo')} pagina={`${t('Preventivo')}: ${p.nome}${codici[0] ? ` (${codici[0]})` : ''} — ${qui}`} />
+        <ModuloRichiesta pulsante={t('Richiedi informazioni')} pagina={`${t('Richiesta')}: ${p.nome}${codici[0] ? ` (${codici[0]})` : ''} — ${qui}`} />
       </div>
     </div>
   </section>

@@ -336,7 +336,7 @@ export const aquaLounger = async (m: Media, designer: Record<string, number>, ca
     kicker: 'Documentazione contract',
     titolo: 'Scheda tecnica,\ndisegni e campioni',
     testo:
-      'Inviamo scheda PDF, file CAD, cartella colori fisica e condizioni riservate per progetti alberghieri e di ristorazione.',
+      'Inviamo scheda tecnica in PDF, file CAD e cartella colori fisica per progetti alberghieri, di ristorazione e residenziali.',
     immagine: await m(`${S}/products/Aquasunloungersquare1.jpg?v=1771512693&width=1800`, 'Aqua Lounger'),
   },
   seo: {

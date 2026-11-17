@@ -1,7 +1,7 @@
 # design.md — aspetto del sito Serralunga
 
-Version: 1.01
-Data: 2026-11-14
+Version: 1.02
+Data: 2026-11-17
 Ambito: token, tipografia, componenti e ricette di pagina. Fonte grafica: i template in `template/` (Home v2 è il riferimento; v3 per l'apertura video). Codice: `web/src/styles/site.css` (unico foglio di stile).
 Regola: se questo file e `site.css` non coincidono, vale il template; poi si aggiornano entrambi.
 
@@ -63,6 +63,10 @@ Breakpoint: 1100, 900, 800, 560px. `prefers-reduced-motion` spegne Ken Burns, sl
 - **Case history** (La Loge): apertura Ken Burns → progetto + scheda → citazione su foto → tre passi → coppia di immagini → protagonista (scuro) → diario (rail mini) → prodotti usati → contatto (notte).
 - **Designer**: intro → griglia card. **Scheda designer**: bio con ritratto → banner frase → pezzi (rail) → CTA scura.
 
-## 6. Accessibilità
+## 6. Voce dei testi
+
+Le regole di pubblico e tono sono in `cliente.md` §3 (revisione testi 2.00). In sintesi per chi impagina: titoli brevi e descrittivi, kicker che dicono di cosa parla la sezione (non slogan), pulsanti che offrono documentazione o contatto (mai prezzi, listini o condizioni), numeri solo se verificati. Il testo di lettura è sempre nero (`--text` = #000); l'oro resta un accento decorativo.
+
+## 7. Accessibilità
 
 Un solo H1 per pagina; `alt` obbligatorio nelle foto del CMS; link "salta al contenuto"; rail scorrevoli da tastiera (`tabindex="0"`); contrasto testo su foto garantito dai veli; nessuno scorrimento orizzontale a 390px.

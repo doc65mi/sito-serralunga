@@ -47,7 +47,7 @@ export const GET: APIRoute = async () => {
       riga('I colori', '/heritage/i-colori/'),
       riga('Materiali e colori', '/materiali/'),
     ]),
-    sezione('Catalogo', [riga('Catalogo B2B', '/catalogo/'), ...cats.map((c) => riga(c.nome, urlCategoria(c, cats), c.seo?.descrizione))]),
+    sezione('Catalogo', [riga('Catalogo', '/catalogo/'), ...cats.map((c) => riga(c.nome, urlCategoria(c, cats), c.seo?.descrizione))]),
     sezione('Contract (B2B: hotel, ristoranti, architetti, enti pubblici, rivenditori)', contract.map((c) => riga(c.nome, c.sezione === 'principale' ? '/contract/' : `/contract/${c.sezione}/`, c.seo?.descrizione || c.estratto || c.testo))),
     sezione('Materiali', materiali.map((m) => riga(m.titolo, `/materiali/${m.slug}/`, m.seo?.descrizione || m.sottotitolo))),
     sezione('Prodotti', prodotti.map((p) => riga(p.nome, urlProdotto(p, cats), p.seo?.descrizione))),

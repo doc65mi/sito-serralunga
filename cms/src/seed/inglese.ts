@@ -10,15 +10,14 @@ import { designerInglese } from './designer-altri'
 
 export const EN: Record<string, string> = {
   // Impostazioni
-  'Contract & Hospitality — Made in Italy dal 1825': 'Contract & Hospitality — Made in Italy since 1825',
-  'Area riservata rivenditori': 'Dealer area',
+  'Arredi, vasi e luci di design — prodotti a Biella dal 1825': 'Design furniture, planters and lighting — made in Biella since 1825',
+  'Richiedi il catalogo': 'Request the catalogue',
   Progetti: 'Projects',
   Installazioni: 'Installations',
   Materiali: 'Materials',
   'Listino B2B': 'B2B price list',
-  'Richiedi il catalogo': 'Request the catalogue',
-  'Mobili, illuminazione, fioriere e oggetti di design 100% made in Italy per interni ed esterni, hospitality e contract.':
-    'Furniture, lighting, planters and design objects, 100% made in Italy, for indoors and outdoors, hospitality and contract.',
+  'Arredi, vasi e luci di design per interni ed esterni, prodotti a Biella dal 1825 per progetti di hôtellerie, residenziali e contract.':
+    'Design furniture, planters and lighting for indoor and outdoor spaces, made in Biella since 1825 for hospitality, residential and contract projects.',
   Prodotti: 'Products',
   'Vasi e fioriere': 'Vases and planters',
   Arredo: 'Furniture',
@@ -33,85 +32,84 @@ export const EN: Record<string, string> = {
   Italia: 'Italy',
 
   // Home
-  'Living outdoor — Contract & Hospitality': 'Outdoor living — Contract & Hospitality',
-  'Il design\nprende il sole': 'Design\ntakes the sun',
-  'Arredi outdoor su misura per hôtellerie, ristorazione e dimore di prestigio. Fioriere, sedute e illuminazione 100% made in Italy, dal 1825.':
-    'Bespoke outdoor furniture for hotels, restaurants and prestigious residences. Planters, seating and lighting, 100% made in Italy, since 1825.',
-  'Vedi la collezione': 'See the collection',
+  'Serralunga — Biella, dal 1825': 'Serralunga — Biella, since 1825',
+  'Design italiano\nper gli spazi _aperti_': 'Italian design\nfor _open_ spaces',
+  'Vasi, sedute, tavoli e luci in polietilene, disegnati da architetti e designer e prodotti a Biella. Per progetti di hôtellerie, ristorazione, residenze e spazi pubblici.':
+    'Polyethylene planters, seating, tables and lighting, designed by architects and designers and made in Biella. For hotel, restaurant, residential and public-space projects.',
+  'Le collezioni': 'The collections',
   Hôtellerie: 'Hotels',
-  'Terrazze, roof e aree piscina: fioriere e sedute in LLDPE colorate su cartella, resistenti a sole, salsedine e gelo.':
-    'Terraces, rooftops and pool areas: LLDPE planters and seating in chart colours, resistant to sun, salt air and frost.',
+  'Terrazze, roof e aree piscina: fioriere, sedute e luci in polietilene tinto in massa, che restano all’aperto tutto l’anno e resistono a sole, salsedine e gelo.':
+    'Terraces, rooftops and pool areas: planters, seating and lighting in mass-coloured polyethylene that stay outdoors all year round and withstand sun, salt air and frost.',
   Ristorazione: 'Restaurants',
-  'Dehors e separé vegetali: sistemi modulari per delimitare i coperti mantenendo leggerezza e identità del locale.':
-    'Outdoor dining areas and green partitions: modular systems that define the tables while keeping the venue light and true to its identity.',
-  'Dimore di prestigio': 'Prestigious residences',
-  "Pezzi d'autore e finiture laccate o Moleskin, sviluppati con studi di architettura e interior designer.":
-    'Signature pieces with lacquered or Moleskin finishes, developed with architecture studios and interior designers.',
+  'Dehors e sale: sedute, tavoli e fioriere per organizzare gli spazi, in colori e finiture coordinati con l’identità del locale.':
+    'Outdoor dining areas and dining rooms: seating, tables and planters to organise the space, in colours and finishes coordinated with the venue’s identity.',
+  'Residenze': 'Residences',
+  "Pezzi firmati, finiture laccate o Moleskin e vasi della tradizione italiana per ville, giardini e terrazze.":
+    'Signature pieces, lacquered or Moleskin finishes and traditional Italian planters for villas, gardens and terraces.',
   'Chi siamo': 'About us',
-  "Una passione per la bellezza,\nuna passione per l'innovazione": 'A passion for beauty,\na passion for innovation',
-  'Dal 1825 lo spirito di ricerca e la tradizione produttiva sono le fondamenta del marchio. Stampaggio rotazionale in LLDPE, tinto in massa e riciclabile al 100%: prodotti pensati per resistere da −35 °C a +80 °C, negli spazi più esposti e più esigenti.':
-    'Since 1825 a spirit of research and a manufacturing tradition have been the foundations of the brand. Rotational moulding in LLDPE, mass-coloured and 100% recyclable: products designed to withstand −35 °C to +80 °C in the most exposed and demanding spaces.',
+  "Ricerca sui materiali\ndal 1825": 'Research into materials\nsince 1825',
+  'Serralunga nasce a Biella nel 1825 ed è stata la prima azienda in Europa a sviluppare lo stampaggio rotazionale. Nello stabilimento di Biella produce arredi e vasi in polietilene lineare (LLDPE) tinto in massa e riciclabile al 100%, stabili da −35 °C a +80 °C e resistenti a raggi UV, urti e salsedine.':
+    'Serralunga was founded in Biella in 1825 and was the first company in Europe to develop rotational moulding. At its Biella plant it makes furniture and planters in mass-coloured, 100% recyclable linear polyethylene (LLDPE), stable from −35 °C to +80 °C and resistant to UV rays, impacts and salt air.',
   'Materiale riciclabile al 100%': '100% recyclable material',
-  'Cartella colori dedicata': 'Dedicated colour chart',
-  'Finitura Moleskin e laccature': 'Moleskin finish and lacquers',
-  'Scopri Serralunga Contract': 'Discover Serralunga Contract',
-  'Anni di manifattura': 'Years of manufacturing',
-  'Referenze a catalogo': 'Catalogue items',
-  'Colori di cartella': 'Chart colours',
-  'Paesi serviti': 'Countries served',
+  'Prodotto a Biella': 'Made in Biella, Italy',
+  '38 colori in cartella': '38 colours on the chart',
+  'Finiture laccate, Moleskin e Corten': 'Lacquered, Moleskin and Corten finishes',
+  'Serralunga Contract': 'Serralunga Contract',
+  'Anni di storia industriale': 'Years of industrial history',
+  'Colori in cartella': 'Colours on the chart',
+  'Polietilene riciclabile': 'Recyclable polyethylene',
+  'Intervallo di utilizzo': 'Operating range',
   INSTALLAZIONI: 'INSTALLATIONS',
-  "Terrazze d'albergo, dehors, aree piscina e ville private: luoghi in cui il disegno italiano incontra la vita all'aperto.":
-    'Hotel terraces, outdoor dining areas, pool areas and private villas: places where Italian design meets outdoor living.',
-  "Una selezione di ambientazioni realizzate con studi di architettura e strutture ricettive in Italia e all'estero.":
-    'A selection of settings created with architecture studios and hospitality venues in Italy and abroad.',
-  'Corte d’ingresso, hotel de charme': 'Entrance courtyard, boutique hotel',
-  'Piemonte — Big-Bo, Luisa Bocchietto': 'Piedmont — Big-Bo, Luisa Bocchietto',
-  'Milano — Atmosfera, Vas-One Family': 'Milan — Atmosfera, Vas-One Family',
+  "Terrazze d’albergo, dehors, aree piscina e giardini privati: ambientazioni con vasi, sedute e luci Serralunga.":
+    'Hotel terraces, outdoor dining areas, pool areas and private gardens: settings with Serralunga planters, seating and lighting.',
+  "Una selezione per tipo di spazio: hotel, ristorazione, spa e residenze.":
+    'A selection by type of space: hotels, restaurants, spas and residences.',
+  'Corte d’ingresso': 'Entrance courtyard',
+  'Big-Bo, Luisa Bocchietto': 'Big-Bo, Luisa Bocchietto',
+  'Atmosfera e Vas-One Family': 'Atmosfera and Vas-One Family',
   'Vasca esterna, spa': 'Outdoor pool, spa',
-  'Riviera Ligure — Fiore di Loto': 'Ligurian Riviera — Fiore di Loto',
+  'Fiore di Loto, Marta Sansoni': 'Fiore di Loto, Marta Sansoni',
   'Lounge esterna': 'Outdoor lounge',
-  'Costa Smeralda — Divano Riviera': 'Costa Smeralda — Riviera sofa',
+  'Divano Riviera': 'Riviera sofa',
   'Bordo piscina': 'Poolside',
-  'Lago di Garda — Collezione Aqua': 'Lake Garda — Aqua collection',
+  'Collezione Aqua, Marc Sadler': 'Aqua collection, Marc Sadler',
   'Giardino privato': 'Private garden',
   'Loggiato di una dimora storica': 'Loggia of a historic residence',
-  'Toscana — Decorati, Festonato, Orcio': 'Tuscany — Decorati, Festonato, Orcio',
+  'Decorati, Festonato, Orcio': 'Decorati, Festonato, Orcio',
   'Vedi tutte le installazioni': 'See all installations',
-  'Le collezioni': 'The collections',
-  "Quattro famiglie di prodotto, un'unica grammatica formale: forme scultoree, colore tinto in massa, resistenza da esterno.":
-    'Four product families, one formal grammar: sculptural shapes, mass-coloured material, outdoor durability.',
+  "Vasi, arredi, illuminazione e accessori: forme disegnate da architetti e designer, in polietilene tinto in massa per interni ed esterni.":
+    'Planters, furniture, lighting and accessories: shapes designed by architects and designers, in mass-coloured polyethylene for indoor and outdoor use.',
   Vasi: 'Vases',
   'Al servizio\ndel progetto': 'At the service\nof the project',
-  'Consulenza progettuale': 'Design consultancy',
-  'Affiancamento a studi e general contractor dalla fase di concept al capitolato.':
-    'Support for studios and general contractors from the concept stage to the specification.',
+  'Supporto alla progettazione': 'Design support',
+  'Schede tecniche, disegni quotati e campioni colore per la scelta dei pezzi e la stesura del capitolato.':
+    'Technical sheets, dimensioned drawings and colour samples for choosing the pieces and writing the specification.',
   'Colori e finiture su misura': 'Bespoke colours and finishes',
-  "Campionature fisiche, laccature, metallizzati e finitura Moleskin coordinati all'identità della struttura.":
-    "Physical samples, lacquers, metallic colours and Moleskin finish matched to the venue's identity.",
-  'Grandi volumi e logistica': 'Large volumes and logistics',
-  'Produzione su commessa, spedizioni pallettizzate e consegne programmate per fasi di cantiere.':
-    'Made-to-order production, palletised shipments and deliveries scheduled by site phase.',
+  "38 colori in cartella, laccati lucidi e metallizzati, finiture Moleskin e Corten. Per i progetti contract si valutano colori dedicati.":
+    "38 colours on the chart, gloss and metallic lacquers, Moleskin and Corten finishes. Dedicated colours can be considered for contract projects.",
+  'Produzione a Biella': 'Made in Biella',
+  'Stampaggio rotazionale nello stabilimento di Biella: la maggior parte dei prodotti si realizza su richiesta, nel colore scelto.':
+    'Rotational moulding at the Biella plant: most products are made to order, in the colour you choose.',
   'Lavoro conto terzi': 'Contract manufacturing',
-  'Catalogo & listino B2B': 'Catalogue & B2B price list',
-  'Richiedi il catalogo\ne le condizioni riservate': 'Request the catalogue\nand trade terms',
-  'Riservato ad alberghi, ristoranti, studi di architettura e rivenditori. Riceverai catalogo, cartella colori e listino dedicato entro 24 ore lavorative.':
-    'For hotels, restaurants, architecture studios and dealers. You will receive the catalogue, colour chart and dedicated price list within 24 working hours.',
-  'Richiesta catalogo': 'Request the catalogue',
-  'Grazie: riceverete catalogo, cartella colori e listino entro 24 ore lavorative.':
-    'Thank you: you will receive the catalogue, colour chart and price list within 24 working hours.',
-  'Serralunga Contract — arredi outdoor dal 1825': 'Serralunga Contract — outdoor furniture since 1825',
-  'Arredi outdoor su misura per hôtellerie, ristorazione e dimore di prestigio: fioriere, sedute e illuminazione 100% made in Italy, dal 1825.':
-    'Bespoke outdoor furniture for hotels, restaurants and prestigious residences: planters, seating and lighting, 100% made in Italy, since 1825.',
+  'Cataloghi e documentazione': 'Catalogues and documentation',
+  'Richiedi il catalogo\ne la cartella colori': 'Request the catalogue\nand colour chart',
+  'Per architetti, interior designer, strutture dell’ospitalità e rivenditori: indicateci il progetto e vi inviamo catalogo, cartella colori e schede tecniche.':
+    'For architects, interior designers, hospitality venues and dealers: tell us about your project and we will send the catalogue, colour chart and technical sheets.',
+  'Grazie: vi invieremo catalogo, cartella colori e schede tecniche.':
+    'Thank you: we will send you the catalogue, colour chart and technical sheets.',
+  'Serralunga: arredi, vasi e luci di design dal 1825': 'Serralunga: design furniture and planters since 1825',
+  'Vasi, sedute, tavoli e luci in polietilene firmati da architetti e designer, prodotti a Biella dal 1825 per hôtellerie, ristorazione, residenze e spazi pubblici.':
+    'Polyethylene planters, seating, tables and lighting by architects and designers, made in Biella since 1825 for hotels, restaurants, residences and public spaces.',
 
   // Pagina designer
   'Le firme': 'The signatures',
   'I designer\nSerralunga': 'The Serralunga\ndesigners',
-  "Architetti e designer italiani e internazionali che dal secondo dopoguerra a oggi hanno dato forma alla nostra materia. Ogni pezzo a catalogo porta il nome di chi lo ha pensato: è la garanzia che dietro a un oggetto d'esterno ci sia un progetto, non un profilo di produzione.":
-    'Italian and international architects and designers who, from the post-war years to today, have given shape to our material. Every piece in the catalogue carries the name of the person who conceived it: the guarantee that behind an outdoor object there is a design, not a production profile.',
+  "Architetti e designer italiani e internazionali che dagli anni Novanta disegnano per Serralunga. Ogni pezzo a catalogo porta il nome di chi lo ha progettato: forma, proporzioni e uso nascono da un progetto d’autore.":
+    'Italian and international architects and designers who have been designing for Serralunga since the 1990s. Every piece in the catalogue bears the name of its designer: shape, proportions and use come from an authored design.',
   'Progetti su misura': 'Bespoke projects',
-  'Un pezzo disegnato\nper il vostro luogo': 'A piece designed\nfor your place',
-  'Per i progetti contract sviluppiamo con i nostri designer dimensioni, colori e finiture dedicate.':
-    'For contract projects we develop dedicated sizes, colours and finishes with our designers.',
+  'Colori e finiture\nper il vostro progetto': 'Colours and finishes\nfor your project',
+  'Per i progetti contract valutiamo colori, finiture e varianti dedicate: scriveteci prodotti, quantità e contesto.':
+    'For contract projects we consider dedicated colours, finishes and variants: tell us the products, quantities and setting.',
   'Parliamo del progetto': 'Let’s talk about the project',
   'I designer Serralunga': 'The Serralunga designers',
   "Marc Sadler, Luisa Bocchietto, Marta Sansoni: i designer e gli architetti che firmano vasi, arredi e luci Serralunga per l'ospitalità e il contract.":
@@ -268,8 +266,8 @@ export const EN: Record<string, string> = {
   'Divani · modulare outdoor': 'Sofas · modular outdoor',
   'Documentazione contract': 'Contract documentation',
   'Scheda tecnica,\ndisegni e campioni': 'Data sheet,\ndrawings and samples',
-  'Inviamo scheda PDF, file CAD, cartella colori fisica e condizioni riservate per progetti alberghieri e di ristorazione.':
-    'We send the PDF data sheet, CAD files, physical colour chart and trade terms for hotel and restaurant projects.',
+  'Inviamo scheda tecnica in PDF, file CAD e cartella colori fisica per progetti alberghieri, di ristorazione e residenziali.':
+    'We send the PDF data sheet, CAD files and physical colour chart for hotel, restaurant and residential projects.',
   'Aqua Lounger, lettino per piscina | Serralunga': 'Aqua Lounger, pool sunlounger | Serralunga',
   "Aqua Lounger di Marc Sadler: lettino in polietilene tinto in massa da usare a bordo piscina o in acqua fino a 15 cm. Dimensioni, colori e scheda tecnica contract.":
     'Aqua Lounger by Marc Sadler: a mass-coloured polyethylene sunlounger for the poolside or in up to 15 cm of water. Dimensions, colours and contract data sheet.',
@@ -353,18 +351,18 @@ Object.assign(EN, {
   'Domande frequenti': 'Frequently asked questions',
   'Listino riservato': 'Trade price list',
   'Serralunga, Biella dal 1825': 'Serralunga, Biella since 1825',
-  'Per progetti contract, forniture e informazioni sui prodotti scriveteci o chiamateci: il nostro ufficio contract vi ricontatterà.':
-    'For contract projects, supplies and product information, write to us or call us: our contract office will get back to you.',
+  'Per informazioni su prodotti, materiali, colori e documentazione tecnica, o per parlarci di un progetto, scriveteci o chiamateci: vi risponde l’ufficio contract.':
+    'For information on products, materials, colours and technical documentation, or to tell us about a project, write to us or call us: our contract office will reply.',
   'Raccontateci il vostro progetto': 'Tell us about your project',
   'Invia la richiesta': 'Send the request',
   'Grazie: il nostro ufficio contract vi ricontatterà a breve.': 'Thank you: our contract office will get back to you shortly.',
   'Contatti | Serralunga Contract': 'Contacts | Serralunga Contract',
-  'Contatti di Serralunga, Biella: ufficio contract per hotel, ristoranti, architetti e rivenditori. Scriveteci per forniture, campioni colore e progetti.':
-    'Contact Serralunga, Biella: contract office for hotels, restaurants, architects and dealers. Write to us for supplies, colour samples and projects.',
+  'Contatti Serralunga, Biella: l’ufficio contract risponde ad architetti, interior designer e strutture dell’ospitalità su prodotti, colori, campioni e documentazione.':
+    'Contact Serralunga in Biella: the contract office answers architects, interior designers and hospitality professionals on products, colours, samples and documentation.',
   'Contract e rivenditori': 'Contract and dealers',
   'Richiedi il listino': 'Request the price list',
-  'Grazie: riceverete catalogo, cartella colori e listino entro 24 ore lavorative.':
-    'Thank you: you will receive the catalogue, colour chart and price list within 24 working hours.',
+  'Grazie: vi invieremo catalogo, cartella colori e schede tecniche.':
+    'Thank you: we will send you the catalogue, colour chart and technical sheets.',
   'Listino riservato B2B | Serralunga Contract': 'Trade price list | Serralunga Contract',
   'Listino Serralunga riservato a hotel, ristoranti, studi di architettura e rivenditori: richiedete catalogo, cartella colori e condizioni dedicate.':
     'Serralunga trade price list for hotels, restaurants, architecture studios and dealers: request the catalogue, colour chart and dedicated terms.',

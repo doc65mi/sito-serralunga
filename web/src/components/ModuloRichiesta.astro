@@ -1,7 +1,7 @@
 ---
 /**
  * Version: 1.02 (consensi privacy e newsletter, reCAPTCHA, cataloghi con link nell'email di conferma)
- * Modulo "Richiedi il volume" (template: Home v2 #listino). Invia a /api/richiesta, che salva in Payload.
+ * Modulo di richiesta (template: Home v2 #listino). Invia a /api/richiesta, che salva in Payload.
  * Con `cataloghi` (pagina Contract > Cataloghi) chi compila sceglie i PDF: la richiesta li registra
  * e, dopo l'invio, la pagina mostra i link per scaricarli (raccolta contatti, alberatura B2C).
  */
@@ -13,7 +13,7 @@ import { fmt } from '../lib/testo'
 interface Props { pulsante?: string; grazie?: string; pagina?: string; cataloghi?: Doc[]; dopoInvio?: string; campoDopoInvio?: string }
 const L = Astro.locals.lingua
 const t = traduttore(L)
-const { pulsante = t('Richiedi il volume'), grazie, pagina = '', cataloghi = [], dopoInvio, campoDopoInvio } = Astro.props
+const { pulsante = t('Invia la richiesta'), grazie, pagina = '', cataloghi = [], dopoInvio, campoDopoInvio } = Astro.props
 const imp = await impostazioni(L)
 const email = imp.azienda?.email || 'info@serralunga.com'
 ---

@@ -1,11 +1,12 @@
 #!/bin/sh
-# Avvio del CMS — Version: 1.04
+# Avvio del CMS — Version: 1.05 (anche seed:testi)
 # 1. Avvia Payload (che applica le migrazioni del database alla prima richiesta).
 # 2. Con SEED_AUTOMATICO=1, quando il CMS risponde, carica i contenuti di partenza
 #    una sola volta: se nel database c'è già un utente non fa nulla.
 # 3. Con AGGIORNAMENTO_AUTOMATICO=1, se il deploy ha portato contenuti nuovi
 #    (versione in .versione-seed, calcolata alla build), lancia da solo
-#    seed:aggiorna e poi seed:catalogo. Entrambi aggiungono solo ciò che manca:
+#    seed:aggiorna, seed:catalogo e seed:testi. Aggiungono solo ciò che manca (seed:testi
+#    cambia solo i testi rimasti identici a quelli di partenza):
 #    i testi e le foto modificati dal pannello o dalla pagina restano come sono.
 #    Il sito resta raggiungibile mentre i contenuti si caricano.
 #    Eccezione: un sito collegato ai contenuti su GitHub (token nel pannello, file
@@ -42,7 +43,7 @@ if [ "${SEED_AUTOMATICO:-0}" = "1" ] || [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1"
       echo "[avvio] contenuti collegati a GitHub: aggiornamento automatico saltato (si caricano da GitHub)"
     elif [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1" ]; then
       VERSIONE="$(cat .versione-seed 2>/dev/null || echo sconosciuta)"
-      for c in aggiorna catalogo; do
+      for c in aggiorna catalogo testi; do
         if [ "$(cat "$DIR/$c.versione" 2>/dev/null)" != "$VERSIONE" ]; then
           echo "[avvio] contenuti nuovi in questo deploy: seed:$c in corso (avanzamento nel pannello, Strumenti)"
           r=0

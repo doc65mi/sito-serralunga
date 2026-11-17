@@ -17,7 +17,7 @@ import path from 'path'
 
 import type { Endpoint, PayloadRequest } from 'payload'
 
-const COMPITI = ['aggiorna', 'catalogo'] as const
+const COMPITI = ['aggiorna', 'catalogo', 'testi'] as const
 type Compito = (typeof COMPITI)[number]
 
 const json = (dati: unknown, status = 200) => Response.json(dati, { status, headers: { 'cache-control': 'no-store' } })

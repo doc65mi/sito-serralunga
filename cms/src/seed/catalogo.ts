@@ -55,9 +55,9 @@ export const CATEGORIE: CategoriaSeed[] = [
     introEn: 'Polyethylene planters for hotels, restaurants, residences and public spaces: classic shapes, light-up versions and large formats, with variants and item codes.',
     seo: {
       titolo: 'Vasi e fioriere per contract e hospitality | Serralunga',
-      descrizione: 'Vasi e fioriere Serralunga in polietilene per hotel, ristoranti e progetti contract: forme classiche, con luce e oversize. Codici, varianti e listino B2B.',
+      descrizione: 'Vasi e fioriere Serralunga in polietilene per hotel, ristoranti e progetti contract: forme classiche, con luce e grandi formati, con varianti, misure e codici.',
       titoloEn: 'Planters for contract and hospitality | Serralunga',
-      descrizioneEn: 'Serralunga polyethylene planters for hotels, restaurants and contract projects: classic shapes, light-up and oversize. Item codes, variants and B2B prices.',
+      descrizioneEn: 'Serralunga polyethylene planters for hotels, restaurants and contract projects: classic shapes, light-up and oversize, with variants, dimensions and codes.',
     },
   },
   {
@@ -83,9 +83,9 @@ export const CATEGORIE: CategoriaSeed[] = [
     fonti: ['planter-with-light'],
     seo: {
       titolo: 'Vasi luminosi per esterni e interni | Serralunga',
-      descrizione: 'Vasi e fioriere Serralunga con luce integrata per terrazze, giardini, hotel e locali: modelli, varianti e codici articolo del catalogo B2B Serralunga.',
+      descrizione: 'Vasi e fioriere Serralunga con luce integrata per terrazze, giardini, hotel e locali: modelli, varianti e codici articolo del catalogo Serralunga.',
       titoloEn: 'Light-up planters for outdoors and indoors | Serralunga',
-      descrizioneEn: 'Serralunga planters with built-in light for terraces, gardens, hotels and venues: models, variants and item codes from the Serralunga B2B catalogue.',
+      descrizioneEn: 'Serralunga planters with built-in light for terraces, gardens, hotels and venues: models, variants and item codes from the Serralunga catalogue.',
     },
   },
   {
@@ -114,9 +114,9 @@ export const CATEGORIE: CategoriaSeed[] = [
     introEn: 'Serralunga armchairs, sofas, chairs, benches and stools for lounges, terraces, poolsides and common areas, with colour variants and item codes.',
     seo: {
       titolo: 'Sedute da esterno e interno per contract | Serralunga',
-      descrizione: 'Poltrone, divani, sedie, panche e sgabelli Serralunga per hotel, ristoranti e spazi contract: modelli di design, varianti, codici articolo e listino B2B.',
+      descrizione: 'Poltrone, divani, sedie, panche e sgabelli Serralunga per hotel, ristoranti e spazi contract: modelli di design con varianti, misure e codici articolo.',
       titoloEn: 'Outdoor and indoor seating for contract | Serralunga',
-      descrizioneEn: 'Serralunga armchairs, sofas, chairs, benches and stools for hotels, restaurants and contract spaces: design models, variants, item codes and B2B prices.',
+      descrizioneEn: 'Serralunga armchairs, sofas, chairs, benches and stools for hotels, restaurants and contract spaces: design models with variants, dimensions and item codes.',
     },
   },
   { slug: 'poltrone', padre: 'sedute', nome: 'Poltrone', nomeEn: 'Armchairs', ordine: 21, fonti: ['armchairs'] },
@@ -136,9 +136,9 @@ export const CATEGORIE: CategoriaSeed[] = [
     introEn: 'Serralunga tables and side tables for outdoor dining areas, lounges and rooms: models, colour variants and item codes.',
     seo: {
       titolo: 'Tavoli e tavolini per hotel e dehors | Serralunga',
-      descrizione: 'Tavoli e tavolini Serralunga per dehors, lounge, camere d’hotel e progetti contract: modelli di design, varianti di colore, codici articolo e listino B2B.',
+      descrizione: 'Tavoli e tavolini Serralunga per dehors, lounge, camere d’hotel e progetti contract: modelli di design, varianti di colore, misure e codici articolo.',
       titoloEn: 'Tables and side tables for hotels and terraces | Serralunga',
-      descrizioneEn: 'Serralunga tables and side tables for terraces, lounges, hotel rooms and contract projects: design models, colour variants, item codes and B2B prices.',
+      descrizioneEn: 'Serralunga tables and side tables for terraces, lounges, hotel rooms and contract projects: design models, colour variants, dimensions and item codes.',
     },
   },
   {
@@ -153,9 +153,9 @@ export const CATEGORIE: CategoriaSeed[] = [
     introEn: 'Sun loungers, deckchairs and furniture for pools, spas and beach clubs, with variants and item codes.',
     seo: {
       titolo: 'Lettini e arredi per piscina e spiaggia | Serralunga',
-      descrizione: 'Lettini, sdraio e arredi Serralunga per piscine, spa, resort e stabilimenti balneari: modelli di design, varianti, codici articolo e listino B2B Serralunga.',
+      descrizione: 'Lettini, sdraio e arredi Serralunga per piscine, spa, resort e stabilimenti balneari: modelli di design con varianti, misure e codici articolo.',
       titoloEn: 'Sun loungers and pool furniture | Serralunga',
-      descrizioneEn: 'Serralunga sun loungers, deckchairs and furniture for pools, spas, resorts and beach clubs: design models, variants, item codes and the B2B price list.',
+      descrizioneEn: 'Serralunga sun loungers, deckchairs and furniture for pools, spas, resorts and beach clubs: design models with variants, dimensions and item codes.',
     },
   },
   {
@@ -170,9 +170,9 @@ export const CATEGORIE: CategoriaSeed[] = [
     introEn: 'Serralunga pendant, floor and portable lamps for indoors and outdoors, with variants and item codes.',
     seo: {
       titolo: 'Lampade da esterno e interno per contract | Serralunga',
-      descrizione: 'Lampade Serralunga a sospensione, da terra e portatili per hotel, ristoranti, giardini e progetti contract: modelli, varianti, codici articolo e listino B2B.',
+      descrizione: 'Lampade Serralunga a sospensione, da terra e portatili per hotel, ristoranti, giardini e progetti contract: modelli, varianti, misure e codici articolo.',
       titoloEn: 'Outdoor and indoor lamps for contract | Serralunga',
-      descrizioneEn: 'Serralunga pendant, floor and portable lamps for hotels, restaurants, gardens and contract projects: models, variants, item codes and the B2B price list.',
+      descrizioneEn: 'Serralunga pendant, floor and portable lamps for hotels, restaurants, gardens and contract projects: models, variants, dimensions and item codes.',
     },
   },
   { slug: 'sospensioni', padre: 'illuminazione', nome: 'Sospensioni', nomeEn: 'Pendant lamps', ordine: 51, fonti: ['pendants'] },
@@ -190,9 +190,9 @@ export const CATEGORIE: CategoriaSeed[] = [
     introEn: 'Serralunga accessories and complements: saucers, cushions, umbrella stands and objects, with item codes.',
     seo: {
       titolo: 'Accessori e complementi d’arredo | Serralunga',
-      descrizione: 'Accessori e complementi Serralunga per completare vasi, sedute e arredi nei progetti contract e hospitality: modelli, varianti, codici articolo e listino B2B.',
+      descrizione: 'Accessori e complementi Serralunga per completare vasi, sedute e arredi nei progetti contract e hospitality: modelli, varianti, misure e codici articolo.',
       titoloEn: 'Accessories and furnishing complements | Serralunga',
-      descrizioneEn: 'Serralunga accessories and complements for planters, seating and furniture in contract and hospitality projects: models, variants, item codes and B2B prices.',
+      descrizioneEn: 'Serralunga accessories and complements for planters, seating and furniture in contract and hospitality projects: models, variants, dimensions and item codes.',
     },
   },
   {
@@ -208,9 +208,9 @@ export const CATEGORIE: CategoriaSeed[] = [
     introEn: 'The latest additions to the Serralunga catalogue.',
     seo: {
       titolo: 'Nuovi arrivi del catalogo | Serralunga',
-      descrizione: 'Le novità del catalogo Serralunga: vasi, sedute, tavoli e lampade di design per hotel, ristoranti e progetti contract, con varianti, codici e listino B2B.',
+      descrizione: 'Le novità del catalogo Serralunga: vasi, sedute, tavoli e lampade di design per hotel, ristoranti e progetti contract, con varianti, misure e codici.',
       titoloEn: 'New arrivals in the catalogue | Serralunga',
-      descrizioneEn: 'New in the Serralunga catalogue: design planters, seating, tables and lamps for hotels, restaurants and contract projects, with variants, codes and B2B prices.',
+      descrizioneEn: 'New in the Serralunga catalogue: design planters, seating, tables and lamps for hotels, restaurants and contract projects, with variants, dimensions and codes.',
     },
   },
   {
@@ -224,44 +224,44 @@ export const CATEGORIE: CategoriaSeed[] = [
     kickerEn: 'Catalogue · Seasonal selection',
     seo: {
       titolo: 'Selezione stagionale | Serralunga',
-      descrizione: 'La selezione stagionale del catalogo Serralunga: pezzi scelti per i progetti del momento in hôtellerie, ristorazione e contract, con codici e listino B2B.',
+      descrizione: 'La selezione stagionale del catalogo Serralunga: pezzi scelti per i progetti del momento in hôtellerie, ristorazione e contract, con varianti e codici.',
       titoloEn: 'Seasonal selection | Serralunga',
-      descrizioneEn: 'The seasonal selection from the Serralunga catalogue: pieces chosen for current hospitality, restaurant and contract projects, with item codes and B2B prices.',
+      descrizioneEn: 'The seasonal selection from the Serralunga catalogue: pieces chosen for current hospitality, restaurant and contract projects, with variants and item codes.',
     },
   },
 ]
 
 const PAGINA = {
   it: {
-    kicker: 'Catalogo B2B',
+    kicker: 'Catalogo',
     titolo: 'Il catalogo\n_Serralunga_',
-    testo: 'Vasi e fioriere, sedute, tavoli, arredi per piscina, illuminazione e accessori: le schede della produzione Serralunga con varianti e codici articolo, per hôtellerie, ristorazione, rivenditori e studi di progettazione.',
+    testo: 'Vasi e fioriere, sedute, tavoli, arredi per piscina, illuminazione e accessori: le schede della produzione Serralunga con varianti, misure e codici articolo, per architetti, interior designer, hôtellerie e ristorazione.',
     cta: {
-      kicker: 'Listino riservato',
-      titolo: 'Listino B2B\ne condizioni contract',
-      testo: 'Raccontateci il progetto o la vostra attività: vi inviamo listino riservato, schede tecniche e disponibilità.',
-      pulsante: 'Richiedi il listino',
-      link: '/listino/',
+      kicker: 'Documentazione tecnica',
+      titolo: 'Schede tecniche,\ncolori e campioni',
+      testo: 'Indicateci prodotti e progetto: vi inviamo schede tecniche, cartella colori e informazioni su varianti e finiture.',
+      pulsante: 'Richiedi la documentazione',
+      link: '/contatti/',
     },
     seo: {
-      titolo: 'Catalogo B2B: arredi, vasi e luci di design | Serralunga',
-      descrizione: 'Catalogo Serralunga per professionisti: vasi, sedute, tavoli, arredi piscina, lampade e accessori con varianti e codici articolo. Listino B2B su richiesta.',
+      titolo: 'Catalogo: arredi, vasi e luci di design | Serralunga',
+      descrizione: 'Catalogo Serralunga per architetti e interior designer: vasi, sedute, tavoli, arredi piscina, lampade e accessori con varianti, misure e codici articolo.',
     },
   },
   en: {
-    kicker: 'B2B catalogue',
+    kicker: 'Catalogue',
     titolo: 'The Serralunga\n_catalogue_',
-    testo: 'Planters, seating, tables, pool furniture, lighting and accessories: Serralunga product sheets with variants and item codes, for hotels, restaurants, dealers and design studios.',
+    testo: 'Planters, seating, tables, pool furniture, lighting and accessories: Serralunga product sheets with variants, dimensions and item codes, for architects, interior designers, hotels and restaurants.',
     cta: {
-      kicker: 'Trade price list',
-      titolo: 'B2B price list\nand contract terms',
-      testo: 'Tell us about your project or business: we will send the trade price list, technical sheets and availability.',
-      pulsante: 'Request the price list',
-      link: '/listino/',
+      kicker: 'Technical documentation',
+      titolo: 'Technical sheets,\ncolours and samples',
+      testo: 'Tell us the products and the project: we will send technical sheets, the colour chart and information on variants and finishes.',
+      pulsante: 'Request the documentation',
+      link: '/contatti/',
     },
     seo: {
-      titolo: 'B2B catalogue: design furniture and planters | Serralunga',
-      descrizione: 'Serralunga catalogue for professionals: planters, seating, tables, pool furniture, lamps and accessories with variants and item codes. B2B price list on request.',
+      titolo: 'Catalogue: design furniture and planters | Serralunga',
+      descrizione: 'Serralunga catalogue for architects and interior designers: planters, seating, tables, pool furniture, lamps and accessories with variants, dimensions and item codes.',
     },
   },
 }
@@ -530,11 +530,11 @@ export async function importaCatalogo(payload: Payload, media: Media, log: (m: s
           descrizione,
           finiture: finitureIt.map(({ nome, codice }) => ({ nome, codice })),
           dimensioni: misure(p, 'it'),
-          pulsante: 'Richiedi preventivo e listino',
+          pulsante: 'Richiedi informazioni',
           richiesta: {
-            kicker: 'Catalogo B2B',
-            titolo: 'Preventivo, listino\ne campionatura',
-            testo: 'Per forniture contract, rivenditori e studi di progettazione: indicate il progetto e vi inviamo listino riservato, schede tecniche e disponibilità.',
+            kicker: 'Documentazione tecnica',
+            titolo: 'Schede tecniche,\ndisegni e campioni',
+            testo: 'Per architetti, interior designer e strutture dell’ospitalità: indicateci il progetto e vi inviamo scheda tecnica, disegni, cartella colori e informazioni su varianti e finiture.',
           },
           seo: { titolo: ritaglia(`${p.title} | Serralunga`, 60), descrizione: ritaglia(descrizione.replace(/\s+/g, ' '), 160) || undefined },
           _status: 'published',
@@ -555,11 +555,11 @@ export async function importaCatalogo(payload: Payload, media: Media, log: (m: s
       en.categoria = tipEn
       en.etichettaCard = [tipEn, dis?.nome].filter(Boolean).join(' — ')
       en.firma = dis ? `Designed by ${dis.nome}` : undefined
-      en.pulsante = 'Request a quote and price list'
+      en.pulsante = 'Request information'
       en.richiesta = {
-        kicker: 'B2B catalogue',
-        titolo: 'Quote, price list\nand samples',
-        testo: 'For contract supplies, dealers and design studios: tell us about your project and we will send the trade price list, technical sheets and availability.',
+        kicker: 'Technical documentation',
+        titolo: 'Data sheets,\ndrawings and samples',
+        testo: 'For architects, interior designers and hospitality venues: tell us about your project and we will send the data sheet, drawings, colour chart and information on variants and finishes.',
       }
     }
     if (!enDoc.descrizione && p.bodyEn) {

@@ -59,7 +59,7 @@ const jsonld = [{
   <section class="intro-pagina" id="catalogo-intro">
     <div class="wrap intro-pagina__griglia">
       <div>
-        <span class="kicker" data-campo="kicker">{pagina.kicker || t('Catalogo B2B')}</span>
+        <span class="kicker" data-campo="kicker">{pagina.kicker || t('Catalogo')}</span>
         <Testo as="h1" class="titolo titolo--display" campo="titolo" t={titolo} />
       </div>
       <Testo class="testo" campo="testo" t={pagina.testo} />
@@ -94,7 +94,7 @@ const jsonld = [{
     </section>
   ) : (
     <section class="pad sez-int" id="catalogo-categorie">
-      <p class="wrap testo">{t('Il catalogo è in preparazione: per schede tecniche e listino scriveteci.')}</p>
+      <p class="wrap testo">{t('Il catalogo è in preparazione: per schede tecniche e informazioni scriveteci.')}</p>
     </section>
   )}
 
@@ -117,10 +117,10 @@ const jsonld = [{
 
   <section id="richiesta" class="sez-int pad scuro">
     <div class="centro centro--s">
-      <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta?.kicker || t('Listino riservato')}</span>
-      <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo || t('Listino B2B\ne condizioni contract')} />
+      <span class="kicker kicker--largo" data-campo="cta.kicker">{pagina.cta?.kicker || t('Documentazione tecnica')}</span>
+      <Testo as="h2" class="titolo titolo--cta" campo="cta.titolo" t={pagina.cta?.titolo || t('Schede tecniche,\ncolori e campioni')} />
       <Testo class="testo" campo="cta.testo" t={pagina.cta?.testo} />
-      <a href={u(pagina.cta?.link || '/listino/')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={pagina.cta?.link || ''}>{pagina.cta?.pulsante || t('Richiedi il listino')}</a>
+      <a href={u(pagina.cta?.link || '/contatti/')} class="btn btn--chiaro" data-campo="cta.pulsante" data-campo-link="cta.link" data-link={pagina.cta?.link || ''}>{pagina.cta?.pulsante || t('Richiedi la documentazione')}</a>
     </div>
   </section>
 </Base>

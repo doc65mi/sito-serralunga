@@ -128,10 +128,10 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
           kicker: 'Perché Serralunga',
           titolo: 'Cosa offriamo\nai professionisti',
           voci: [
-            { titolo: 'Esperienza sui progetti complessi', testo: 'Decenni di lavoro per hotel, ristorazione e wellness: sappiamo come portare a termine anche i progetti più articolati.' },
+            { titolo: 'Esperienza sui progetti complessi', testo: 'Decenni di forniture per hotel, ristorazione e wellness, anche per progetti articolati in più fasi e più ambienti.' },
             { titolo: 'Personalizzazione', testo: 'Varianti di colore, finiture e prodotti su misura: lavoriamo su materiali, tecnologie ed estetica per rispondere alle esigenze di ogni progetto.' },
             { titolo: 'Made in Italy', testo: 'Tutti i prodotti sono fabbricati in Italia: qualità del prodotto, ricerca continua, legame con la storia e il territorio, rispetto dell’ambiente.' },
-            { titolo: 'Flessibilità, qualità, durata', testo: 'L’innovazione della produzione e il miglioramento continuo ci permettono di offrire ciò che serve a chi lavora nell’ospitalità.' },
+            { titolo: 'Flessibilità, qualità, durata', testo: 'Materiali resistenti alle intemperie, colore in massa e produzione su richiesta: arredi pensati per l’uso intenso dell’ospitalità.' },
           ],
         },
         galleria: { kicker: 'Portfolio', titolo: 'Progetti\nrealizzati', voci: gal(galleriaHome, 'it') },
@@ -152,10 +152,10 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
           kicker: 'Why Serralunga',
           titolo: 'What we offer\nprofessionals',
           voci: [
-            { titolo: 'Experience with complex projects', testo: 'Decades of work for hotels, restaurants and wellness: we know how to bring even the most demanding projects to completion.' },
+            { titolo: 'Experience with complex projects', testo: 'Decades of supplies for hotels, restaurants and wellness, including projects spanning several phases and spaces.' },
             { titolo: 'Customisation', testo: 'Colour variants, finishes and bespoke products: we work on materials, technologies and aesthetics to meet the needs of every project.' },
             { titolo: 'Made in Italy', testo: 'All our products are made in Italy: product quality, continuous research, ties to history and territory, respect for the environment.' },
-            { titolo: 'Flexibility, quality, durability', testo: 'Innovation in production and continuous improvement let us offer what hospitality professionals need.' },
+            { titolo: 'Flexibility, quality, durability', testo: 'Weather-resistant materials, mass colouring and made-to-order production: furniture designed for intensive use in hospitality.' },
           ],
         },
         galleria: { kicker: 'Portfolio', titolo: 'Completed\nprojects', voci: gal(galleriaHome, 'en') },
@@ -182,8 +182,8 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
           kicker: 'Ambiti',
           titolo: 'Per chi accoglie\nogni giorno',
           voci: [
-            { titolo: 'Hotel e resort', testo: 'Terrazze, roof e aree piscina: fioriere e sedute in LLDPE colorate su cartella, resistenti a sole, salsedine e gelo.' },
-            { titolo: 'Bar e ristoranti', testo: 'Dehors e separé vegetali: sistemi modulari per delimitare i coperti mantenendo leggerezza e identità del locale.' },
+            { titolo: 'Hotel e resort', testo: 'Terrazze, roof e aree piscina: fioriere, sedute e luci in polietilene tinto in massa, che restano all’aperto tutto l’anno e resistono a sole, salsedine e gelo.' },
+            { titolo: 'Bar e ristoranti', testo: 'Dehors e sale: sedute, tavoli e fioriere per organizzare gli spazi, in colori e finiture coordinati con l’identità del locale.' },
             { titolo: 'Spa e piscine', testo: 'Lettini, sedute e oggetti luminosi per l’acqua e il bordo vasca, in materiali che non temono umidità, sole e sbalzi di temperatura.' },
             { titolo: 'Su misura', testo: 'Varianti di colore, personalizzazioni e prodotti su misura, con il supporto dell’ufficio contract.' },
           ],
@@ -208,8 +208,8 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
           kicker: 'Settings',
           titolo: 'For those who\nwelcome guests every day',
           voci: [
-            { titolo: 'Hotels and resorts', testo: 'Terraces, rooftops and pool areas: LLDPE planters and seating in chart colours, resistant to sun, salt air and frost.' },
-            { titolo: 'Bars and restaurants', testo: 'Outdoor dining areas and green partitions: modular systems that define the tables while keeping the venue light and true to its identity.' },
+            { titolo: 'Hotels and resorts', testo: 'Terraces, rooftops and pool areas: planters, seating and lighting in mass-coloured polyethylene that stay outdoors all year round and withstand sun, salt air and frost.' },
+            { titolo: 'Bars and restaurants', testo: 'Outdoor dining areas and dining rooms: seating, tables and planters to organise the space, in colours and finishes coordinated with the venue’s identity.' },
             { titolo: 'Spas and pools', testo: 'Sun loungers, seating and luminous objects for the water and the poolside, in materials unaffected by humidity, sun and temperature swings.' },
             { titolo: 'Bespoke', testo: 'Colour variants, customisation and bespoke products, with the support of our contract office.' },
           ],
@@ -240,7 +240,7 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
           titolo: 'Al fianco\ndi chi progetta',
           voci: [
             { titolo: 'Pezzi firmati', testo: 'Collezioni disegnate da architetti e designer italiani e internazionali: ogni pezzo porta il nome di chi lo ha pensato.' },
-            { titolo: 'Finiture e colori', testo: 'Pezzi d’autore e finiture laccate o Moleskin, sviluppati con studi di architettura e interior designer.' },
+            { titolo: 'Finiture e colori', testo: 'Laccati lucidi e metallizzati, finiture Moleskin e Corten, 38 colori in cartella.' },
             { titolo: 'Interni ed esterni', testo: 'Vasi della tradizione italiana e pezzi di design per giardini, terrazze e interni.' },
             { titolo: 'Documentazione', testo: 'Schede tecniche, disegni e campionature su richiesta, per il capitolato e la scelta con il cliente.' },
           ],
@@ -265,7 +265,7 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
           titolo: 'Alongside\nthose who design',
           voci: [
             { titolo: 'Signature pieces', testo: 'Collections designed by Italian and international architects and designers: every piece bears the name of the person who conceived it.' },
-            { titolo: 'Finishes and colours', testo: 'Signature pieces with lacquered or Moleskin finishes, developed with architecture studios and interior designers.' },
+            { titolo: 'Finishes and colours', testo: 'Gloss and metallic lacquers, Moleskin and Corten finishes, 38 colours on the chart.' },
             { titolo: 'Indoors and outdoors', testo: 'Traditional Italian pots and design pieces for gardens, terraces and interiors.' },
             { titolo: 'Documentation', testo: 'Data sheets, drawings and samples on request, for specifications and for choosing with your client.' },
           ],
@@ -346,21 +346,21 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
         kicker: 'Contract — Cataloghi',
         titolo: 'Cataloghi\nda _scaricare_',
         testo:
-          'Mobili, piscina e spiaggia, fioriere, regali: scegliete i cataloghi che vi servono e lasciateci i vostri riferimenti. I PDF si aprono subito e l’ufficio contract potrà inviarvi listino e condizioni riservate.',
+          'Mobili, piscina e spiaggia, fioriere, regali: scegliete i cataloghi che vi servono e lasciateci i vostri riferimenti. I PDF si aprono subito; l’ufficio contract resta a disposizione per schede tecniche, campioni colore e informazioni sui prodotti.',
         immagine: await f('catalogo', 'Catalogo Serralunga'),
         estratto: 'I cataloghi Serralunga in PDF: mobili, piscina e spiaggia, fioriere, regali.',
         cataloghi: {
           mostra: true,
           kicker: 'Download PDF',
           titolo: 'I cataloghi\nSerralunga',
-          testo: 'Riservato ad alberghi, ristoranti, studi di architettura e rivenditori.',
+          testo: 'Per architetti, interior designer, strutture dell’ospitalità e rivenditori.',
           dopoInvio: 'Grazie. Ecco i cataloghi scelti, si aprono in una nuova scheda:',
         },
         cta: { pulsante: 'Ricevi i cataloghi', grazie: 'Grazie: i link ai cataloghi sono qui sotto.' },
         seo: {
           titolo: 'Cataloghi Serralunga in PDF | Serralunga Contract',
           descrizione:
-            'Scaricate i cataloghi Serralunga in PDF: mobili, piscina e spiaggia, fioriere e regali. Per hotel, ristoranti, architetti e rivenditori, con listino riservato.',
+            'Scaricate i cataloghi Serralunga in PDF: mobili, piscina e spiaggia, fioriere e regali, per architetti, interior designer, hotel e ristoranti.',
         },
       },
       en: {
@@ -368,20 +368,20 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
         kicker: 'Contract — Catalogues',
         titolo: 'Catalogues\nto _download_',
         testo:
-          'Furniture, pool and beach, planters, gifts: choose the catalogues you need and leave us your details. The PDFs open straight away and our contract office can send you the trade price list and conditions.',
+          'Furniture, pool and beach, planters, gifts: choose the catalogues you need and leave us your details. The PDFs open straight away; our contract office is available for technical sheets, colour samples and product information.',
         estratto: 'Serralunga catalogues in PDF: furniture, pool and beach, planters, gifts.',
         cataloghi: {
           mostra: true,
           kicker: 'PDF download',
           titolo: 'Serralunga\ncatalogues',
-          testo: 'For hotels, restaurants, architecture firms and dealers.',
+          testo: 'For architects, interior designers, hospitality venues and dealers.',
           dopoInvio: 'Thank you. Here are the catalogues you chose; they open in a new tab:',
         },
         cta: { pulsante: 'Get the catalogues', grazie: 'Thank you: the catalogue links are below.' },
         seo: {
           titolo: 'Serralunga catalogues in PDF | Serralunga Contract',
           descrizione:
-            'Download the Serralunga catalogues in PDF: furniture, pool and beach, planters and gifts. For hotels, restaurants, architects and dealers, with trade prices.',
+            'Download the Serralunga catalogues in PDF: furniture, pool and beach, planters and gifts, for architects, interior designers, hotels and restaurants.',
         },
       },
     },

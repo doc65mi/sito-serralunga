@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Version: 1.02
+ * Version: 1.03 (compito «Aggiorna i testi»)
  * Riquadro "Strumenti" nel cruscotto: aggiorna i contenuti e importa il catalogo da
  * serralunga.com senza terminale. Mostra stato e avanzamento, aggiornati ogni 5 secondi.
  * Aggiunge solo ciò che manca; le modifiche a contenuti già presenti compaiono come
@@ -11,7 +11,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
 interface Stato {
-  compito: 'aggiorna' | 'catalogo'
+  compito: 'aggiorna' | 'catalogo' | 'testi'
   stato: 'mai' | 'in-corso' | 'ok' | 'errore' | 'fermato'
   quando: string
   inAttesa: boolean
@@ -29,6 +29,10 @@ const VOCI = {
   catalogo: {
     titolo: 'Importa catalogo da serralunga.com',
     testo: 'Aggiunge categorie e schede prodotto che mancano, con varianti e foto pubblicate su serralunga.com. Le schede esistenti non si toccano. Scarica centinaia di foto: 15–40 minuti.',
+  },
+  testi: {
+    titolo: 'Aggiorna i testi (revisione 2.00)',
+    testo: 'Porta i testi rivisti per architetti, interior designer e hôtellerie. Cambia solo i testi rimasti identici a quelli di partenza: quelli modificati dal pannello o dalla pagina restano come sono. Copia di sicurezza prima di ogni modifica. Circa 1–3 minuti.',
   },
 } as const
 

@@ -1,6 +1,6 @@
 #!/bin/sh
-# Compiti di manutenzione dei contenuti — Version: 1.02
-# Uso: sh ./compito.sh aggiorna|catalogo [versione]
+# Compiti di manutenzione dei contenuti — Version: 1.03 (compito «testi»)
+# Uso: sh ./compito.sh aggiorna|catalogo|testi [versione]
 # Di norma aggiunge solo ciò che manca (seed/prudenza.ts). Con SEED_APPLICA=1 applica anche
 # le modifiche proposte ai contenuti esistenti, salvando prima una copia di ognuno.
 # Lanciato da avvio.sh (aggiornamento automatico dopo un deploy) e dal pannello
@@ -17,7 +17,7 @@
 COMPITO="$1"
 VERSIONE="$2"
 case "$COMPITO" in
-  aggiorna|catalogo) ;;
+  aggiorna|catalogo|testi) ;;
   *) echo "compito sconosciuto: $COMPITO" >&2; exit 2 ;;
 esac
 

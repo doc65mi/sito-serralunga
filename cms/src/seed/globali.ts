@@ -119,12 +119,12 @@ export const PAGINE = [
     titolo: 'Contatti',
     slug: 'contatti',
     kicker: 'Serralunga, Biella dal 1825',
-    intro: 'Per progetti contract, forniture e informazioni sui prodotti scriveteci o chiamateci: il nostro ufficio contract vi ricontatterà.',
+    intro: 'Per informazioni su prodotti, materiali, colori e documentazione tecnica, o per parlarci di un progetto, scriveteci o chiamateci: vi risponde l’ufficio contract.',
     modulo: { mostra: true, titolo: 'Raccontateci il vostro progetto', pulsante: 'Invia la richiesta', grazie: 'Grazie: il nostro ufficio contract vi ricontatterà a breve.' },
     mostraContatti: true,
     seo: {
       titolo: 'Contatti | Serralunga Contract',
-      descrizione: 'Contatti di Serralunga, Biella: ufficio contract per hotel, ristoranti, architetti e rivenditori. Scriveteci per forniture, campioni colore e progetti.',
+      descrizione: 'Contatti Serralunga, Biella: l’ufficio contract risponde ad architetti, interior designer e strutture dell’ospitalità su prodotti, colori, campioni e documentazione.',
     },
     _status: 'published',
   },
@@ -132,8 +132,8 @@ export const PAGINE = [
     titolo: 'Listino riservato',
     slug: 'listino',
     kicker: 'Contract e rivenditori',
-    intro: 'Riservato ad alberghi, ristoranti, studi di architettura e rivenditori. Riceverai catalogo, cartella colori e listino dedicato entro 24 ore lavorative.',
-    modulo: { mostra: true, titolo: 'Richiedi il listino', pulsante: 'Richiedi il listino', grazie: 'Grazie: riceverete catalogo, cartella colori e listino entro 24 ore lavorative.' },
+    intro: 'Per architetti, interior designer, strutture dell’ospitalità e rivenditori: indicateci il progetto e vi inviamo catalogo, cartella colori e schede tecniche.',
+    modulo: { mostra: true, titolo: 'Richiedi il listino', pulsante: 'Richiedi il listino', grazie: 'Grazie: vi invieremo catalogo, cartella colori e schede tecniche.' },
     mostraContatti: false,
     seo: {
       titolo: 'Listino riservato B2B | Serralunga Contract',
@@ -156,15 +156,15 @@ export const impostazioniDati = async (m: Media) => ({
   rivelaAlloScorrimento: true,
   mostraDidascalie: true,
   barra: {
-    testo: 'Contract & Hospitality — Made in Italy dal 1825',
-    linkEtichetta: 'Area riservata rivenditori',
+    testo: 'Arredi, vasi e luci di design — prodotti a Biella dal 1825',
+    linkEtichetta: 'Richiedi il catalogo',
     link: '/#listino',
   },
   menuSuperiore: MENU_SUPERIORE,
   menu: MENU,
   social: SOCIAL,
   descrizione:
-    'Mobili, illuminazione, fioriere e oggetti di design 100% made in Italy per interni ed esterni, hospitality e contract.',
+    'Arredi, vasi e luci di design per interni ed esterni, prodotti a Biella dal 1825 per progetti di hôtellerie, residenziali e contract.',
   colonne: COLONNE,
   copyright: '© {anno} Serralunga — 1825 S.R.L.',
   // Pagine legali create da seed/legali.ts (CMP 1.00); «Termini» resta senza pagina finché il cliente non la fornisce.
@@ -190,11 +190,11 @@ export const homeDati = async (m: Media) => ({
   hero: {
     immagine: await m(`${S}/files/summer_serralunga.webp?v=1782985471&width=2400`, 'Arredi Serralunga in un giardino al sole'),
     notaVideo: false,
-    kicker: 'Living outdoor — Contract & Hospitality',
-    titolo: 'Il design\nprende il sole',
+    kicker: 'Serralunga — Biella, dal 1825',
+    titolo: 'Design italiano\nper gli spazi _aperti_',
     testo:
-      'Arredi outdoor su misura per hôtellerie, ristorazione e dimore di prestigio. Fioriere, sedute e illuminazione 100% made in Italy, dal 1825.',
-    link1Etichetta: 'Vedi la collezione',
+      'Vasi, sedute, tavoli e luci in polietilene, disegnati da architetti e designer e prodotti a Biella. Per progetti di hôtellerie, ristorazione, residenze e spazi pubblici.',
+    link1Etichetta: 'Le collezioni',
     link1: '#collezioni',
     link2Etichetta: 'Richiedi il catalogo',
     link2: '#listino',
@@ -202,17 +202,17 @@ export const homeDati = async (m: Media) => ({
   progetti: [
     {
       titolo: 'Hôtellerie',
-      testo: 'Terrazze, roof e aree piscina: fioriere e sedute in LLDPE colorate su cartella, resistenti a sole, salsedine e gelo.',
+      testo: 'Terrazze, roof e aree piscina: fioriere, sedute e luci in polietilene tinto in massa, che restano all’aperto tutto l’anno e resistono a sole, salsedine e gelo.',
       link: '#contract',
     },
     {
       titolo: 'Ristorazione',
-      testo: 'Dehors e separé vegetali: sistemi modulari per delimitare i coperti mantenendo leggerezza e identità del locale.',
+      testo: 'Dehors e sale: sedute, tavoli e fioriere per organizzare gli spazi, in colori e finiture coordinati con l’identità del locale.',
       link: '#contract',
     },
     {
-      titolo: 'Dimore di prestigio',
-      testo: "Pezzi d'autore e finiture laccate o Moleskin, sviluppati con studi di architettura e interior designer.",
+      titolo: 'Residenze',
+      testo: "Pezzi firmati, finiture laccate o Moleskin e vasi della tradizione italiana per ville, giardini e terrazze.",
       link: '#contract',
     },
   ],
@@ -220,35 +220,35 @@ export const homeDati = async (m: Media) => ({
     sfondo: '1825',
     immagine: await m(`${S}/files/storia_5e3ef214-3e06-4c94-ad73-ac8b8d312ce6.jpg?v=1667499580&width=1200`, 'La manifattura Serralunga'),
     kicker: 'Chi siamo',
-    titolo: "Una passione per la bellezza,\nuna passione per l'innovazione",
+    titolo: "Ricerca sui materiali\ndal 1825",
     testo:
-      'Dal 1825 lo spirito di ricerca e la tradizione produttiva sono le fondamenta del marchio. Stampaggio rotazionale in LLDPE, tinto in massa e riciclabile al 100%: prodotti pensati per resistere da −35 °C a +80 °C, negli spazi più esposti e più esigenti.',
+      'Serralunga nasce a Biella nel 1825 ed è stata la prima azienda in Europa a sviluppare lo stampaggio rotazionale. Nello stabilimento di Biella produce arredi e vasi in polietilene lineare (LLDPE) tinto in massa e riciclabile al 100%, stabili da −35 °C a +80 °C e resistenti a raggi UV, urti e salsedine.',
     punti: [
-      { testo: '100% Made in Italy' },
+      { testo: 'Prodotto a Biella' },
       { testo: 'Materiale riciclabile al 100%' },
-      { testo: 'Cartella colori dedicata' },
-      { testo: 'Finitura Moleskin e laccature' },
+      { testo: '38 colori in cartella' },
+      { testo: 'Finiture laccate, Moleskin e Corten' },
     ],
-    pulsante: 'Scopri Serralunga Contract',
+    pulsante: 'Serralunga Contract',
     link: '#contract',
   },
   numeri: [
-    { valore: '200', etichetta: 'Anni di manifattura' },
-    { valore: '500+', etichetta: 'Referenze a catalogo' },
-    { valore: '40', etichetta: 'Colori di cartella' },
-    { valore: '60', etichetta: 'Paesi serviti' },
+    { valore: '200', etichetta: 'Anni di storia industriale' },
+    { valore: '38', etichetta: 'Colori in cartella' },
+    { valore: '100%', etichetta: 'Polietilene riciclabile' },
+    { valore: '−35/+80 °C', etichetta: 'Intervallo di utilizzo' },
   ],
   installazioni: {
     sfondo: 'INSTALLAZIONI',
     testoSinistra:
-      "Terrazze d'albergo, dehors, aree piscina e ville private: luoghi in cui il disegno italiano incontra la vita all'aperto.",
+      "Terrazze d’albergo, dehors, aree piscina e giardini privati: ambientazioni con vasi, sedute e luci Serralunga.",
     testoDestra:
-      "Una selezione di ambientazioni realizzate con studi di architettura e strutture ricettive in Italia e all'estero.",
+      "Una selezione per tipo di spazio: hotel, ristorazione, spa e residenze.",
     voci: [
       {
         immagine: await m(`${S}/products/bigbo-pag170_hi.jpg?v=1771514306&width=1400`, 'Big-Bo in ambientazione alberghiera'),
-        titolo: 'Corte d’ingresso, hotel de charme',
-        sottotitolo: 'Piemonte — Big-Bo, Luisa Bocchietto',
+        titolo: 'Corte d’ingresso',
+        sottotitolo: 'Big-Bo, Luisa Bocchietto',
         categoria: 'hotel',
         formato: 'alta',
         link: '#progetti',
@@ -256,7 +256,7 @@ export const homeDati = async (m: Media) => ({
       {
         immagine: await m(`${S}/products/Vastwo-AtmosferaandBig-Bolifestyle1.jpg?v=1771514307&width=1400`, 'Atmosfera e Big-Bo su rooftop'),
         titolo: 'Rooftop bar',
-        sottotitolo: 'Milano — Atmosfera, Vas-One Family',
+        sottotitolo: 'Atmosfera e Vas-One Family',
         categoria: 'risto',
         formato: 'bassa',
         link: '#progetti',
@@ -264,7 +264,7 @@ export const homeDati = async (m: Media) => ({
       {
         immagine: await m(`${S}/files/Fioredilotostilllife2.jpg?v=1771515672&width=1200`, 'Fiore di Loto galleggiante'),
         titolo: 'Vasca esterna, spa',
-        sottotitolo: 'Riviera Ligure — Fiore di Loto',
+        sottotitolo: 'Fiore di Loto, Marta Sansoni',
         categoria: 'spa',
         formato: 'bassa',
         link: '#progetti',
@@ -272,7 +272,7 @@ export const homeDati = async (m: Media) => ({
       {
         immagine: await m(`${S}/files/RIVIERA.png?v=1760515750&width=1600`, 'Divano Riviera'),
         titolo: 'Lounge esterna',
-        sottotitolo: 'Costa Smeralda — Divano Riviera',
+        sottotitolo: 'Divano Riviera',
         categoria: 'hotel',
         formato: 'media',
         link: '#progetti',
@@ -280,7 +280,7 @@ export const homeDati = async (m: Media) => ({
       {
         immagine: await m(`${S}/files/AquafamilyFioredilottoLifestyle2square2.jpg?v=1771515674&width=1200`, 'Collezione Aqua a bordo piscina'),
         titolo: 'Bordo piscina',
-        sottotitolo: 'Lago di Garda — Collezione Aqua',
+        sottotitolo: 'Collezione Aqua, Marc Sadler',
         categoria: 'spa',
         formato: 'media',
         link: '#progetti',
@@ -288,7 +288,7 @@ export const homeDati = async (m: Media) => ({
       {
         immagine: await m(`${S}/products/vastwo-pag168_hi.jpg?v=1771514310&width=1400`, 'Vas-Two in giardino privato'),
         titolo: 'Giardino privato',
-        sottotitolo: 'Brianza — Vas-Two',
+        sottotitolo: 'Vas-Two',
         categoria: 'resid',
         formato: 'media',
         link: '#progetti',
@@ -296,7 +296,7 @@ export const homeDati = async (m: Media) => ({
       {
         immagine: await m(`${S}/files/the_vases-_The_Vases_3.jpg?v=1727867232&width=1600`, 'Vasi della tradizione italiana'),
         titolo: 'Loggiato di una dimora storica',
-        sottotitolo: 'Toscana — Decorati, Festonato, Orcio',
+        sottotitolo: 'Decorati, Festonato, Orcio',
         categoria: 'resid',
         formato: 'larga',
         link: '#progetti',
@@ -308,7 +308,7 @@ export const homeDati = async (m: Media) => ({
   collezioni: {
     titolo: 'Le collezioni',
     testo:
-      "Quattro famiglie di prodotto, un'unica grammatica formale: forme scultoree, colore tinto in massa, resistenza da esterno.",
+      "Vasi, arredi, illuminazione e accessori: forme disegnate da architetti e designer, in polietilene tinto in massa per interni ed esterni.",
     tessere: [
       {
         etichetta: 'Vasi',
@@ -336,14 +336,14 @@ export const homeDati = async (m: Media) => ({
     kicker: 'Serralunga Contract',
     titolo: 'Al servizio\ndel progetto',
     servizi: [
-      { titolo: 'Consulenza progettuale', testo: 'Affiancamento a studi e general contractor dalla fase di concept al capitolato.' },
+      { titolo: 'Supporto alla progettazione', testo: 'Schede tecniche, disegni quotati e campioni colore per la scelta dei pezzi e la stesura del capitolato.' },
       {
         titolo: 'Colori e finiture su misura',
-        testo: "Campionature fisiche, laccature, metallizzati e finitura Moleskin coordinati all'identità della struttura.",
+        testo: "38 colori in cartella, laccati lucidi e metallizzati, finiture Moleskin e Corten. Per i progetti contract si valutano colori dedicati.",
       },
       {
-        titolo: 'Grandi volumi e logistica',
-        testo: 'Produzione su commessa, spedizioni pallettizzate e consegne programmate per fasi di cantiere.',
+        titolo: 'Produzione a Biella',
+        testo: 'Stampaggio rotazionale nello stabilimento di Biella: la maggior parte dei prodotti si realizza su richiesta, nel colore scelto.',
       },
       // Nel template il testo è un segnaposto ("bla bla"): da scrivere nel pannello.
       { titolo: 'Lavoro conto terzi', testo: '' },
@@ -351,17 +351,17 @@ export const homeDati = async (m: Media) => ({
   },
   catalogo: {
     immagine: await m(`${S}/files/Serralunga_catalog_front.jpg?v=1750701072&width=1312`, 'Catalogo Serralunga'),
-    kicker: 'Catalogo & listino B2B',
-    titolo: 'Richiedi il catalogo\ne le condizioni riservate',
+    kicker: 'Cataloghi e documentazione',
+    titolo: 'Richiedi il catalogo\ne la cartella colori',
     testo:
-      'Riservato ad alberghi, ristoranti, studi di architettura e rivenditori. Riceverai catalogo, cartella colori e listino dedicato entro 24 ore lavorative.',
-    pulsante: 'Richiesta catalogo',
-    grazie: 'Grazie: riceverete catalogo, cartella colori e listino entro 24 ore lavorative.',
+      'Per architetti, interior designer, strutture dell’ospitalità e rivenditori: indicateci il progetto e vi inviamo catalogo, cartella colori e schede tecniche.',
+    pulsante: 'Richiedi il catalogo',
+    grazie: 'Grazie: vi invieremo catalogo, cartella colori e schede tecniche.',
   },
   seo: {
-    titolo: 'Serralunga Contract — arredi outdoor dal 1825',
+    titolo: 'Serralunga: arredi, vasi e luci di design dal 1825',
     descrizione:
-      'Arredi outdoor su misura per hôtellerie, ristorazione e dimore di prestigio: fioriere, sedute e illuminazione 100% made in Italy, dal 1825.',
+      'Vasi, sedute, tavoli e luci in polietilene firmati da architetti e designer, prodotti a Biella dal 1825 per hôtellerie, ristorazione, residenze e spazi pubblici.',
   },
 })
 
@@ -369,12 +369,12 @@ export const paginaDesignerDati = async () => ({
   kicker: 'Le firme',
   titolo: 'I designer\nSerralunga',
   testo:
-    "Architetti e designer italiani e internazionali che dal secondo dopoguerra a oggi hanno dato forma alla nostra materia. Ogni pezzo a catalogo porta il nome di chi lo ha pensato: è la garanzia che dietro a un oggetto d'esterno ci sia un progetto, non un profilo di produzione.",
+    "Architetti e designer italiani e internazionali che dagli anni Novanta disegnano per Serralunga. Ogni pezzo a catalogo porta il nome di chi lo ha progettato: forma, proporzioni e uso nascono da un progetto d’autore.",
   segnaposto: 0,
   cta: {
     kicker: 'Progetti su misura',
-    titolo: 'Un pezzo disegnato\nper il vostro luogo',
-    testo: 'Per i progetti contract sviluppiamo con i nostri designer dimensioni, colori e finiture dedicate.',
+    titolo: 'Colori e finiture\nper il vostro progetto',
+    testo: 'Per i progetti contract valutiamo colori, finiture e varianti dedicate: scriveteci prodotti, quantità e contesto.',
     pulsante: 'Parliamo del progetto',
     link: '/#listino',
   },

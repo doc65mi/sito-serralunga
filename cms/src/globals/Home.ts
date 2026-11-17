@@ -198,9 +198,9 @@ export const Home: GlobalConfig = {
                 testo('kicker', 'Kicker'),
                 area('titolo', 'Titolo'),
                 area('testo', 'Testo'),
-                testo('pulsante', 'Testo del pulsante', { defaultValue: 'Richiesta catalogo' }),
+                testo('pulsante', 'Testo del pulsante', { defaultValue: 'Richiedi il catalogo' }),
                 area('grazie', 'Messaggio dopo l’invio', {
-                  defaultValue: 'Grazie: riceverete catalogo e listino entro 24 ore lavorative.',
+                  defaultValue: 'Grazie: vi invieremo catalogo, cartella colori e schede tecniche.',
                 }),
               ],
             },

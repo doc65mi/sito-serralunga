@@ -14,6 +14,7 @@
     "seed:primo": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=primo payload run src/seed/index.ts",
     "seed:aggiorna": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=aggiorna payload run src/seed/index.ts",
     "seed:catalogo": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=catalogo payload run src/seed/index.ts",
+    "seed:testi": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed/testi.ts",
     "seed:designer": "cross-env NODE_OPTIONS=--no-deprecation SEED_SOLO=aggiorna payload run src/seed/index.ts",
     "ai:prova": "cross-env NODE_OPTIONS=--no-deprecation payload run src/ai/prova.ts",
     "ai:prova:immagine": "cross-env NODE_OPTIONS=--no-deprecation AI_PROVA=immagine payload run src/ai/prova.ts",
