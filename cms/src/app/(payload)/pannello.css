@@ -1,6 +1,6 @@
 /*
  * Pannello Serralunga
- * Version: 1.03 (testi neri, almeno 14px, barra laterale chiara, titoli dei gruppi evidenziati)
+ * Version: 1.04 (Pubblica su Coolify; testi neri, almeno 14px, barra laterale chiara, titoli dei gruppi evidenziati)
  * Aspetto del pannello di redazione: stessi caratteri e colori del sito
  * (carta, inchiostro, oro), barra laterale scura, angoli vivi.
  */
@@ -140,6 +140,11 @@ input:focus-visible, textarea:focus-visible, .rs__control--is-focused { outline:
 .sl-strumento__pulsante:disabled { opacity: 0.5; cursor: default; }
 .sl-strumento__registro-pulsante { padding: 9px 14px; border: 1px solid var(--theme-elevation-250); background: transparent; color: inherit; font-size: 12px; cursor: pointer; }
 .sl-strumento__registro { max-height: 280px; overflow: auto; margin: 0; padding: 12px; background: var(--theme-elevation-50); font-size: 11px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+
+.sl-strumento__modulo { display: flex; flex-direction: column; gap: 10px; }
+.sl-strumento__campo { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #000; }
+.sl-strumento__campo input { padding: 9px 10px; border: 1px solid var(--theme-elevation-250); background: var(--theme-elevation-0); color: #000; font-size: 14px; }
+.sl-strumento__chiave { font-size: 14px; padding: 2px 6px; background: var(--theme-elevation-50); word-break: break-all; }
 
 .sl-strumento__proposte { margin-top: 6px; padding: 14px 16px; border-left: 3px solid var(--sl-oro); background: var(--theme-elevation-50); display: flex; flex-direction: column; gap: 8px; }
 .sl-strumento__proposte-titolo { margin: 0; font-weight: 600; font-size: 14px; }

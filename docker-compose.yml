@@ -35,6 +35,9 @@ services:
       SITO_CHIAVE: ${SITO_CHIAVE:?imposta SITO_CHIAVE}
       SEED_EMAIL: ${SEED_EMAIL:-}
       SEED_PASSWORD: ${SEED_PASSWORD:-}
+      # 1 = dopo un aggiornamento del codice con contenuti nuovi, aggiunge da solo ciò che manca
+      # (modalità prudente: non modifica nulla di ciò che esiste). Avanzamento in Strumenti.
+      AGGIORNAMENTO_AUTOMATICO: ${AGGIORNAMENTO_AUTOMATICO:-1}
       NOTIFICHE_EMAIL: ${NOTIFICHE_EMAIL:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}

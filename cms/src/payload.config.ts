@@ -24,6 +24,7 @@ import { SpaziFoto } from './collections/SpaziFoto'
 import { Articoli } from './collections/Articoli'
 import { endpointAi } from './ai/endpoints'
 import { endpointStrumenti } from './strumenti/endpoints'
+import { endpointSincronizza } from './strumenti/sincronizza'
 import { Ai } from './globals/Ai'
 import { PaginaJournal } from './globals/PaginaJournal'
 import { Richieste } from './collections/Richieste'
@@ -76,7 +77,7 @@ export default buildConfig({
       beforeNavLinks: ['/componenti/ModificaFrontend'],
       afterNavLinks: ['/componenti/VoceStrumenti'],
       actions: ['/componenti/AzioneFrontend'],
-      beforeDashboard: ['/componenti/Cruscotto', '/componenti/Strumenti'],
+      beforeDashboard: ['/componenti/Cruscotto', '/componenti/Sincronizza', '/componenti/Strumenti'],
       graphics: { Logo: '/componenti/Logo', Icon: '/componenti/Icona' },
     },
     importMap: { baseDir: path.resolve(dirname) },
@@ -122,7 +123,7 @@ export default buildConfig({
   // Righe degli elenchi chiuse con il proprio nome (fields/etichette.ts) invece di "Voce 01".
   collections: [Prodotti, Categorie, CaseHistory, Spunti, Materiali, Colori, Articoli, Pagine, Contract, PagineHeritage, Designer, Media, SpaziFoto, Richieste, Users].map(conEtichette),
   globals: [Home, PaginaCatalogo, PaginaDesigner, PaginaInstallazioni, PaginaSpunti, PaginaMateriali, PaginaJournal, PaginaHeritage, Impostazioni, Ai].map(conEtichette),
-  endpoints: [...endpointAi, ...endpointStrumenti],
+  endpoints: [...endpointAi, ...endpointStrumenti, ...endpointSincronizza],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },

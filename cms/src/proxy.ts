@@ -1,5 +1,5 @@
 /**
- * Version: 1.00
+ * Version: 1.01
  * Salvataggi dal pannello e dalla pagina con qualunque nome del sito.
  *
  * Payload accetta il cookie di accesso solo se l'intestazione Origin è nell'elenco `csrf`
@@ -31,4 +31,6 @@ export function proxy(req: NextRequest) {
   return NextResponse.next({ request: { headers: intestazioni } })
 }
 
-export const config = { matcher: ['/api/:path*', '/admin/:path*'] }
+// /api/sincronizza/* resta fuori: arriva da un altro server (niente cookie né Origin) e porta file
+// grandi, che il proxy di Next tronca oltre i 10 MB.
+export const config = { matcher: ['/api/((?!sincronizza/).*)', '/admin/:path*'] }

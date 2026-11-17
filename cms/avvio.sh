@@ -1,5 +1,5 @@
 #!/bin/sh
-# Avvio del CMS — Version: 1.03
+# Avvio del CMS — Version: 1.04
 # 1. Avvia Payload (che applica le migrazioni del database alla prima richiesta).
 # 2. Con SEED_AUTOMATICO=1, quando il CMS risponde, carica i contenuti di partenza
 #    una sola volta: se nel database c'è già un utente non fa nulla.
@@ -8,6 +8,9 @@
 #    seed:aggiorna e poi seed:catalogo. Entrambi aggiungono solo ciò che manca:
 #    i testi e le foto modificati dal pannello o dalla pagina restano come sono.
 #    Il sito resta raggiungibile mentre i contenuti si caricano.
+#    Eccezione: un sito che riceve i contenuti dal PC (Strumenti > Pubblica su Coolify,
+#    file .compiti/sincronizza.ricevuta) non li aggiorna da solo: la fonte è il PC,
+#    e un aggiornamento fatto solo qui creerebbe differenze tra le due copie.
 set -e
 
 DIR="${MEDIA_DIR:-./media}/.compiti"
@@ -34,7 +37,9 @@ if [ "${SEED_AUTOMATICO:-0}" = "1" ] || [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1"
     if [ "${SEED_AUTOMATICO:-0}" = "1" ]; then
       nice -n 19 env VIPS_CONCURRENCY=1 UV_THREADPOOL_SIZE=2 npm run seed:primo || echo "[avvio] contenuti di partenza non completati: si rilanciano dal pannello, Strumenti"
     fi
-    if [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1" ]; then
+    if [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1" ] && [ -f "$DIR/sincronizza.ricevuta" ]; then
+      echo "[avvio] contenuti ricevuti dal PC: aggiornamento automatico saltato (si pubblica dal PC, Strumenti > Pubblica su Coolify)"
+    elif [ "${AGGIORNAMENTO_AUTOMATICO:-0}" = "1" ]; then
       VERSIONE="$(cat .versione-seed 2>/dev/null || echo sconosciuta)"
       for c in aggiorna catalogo; do
         if [ "$(cat "$DIR/$c.versione" 2>/dev/null)" != "$VERSIONE" ]; then

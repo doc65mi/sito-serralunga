@@ -1,7 +1,9 @@
-# Version: 1.00
+# Version: 1.01
 # I file eseguiti dentro i container Linux devono avere il fine riga LF anche su Windows:
 # con CRLF lo script di avvio del CMS si ferma ("illegal option").
 *.sh text eol=lf
 Dockerfile text eol=lf
 Caddyfile text eol=lf
 *.yml text eol=lf
+# Gli script per Windows (doppio clic) vogliono CRLF.
+*.bat text eol=crlf

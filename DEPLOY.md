@@ -1,6 +1,6 @@
 # Avvio e pubblicazione
 
-Version: 1.08
+Version: 1.09
 
 Quattro servizi Docker: `db` (PostgreSQL 16), `cms` (Payload), `web` (Astro) e `proxy` (Caddy). Solo il proxy è aperto verso l'esterno: **sito e pannello stanno sulla stessa porta**, il pannello su `/admin`.
 Il database e le foto caricate stanno in due volumi: `db-dati` e `media`. **Sono gli unici da salvare nei backup.**
@@ -132,6 +132,20 @@ A ogni invio su GitHub nel ramo scelto Coolify ricompila e ripubblica da solo (s
 **Interrompere e riprendere.** In Strumenti ogni compito in corso ha il pulsante «Interrompi». Il punto raggiunto (fasi finite, designer e prodotti già lavorati) resta salvato in `media/.compiti/`: «Riprendi» riparte da lì, «Ricomincia da capo» rifà tutto. Anche un riavvio o un nuovo deploy a metà lavoro riprende dal punto salvato. Le foto già caricate non si scaricano di nuovo.
 Il seed **non** va rilanciato dopo aver modificato i testi: riporta quelli italiani ai valori di partenza.
 Per aggiornare un sito già avviato senza toccare i testi modificati c'è `npm run seed:aggiorna` (dal terminale del servizio `cms`, in locale `docker compose exec cms npm run seed:aggiorna`). Aggiunge le schede dei designer mancanti, scarica da serralunga.com i ritratti a risoluzione piena e le foto delle creazioni di ogni designer (solo se la scheda non ne ha già), crea le pagine Installazioni e Spunti e idee con le loro voci di menu, rigenera in AVIF le versioni ridotte di tutte le foto e scrive nel registro l'elenco delle foto più strette di 1200 px. Si può rilanciare quando si vuole.
+
+### Il PC è la fonte: «Pubblica su Coolify» (dalla 1.09)
+
+Su GitHub viaggia solo il **codice**. Contenuti e foto (testi, menu, logo, blocchi della home, schede, ritratti migliorati con l'AI) stanno nel database e nella cartella `media` di ciascun sito: se si modificano sul PC non arrivano da soli su Coolify, ed è così che le due copie si erano allontanate (logo, menu e sezione catalogo diversi). Da questa versione il flusso è:
+
+1. **Codice** – Claude invia su GitHub (ramo `claude/project-thread-cs7x7p`); Coolify ricompila da solo (Auto Deploy).
+2. **PC** – doppio clic su `aggiorna-pc.bat` nella cartella `sito-serralunga-app`: copia del database in `backup\`, `git pull`, ricostruzione. I contenuti nuovi del codice si aggiungono da soli (Strumenti), come su Coolify.
+3. **Contenuti e foto** – sul PC, pannello → cruscotto → **Pubblica su Coolify** → «Pubblica su Coolify» → conferma. La prima volta si inseriscono indirizzo del sito online e la sua *chiave di ricezione* (pannello di Coolify → stesso riquadro, «Ricevi dal PC» → Copia).
+
+Cosa fa la pubblicazione: controlla che i due siti abbiano la stessa versione del codice (stesse migrazioni; se no dice quale aggiornare), invia solo le foto mancanti o cambiate, poi invia tutti i contenuti. Coolify salva prima una copia di quello che ha (`media/.compiti/copie/`, ultime 5) e sostituisce tutto in una sola transazione: o riesce tutto o non cambia nulla. «Ripristina i contenuti di prima dell'ultima ricezione…» rimette la copia.
+
+Restano di ciascun sito: utenti e accessi, preferenze del pannello, **richieste ricevute dai clienti**. Le chiavi API dell'AI passano dentro la connessione HTTPS e vengono cifrate di nuovo con il `PAYLOAD_SECRET` di Coolify. Un sito che ha ricevuto contenuti dal PC non lancia più gli aggiornamenti automatici dopo un deploy (lo fa il PC): così le due copie non si separano di nuovo.
+
+**Regola:** si modifica sul PC e si pubblica. Una modifica fatta direttamente sul pannello di Coolify viene sostituita alla pubblicazione successiva (resta nella copia di sicurezza).
 
 ### Cambio di dominio (dalla prova al lancio)
 
