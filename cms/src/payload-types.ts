@@ -2379,7 +2379,7 @@ export interface Contract {
   /**
    * Pagina principale: /contract/. Le altre: /contract/{sezione}/.
    */
-  sezione: 'principale' | 'hospitality' | 'residenziale' | 'urbano' | 'cataloghi' | 'area-riservata';
+  sezione: 'principale' | 'hospitality' | 'residenziale' | 'urbano' | 'su-misura' | 'cataloghi' | 'area-riservata';
   /**
    * Numeri più bassi compaiono prima.
    */

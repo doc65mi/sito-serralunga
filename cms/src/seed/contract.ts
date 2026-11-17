@@ -1,5 +1,11 @@
 /**
- * Sezione Contract (Version: 1.00): contenuti di partenza in italiano e inglese.
+ * Sezione Contract (Version: 1.01): contenuti di partenza in italiano e inglese.
+ * 1.01: pagina «Su misura» (/contract/su-misura/). Fonti: serralunga.com/pages/contract («dalle varianti
+ * colore, alla personalizzazione fino allo sviluppo di prodotti su misura»; «materiali, tecnologie ed estetica»),
+ * serralunga.com/pages/about-us (primi in Europa nello stampaggio rotazionale, primo vaso illuminato, laccature),
+ * serralunga.com/pages/sustainability (tutto il processo nello stabilimento di Biella, LLDPE, −35/+80 °C),
+ * cartella colori e finiture già nel sito (38 colori, laccati, metallizzati, Moleskin, Corten).
+ * Gli stampi su misura sono indicati dal committente del sito (2026-11-17). Nessun numero, tempo o costo.
  *
  * Fonti: serralunga.com/pages/contract (Progetti, Le nostre competenze, All'italiana,
  * Personalizzazione, categorie Hotel / Bar e ristoranti / Progettazione urbana / Uffici e le loro foto),
@@ -335,6 +341,113 @@ export async function contractDati(media: Media): Promise<PaginaContractSeed[]> 
           titolo: 'Urban furniture and large planters | Serralunga',
           descrizione:
             'Large and illuminated planters for squares, avenues and public spaces: Big-Bo, Cone, Primavera and Versailles in recyclable polyethylene, made in Italy.',
+        },
+      },
+    },
+    {
+      sezione: 'su-misura',
+      ordine: 35,
+      it: {
+        nome: 'Su misura',
+        kicker: 'Contract — Su misura',
+        titolo: 'Arredi _su misura_\nper il progetto',
+        testo:
+          'Dalle varianti di colore alla personalizzazione, fino allo sviluppo di prodotti e stampi su misura: per i progetti contract Serralunga adatta i propri arredi alle esigenze dello spazio e del committente. Tutto il processo si svolge nello stabilimento di Biella, con lo stampaggio rotazionale che Serralunga è stata la prima in Europa a sviluppare.',
+        immagine: await f('storia', 'La manifattura Serralunga a Biella'),
+        estratto: 'Varianti di colore, finiture, versioni luminose e prodotti su misura, fino allo stampo dedicato al progetto.',
+        punti: {
+          kicker: 'Cosa si può personalizzare',
+          titolo: 'Dal colore\nallo _stampo_ dedicato',
+          voci: [
+            {
+              titolo: 'Colore',
+              testo: 'Ogni prodotto si sceglie tra i 38 colori della cartella, tinti in massa nel polietilene. Per i progetti contract si valutano anche colori dedicati.',
+            },
+            {
+              titolo: 'Finiture',
+              testo: 'Laccati lucidi e metallizzati, finiture Moleskin e Corten, da coordinare con i colori e i materiali del progetto.',
+            },
+            {
+              titolo: 'Luce',
+              testo: 'Molti vasi e oggetti esistono anche in versione luminosa. Serralunga è stata la prima a disegnare il vaso illuminato.',
+            },
+            {
+              titolo: 'Personalizzazione del prodotto',
+              testo: 'Con l’esperienza e la conoscenza tecnica maturate in decenni di progetti complessi, Serralunga lavora su materiali, tecnologie ed estetica per rispondere alle esigenze specifiche di ogni progetto.',
+            },
+            {
+              titolo: 'Prodotti e stampi su misura',
+              testo: 'Oltre alle varianti dei prodotti in catalogo, Serralunga sviluppa prodotti su misura, anche con stampi dedicati al singolo progetto.',
+            },
+            {
+              titolo: 'Un solo stabilimento',
+              testo: 'Tutto il processo produttivo si svolge nello stabilimento di Biella, in polietilene lineare (LLDPE) riciclabile al 100%, stabile da −35 °C a +80 °C e resistente a raggi UV, urti e salsedine.',
+            },
+          ],
+        },
+        cta: {
+          kicker: 'Ufficio contract',
+          titolo: 'Parliamo del\nvostro progetto',
+          testo:
+            'Per varianti di colore, finiture o prodotti su misura scriveteci prodotti, quantità e contesto: vi risponde l’ufficio contract.',
+          pulsante: 'Invia la richiesta',
+          grazie: 'Grazie: l’ufficio contract vi ricontatterà a breve.',
+        },
+        seo: {
+          titolo: 'Arredi su misura per il contract | Serralunga',
+          descrizione:
+            'Colori dedicati, finiture laccate e Moleskin, versioni luminose, prodotti e stampi su misura: arredi Serralunga personalizzati per hotel e progetti.',
+        },
+      },
+      en: {
+        nome: 'Bespoke',
+        kicker: 'Contract — Bespoke',
+        titolo: '_Bespoke_ furniture\nfor your project',
+        testo:
+          'From colour variants and customisation to the development of bespoke products and moulds: for contract projects Serralunga adapts its furniture to the needs of the space and the client. The whole process takes place at the Biella factory, using the rotational moulding technology Serralunga was the first in Europe to develop.',
+        estratto: 'Colour variants, finishes, illuminated versions and bespoke products, up to a mould dedicated to your project.',
+        punti: {
+          kicker: 'What can be customised',
+          titolo: 'From colour\nto a dedicated _mould_',
+          voci: [
+            {
+              titolo: 'Colour',
+              testo: 'Each product can be specified in the 38 colours of the chart, mass-coloured in the polyethylene. Dedicated colours can also be assessed for contract projects.',
+            },
+            {
+              titolo: 'Finishes',
+              testo: 'Gloss and metallic lacquers, Moleskin and Corten finishes, to coordinate with the colours and materials of the project.',
+            },
+            {
+              titolo: 'Light',
+              testo: 'Many pots and objects also come in an illuminated version. Serralunga was the first to design the illuminated pot.',
+            },
+            {
+              titolo: 'Product customisation',
+              testo: 'Drawing on decades of experience and technical know-how with complex projects, Serralunga works on materials, technologies and aesthetics to meet the specific requirements of each project.',
+            },
+            {
+              titolo: 'Bespoke products and moulds',
+              testo: 'Beyond variants of catalogue products, Serralunga develops bespoke products, including moulds dedicated to a single project.',
+            },
+            {
+              titolo: 'One factory',
+              testo: 'The entire production process takes place at the Biella factory, in 100% recyclable linear polyethylene (LLDPE), stable from −35 °C to +80 °C and resistant to UV rays, impacts and salt air.',
+            },
+          ],
+        },
+        cta: {
+          kicker: 'Contract office',
+          titolo: 'Tell us about\nyour project',
+          testo:
+            'For colour variants, finishes or bespoke products, tell us the products, quantities and setting: our contract office will get back to you.',
+          pulsante: 'Send the request',
+          grazie: 'Thank you: our contract office will be in touch shortly.',
+        },
+        seo: {
+          titolo: 'Bespoke contract furniture | Serralunga',
+          descrizione:
+            'Dedicated colours, lacquered and Moleskin finishes, illuminated versions, bespoke products and moulds: customised Serralunga furniture for hotels and projects.',
         },
       },
     },

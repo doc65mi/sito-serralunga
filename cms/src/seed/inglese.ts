@@ -1,5 +1,5 @@
 /**
- * Traduzione inglese dei contenuti di partenza (Version: 1.01).
+ * Traduzione inglese dei contenuti di partenza (Version: 1.02).
  * Chiave = testo italiano del seed, valore = testo inglese. Dopo il seed italiano,
  * `applicaInglese` riempie i campi inglesi ancora vuoti; quelli già scritti dal pannello restano.
  * Nomi propri, misure e codici uguali nelle due lingue non servono qui.
@@ -344,6 +344,7 @@ Object.assign(EN, {
   'I colori': 'Colours',
   Residenziale: 'Residential',
   Urbano: 'Urban',
+  'Su misura': 'Bespoke',
   Cataloghi: 'Catalogues',
   'Area riservata': 'Reserved area',
   Professionisti: 'Professionals',

@@ -1,6 +1,6 @@
 # cliente.md — fatti sul cliente Serralunga
 
-Version: 1.01
+Version: 1.02
 Data: 2026-11-17
 Ambito: dati aziendali, marchio, tono, URL di riferimento. I dati sono anche nel CMS (Impostazioni → Azienda), che fa fede per il sito.
 Fonte: www.serralunga.com, template in `template/`.
@@ -59,3 +59,6 @@ Dove sono i testi: contenuti nel CMS (pannello o modifica dalla pagina); testi d
 | Designer | `/designer/`, `/designer/{slug}/` |
 | Prodotto | `/prodotti/{slug}/` |
 | Case history | `/case-history/{slug}/` |
+| Contract | `/contract/`, `/contract/{hospitality,residenziale,urbano,su-misura,cataloghi,area-riservata}/` |
+
+Su misura (`/contract/su-misura/`, 1.02): solo fatti di serralunga.com (varianti colore, personalizzazione, prodotti su misura, primo vaso luminoso, stabilimento di Biella) più gli stampi su misura indicati dal committente. Loghi, tempi, quantità minime e costi non sono confermati: non scriverli finché il cliente non li fornisce.

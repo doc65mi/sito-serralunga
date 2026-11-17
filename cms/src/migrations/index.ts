@@ -13,6 +13,7 @@ import * as migration_20261116_174732_disegno_quotato_campioni from './20261116_
 import * as migration_20261117_082017_moduli_newsletter_tracciamento from './20261117_082017_moduli_newsletter_tracciamento';
 import * as migration_20261117_113758_social_barra_mobile from './20261117_113758_social_barra_mobile';
 import * as migration_20261117_155756_cmp_privacy_cookies from './20261117_155756_cmp_privacy_cookies';
+import * as migration_20261117_163619_contract_su_misura from './20261117_163619_contract_su_misura';
 
 export const migrations = [
   {
@@ -88,6 +89,11 @@ export const migrations = [
   {
     up: migration_20261117_155756_cmp_privacy_cookies.up,
     down: migration_20261117_155756_cmp_privacy_cookies.down,
-    name: '20261117_155756_cmp_privacy_cookies'
+    name: '20261117_155756_cmp_privacy_cookies',
+  },
+  {
+    up: migration_20261117_163619_contract_su_misura.up,
+    down: migration_20261117_163619_contract_su_misura.down,
+    name: '20261117_163619_contract_su_misura'
   },
 ];

@@ -62,7 +62,7 @@ const percorsoBriciole = eLanding
 const sito = SITO
 const canonico = `${sito}${u(indirizzo(sezione))}`
 const jsonld: Doc[] = []
-if (['principale', 'hospitality', 'residenziale', 'urbano'].includes(sezione)) {
+if (['principale', 'hospitality', 'residenziale', 'urbano', 'su-misura'].includes(sezione)) {
   jsonld.push({
     '@type': 'Service',
     '@id': `${canonico}#servizio`,

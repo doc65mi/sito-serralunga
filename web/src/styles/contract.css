@@ -1,8 +1,9 @@
 /*
- * Sezione Contract (Version: 1.00): sub-brand visivo chiesto dall'alberatura
+ * Sezione Contract (Version: 1.01): sub-brand visivo chiesto dall'alberatura
  * ("layout dedicato con header diverso o sub-brand visivo"). Fascia scura con il marchio
  * Serralunga Contract e le sottosezioni, apertura scura, poi le parti della pagina.
  * Solo token di site.css: nessun colore nuovo.
+ * 1.01: sulle fasce scure (barra Contract, apertura) la parola in corsivo del titolo torna oro: con il testo nero era invisibile.
  */
 
 /* Fascia del sub-brand */
@@ -23,6 +24,7 @@
 
 /* Apertura */
 .contract-apertura { background: var(--ink); color: var(--on-dark); }
+.contract-nav, .contract-apertura { --accent-testo: var(--accent); }
 .contract-apertura__griglia { display: grid; grid-template-columns: 1fr 1fr; min-height: min(78vh, 760px); }
 .contract-apertura__testi { padding: clamp(60px, 8vw, 120px) clamp(24px, 6vw, 100px) clamp(60px, 7vw, 100px) var(--gut); display: flex; flex-direction: column; justify-content: center; gap: 30px; max-width: 760px; justify-self: end; width: 100%; }
 .contract-apertura .testo { color: var(--on-dark-muted); font-size: 17px; max-width: 52ch; }

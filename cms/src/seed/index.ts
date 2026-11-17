@@ -325,7 +325,10 @@ async function completaPagine() {
       voce.voci = voce.voci || []
       for (const x of modello.voci || []) {
         if (!voce.voci.some((y) => y.link === x.link)) {
-          voce.voci.push({ ...x })
+          // Al suo posto: subito dopo la voce che la precede nel modello (es. Su misura dopo Urbano), altrimenti in fondo.
+          const pos = (modello.voci || []).indexOf(x)
+          const prec = pos > 0 ? voce.voci.findIndex((y) => y.link === modello.voci![pos - 1].link) : -1
+          voce.voci.splice(prec >= 0 ? prec + 1 : voce.voci.length, 0, { ...x })
           aggiunte.push(`aggiunta ${voce.etichetta} > ${x.etichetta}`)
         }
       }

@@ -6,16 +6,18 @@ import { CATEGORIE_INSTALLAZIONI } from '../globals/PaginaInstallazioni'
 import { area, immagine, link, ordine, seoField, testo } from '../fields'
 
 /**
- * Sezione Contract (Version: 1.00): /contract/ e le sue sottopagine, una scheda per pagina.
+ * Sezione Contract (Version: 1.01): /contract/ e le sue sottopagine, una scheda per pagina.
  * Indirizzo fisso per sezione (alberatura: progetto/Serralunga_Alberatura_B2C_2026.docx.pdf).
  * Ogni parte della scheda compare solo se compilata: la stessa struttura serve alla pagina
- * principale, agli ambiti (hospitality, residenziale, urbano), ai cataloghi e all'area riservata.
+ * principale, agli ambiti (hospitality, residenziale, urbano), al su misura, ai cataloghi e all'area riservata.
+ * 1.01: sezione «Su misura» (/contract/su-misura/): personalizzazioni e stampi su misura.
  */
 export const SEZIONI_CONTRACT = [
   { label: 'Contract (pagina principale)', value: 'principale' },
   { label: 'Hospitality', value: 'hospitality' },
   { label: 'Residenziale', value: 'residenziale' },
   { label: 'Urbano', value: 'urbano' },
+  { label: 'Su misura', value: 'su-misura' },
   { label: 'Cataloghi', value: 'cataloghi' },
   { label: 'Area riservata', value: 'area-riservata' },
 ] as const
