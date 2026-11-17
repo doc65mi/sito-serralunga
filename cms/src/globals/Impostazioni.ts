@@ -4,7 +4,7 @@ import { pubblico, soloRedazione } from '../access'
 import { area, immagine, link, testo } from '../fields'
 import { campoSegreto } from '../fields/segreto'
 
-/** Header, footer, dati del cliente (fonte: file-md/cliente.md), social e barra mobile, sicurezza e tracciamento. Version: 2.03 */
+/** Header, footer, dati del cliente (fonte: file-md/cliente.md), social e barra mobile, sicurezza e tracciamento. Version: 2.04 */
 export const Impostazioni: GlobalConfig = {
   slug: 'impostazioni',
   label: 'Impostazioni del sito',
@@ -312,6 +312,7 @@ export const Impostazioni: GlobalConfig = {
             {
               type: 'collapsible',
               label: 'Statistiche',
+              admin: { description: 'Nella CMP: categoria «Statistiche». Con un codice inserito, il servizio compare da solo nel banner e nella Cookie Policy e parte solo con il consenso.' },
               fields: [
                 {
                   type: 'row',
@@ -326,6 +327,7 @@ export const Impostazioni: GlobalConfig = {
             {
               type: 'collapsible',
               label: 'Marketing e conversioni',
+              admin: { description: 'Nella CMP: categoria «Marketing» (Consent Mode: ad_storage, ad_user_data, ad_personalization). Con un codice inserito, il servizio compare da solo nel banner e nella Cookie Policy e parte solo con il consenso.' },
               fields: [
                 {
                   type: 'row',

@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Version: 1.00
+ * Version: 1.01 (collegamento alla CMP: Impostazioni › Privacy e cookies)
  * Riquadro in Impostazioni > Sicurezza e tracciamento: dove stanno gli altri collegamenti
  * (ContentAIPro, chiavi AI, posta e newsletter), con l'indirizzo da copiare in ContentAIPro.
  */
@@ -24,6 +24,11 @@ export const NotaCollegamenti: React.FC = () => {
       </p>
       <p style={{ margin: '0 0 8px' }}>
         <strong>Chiavi AI</strong> (OpenAI, OpenRouter, Gemini): <a style={a} href="/admin/globals/ai">Intelligenza artificiale</a>.
+      </p>
+      <p style={{ margin: '0 0 8px' }}>
+        <strong>Banner dei cookie (CMP)</strong>: i codici inseriti qui entrano da soli nel banner, nelle categorie e nella Cookie Policy. Testi, versione
+        dell’informativa, fornitori aggiuntivi, registro dei consensi e l’elenco dei servizi rilevati sono in{' '}
+        <a style={a} href="/admin/globals/privacy-cookies">Impostazioni › Privacy e cookies</a>.
       </p>
       <p style={{ margin: 0 }}>
         <strong>Privacy dei moduli, newsletter, email di conferma e server di posta</strong>:{' '}

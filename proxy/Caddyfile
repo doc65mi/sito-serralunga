@@ -1,6 +1,6 @@
-# Proxy unico — Version: 1.05 (CMP: /api/v1/consent-log va al sito; video e mappe dopo il consenso)
+# Proxy unico — Version: 1.06 (CMP: /api/v1/consent-log e /api/cmp/servizi vanno al sito; video e mappe dopo il consenso)
 # Sito e pannello sulla stessa porta: il pannello (Payload) risponde su /admin,
-# /api e /_next; tutto il resto è il sito (Astro). Le API del sito sono /api/richiesta, /api/newsletter, /api/cerca e /api/v1/consent-log (registro dei consensi ai cookie).
+# /api e /_next; tutto il resto è il sito (Astro). Le API del sito sono /api/richiesta, /api/newsletter, /api/cerca, /api/v1/consent-log (registro dei consensi ai cookie) e /api/cmp/servizi (servizi rilevati dalla CMP, per il pannello).
 # Davanti può esserci un altro proxy (Coolify/Traefik): ci si fida delle sue intestazioni
 # X-Forwarded-* solo se arriva da una rete privata.
 # Intestazioni di sicurezza: niente incorporamento da altri siti, niente MIME indovinato,
@@ -58,6 +58,7 @@
 		reverse_proxy /api/newsletter web:4321
 		reverse_proxy /api/cerca web:4321
 		reverse_proxy /api/v1/consent-log web:4321
+		reverse_proxy /api/cmp/* web:4321
 		reverse_proxy /admin* cms:3000
 		reverse_proxy /api/* cms:3000
 		reverse_proxy /_next/* cms:3000

@@ -7370,7 +7370,7 @@ export interface Impostazioni {
   createdAt?: string | null;
 }
 /**
- * Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.00. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.
+ * Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.01. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "privacy-cookies".

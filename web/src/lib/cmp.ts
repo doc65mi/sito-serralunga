@@ -175,6 +175,24 @@ export const FORNITORI: Record<string, Omit<Fornitore, 'id'>> = {
   },
 }
 
+/**
+ * Da dove arriva ogni servizio: campo del pannello che lo attiva (Impostazioni del sito >
+ * Sicurezza e tracciamento) e codice inserito. Serve al riquadro «Servizi rilevati» del pannello.
+ */
+export const ORIGINE: Record<string, { campo: string; codice?: keyof ReturnType<typeof codiciTracciamento> }> = {
+  sito: { campo: 'Sempre attivo (sito e pannello)' },
+  recaptcha: { campo: 'Sicurezza e tracciamento › reCAPTCHA' },
+  ga4: { campo: 'Sicurezza e tracciamento › Statistiche › Google Analytics 4', codice: 'ga4' },
+  gtm: { campo: 'Sicurezza e tracciamento › Statistiche › Google Tag Manager', codice: 'gtm' },
+  clarity: { campo: 'Sicurezza e tracciamento › Statistiche › Microsoft Clarity', codice: 'clarity' },
+  ads: { campo: 'Sicurezza e tracciamento › Marketing › Google Ads', codice: 'ads' },
+  meta: { campo: 'Sicurezza e tracciamento › Marketing › Meta Pixel', codice: 'meta' },
+  linkedin: { campo: 'Sicurezza e tracciamento › Marketing › LinkedIn Insight Tag', codice: 'linkedin' },
+  youtube: { campo: 'Privacy e cookies › Video e mappe incorporati' },
+  vimeo: { campo: 'Privacy e cookies › Video e mappe incorporati' },
+  maps: { campo: 'Privacy e cookies › Video e mappe incorporati' },
+}
+
 /** Cookie di ogni categoria da cancellare sul dominio del sito quando il consenso viene tolto. */
 export const DA_CANCELLARE: Record<Exclude<Categoria, 'necessari'>, string[]> = {
   preferenze: [],
@@ -233,9 +251,9 @@ export type TestiCmp = { -readonly [K in keyof (typeof TESTI_CMP)['it']]: string
 const cache = new Map<Lingua, { t: number; v: Doc }>()
 
 /** Global «privacy-cookies» senza ripiego sull'italiano (il ripiego lo fanno i testi qui sopra). */
-export async function privacyCookies(L: Lingua): Promise<Doc> {
+export async function privacyCookies(L: Lingua, fresco = false): Promise<Doc> {
   const x = cache.get(L)
-  if (x && Date.now() - x.t < 60_000) return x.v
+  if (!fresco && x && Date.now() - x.t < 60_000) return x.v
   let v: Doc = {}
   try {
     const qs = new URLSearchParams({ locale: L, 'fallback-locale': L === 'it' ? 'it' : 'none', depth: '0' })

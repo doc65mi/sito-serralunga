@@ -4,7 +4,7 @@ import { pubblico, soloRedazione } from '../access'
 import { link } from '../fields'
 
 /**
- * Version: 1.00
+ * Version: 1.01 (scheda «Servizi rilevati»: elenco letto da Sicurezza e tracciamento)
  * Impostazioni > Privacy e cookies: la piattaforma di gestione del consenso (CMP) del sito.
  * GDPR (UE 2016/679), art. 122 Codice privacy, Linee guida del Garante (provv. 231/2021),
  * Google Consent Mode v2. I codici di Google, Microsoft, Meta e LinkedIn restano in
@@ -27,13 +27,18 @@ export const PrivacyCookies: GlobalConfig = {
   admin: {
     group: 'Impostazioni',
     description:
-      'Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.00. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.',
+      'Banner dei cookie, preferenze per categoria, registro dei consensi e pagine Privacy Policy e Cookie Policy. Version 1.01. I codici di tracciamento si inseriscono in Impostazioni del sito > Sicurezza e tracciamento: partono solo dopo il consenso.',
   },
   access: { read: pubblico, update: soloRedazione },
   fields: [
     {
       type: 'tabs',
       tabs: [
+        {
+          label: 'Servizi rilevati',
+          description: 'Collegamento con Impostazioni del sito › Sicurezza e tracciamento: i servizi con un codice inserito lì entrano da soli nella CMP.',
+          fields: [{ name: 'serviziRilevati', type: 'ui', admin: { components: { Field: '/componenti/ServiziCmp#ServiziCmp' } } }],
+        },
         {
           label: 'Banner',
           fields: [

@@ -1,5 +1,6 @@
 import { default as default_5fc540fde5a5ee2475fd33bd51f7dd84 } from '../../../componenti/EtichettaRiga'
 import { NotaCollegamenti as NotaCollegamenti_690a99155d2c327b5854e9c2c78e596e } from '../../../componenti/NotaCollegamenti'
+import { ServiziCmp as ServiziCmp_ed29665d7cc9103458bd74238e9a2e74 } from '../../../componenti/ServiziCmp'
 import { ProvaEmail as ProvaEmail_19b8864d5bf73cec28ae79ee26bf6caa } from '../../../componenti/ProvaEmail'
 import { CampoModello as CampoModello_c0e2f720d59705c569c2c87c2b2ab6f4 } from '../../../componenti/CampoModello'
 import { default as default_a5c62363df18077b83503d139aa5ffbb } from '../../../componenti/Icona'
@@ -16,6 +17,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 export const importMap = {
   "/componenti/EtichettaRiga#default": default_5fc540fde5a5ee2475fd33bd51f7dd84,
   "/componenti/NotaCollegamenti#NotaCollegamenti": NotaCollegamenti_690a99155d2c327b5854e9c2c78e596e,
+  "/componenti/ServiziCmp#ServiziCmp": ServiziCmp_ed29665d7cc9103458bd74238e9a2e74,
   "/componenti/ProvaEmail#ProvaEmail": ProvaEmail_19b8864d5bf73cec28ae79ee26bf6caa,
   "/componenti/CampoModello#CampoModello": CampoModello_c0e2f720d59705c569c2c87c2b2ab6f4,
   "/componenti/Icona#default": default_a5c62363df18077b83503d139aa5ffbb,
