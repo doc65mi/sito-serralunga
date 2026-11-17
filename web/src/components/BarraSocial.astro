@@ -1,21 +1,21 @@
 ---
 /**
- * Barra social laterale (Version: 1.00): nera semitrasparente, a destra, a metà altezza.
+ * Barra social laterale (Version: 1.01): nera semitrasparente, a destra, a metà altezza.
+ * 1.01: in fondo la lente della ricerca, su fondo #595858 per separarla dalle icone social.
  * Solo su schermi larghi e solo se in Impostazioni > Social e barra mobile la posizione è «barra» o «entrambi».
  * Sui telefoni gli stessi profili stanno nel pulsante «Social» della barra in basso.
  */
 import Icona from './Icona.astro'
 import type { Doc } from '../lib/cms'
 import { posizioneSocial, socialAttivi } from '../lib/social'
-import { traduttore } from '../lib/lingua'
+import { percorso, traduttore } from '../lib/lingua'
 interface Props { imp: Doc }
 const { imp } = Astro.props
 const t = traduttore(Astro.locals.lingua)
-const profili = socialAttivi(imp)
-const mostra = profili.length > 0 && ['barra', 'entrambi'].includes(posizioneSocial(imp))
+// La lente c'è sempre; le icone social solo se la posizione scelta è «barra» o «entrambi».
+const profili = ['barra', 'entrambi'].includes(posizioneSocial(imp)) ? socialAttivi(imp) : []
 ---
-{mostra && (
-  <aside class="barra-social" aria-label={t('Serralunga sui social')}>
+<aside class="barra-social" aria-label={t('Social e ricerca')}>
     <ul>
       {profili.map((s) => (
         <li>
@@ -24,6 +24,10 @@ const mostra = profili.length > 0 && ['barra', 'entrambi'].includes(posizioneSoc
           </a>
         </li>
       ))}
+      <li class="barra-social__cerca">
+        <a href={percorso(Astro.locals.lingua, '/cerca/')} data-cerca-apri aria-haspopup="dialog" aria-label={t('Cerca nel sito')} title={t('Cerca nel sito')}>
+          <Icona nome="cerca" dim={20} />
+        </a>
+      </li>
     </ul>
   </aside>
-)}

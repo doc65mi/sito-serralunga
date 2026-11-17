@@ -49,6 +49,7 @@ const EN: Record<string, string> = {
   'Serralunga sui social': 'Serralunga on social media',
   'si apre in una nuova finestra': 'opens in a new window',
   'Barra rapida': 'Quick bar',
+  'Social e ricerca': 'Social media and search',
   Social: 'Social',
   Account: 'Account',
   Contatti: 'Contacts',

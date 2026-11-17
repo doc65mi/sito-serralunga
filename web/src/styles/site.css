@@ -283,6 +283,11 @@ h1, h2, h3 { margin: 0; font-weight: 300; }
 .barra-social ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .barra-social a { display: flex; align-items: center; justify-content: center; width: 46px; height: 44px; color: #fff; transition: background .2s; }
 .barra-social a:hover, .barra-social a:focus-visible { background: rgba(255, 255, 255, .16); }
+.barra-social__cerca a { background: #595858; }
+.barra-social__cerca a:hover, .barra-social__cerca a:focus-visible { background: #6b6a6a; }
+.barra-social li:first-child.barra-social__cerca { margin-top: -6px; }
+.barra-social li:last-child.barra-social__cerca { margin-bottom: -6px; }
+.barra-social:has(.barra-social__cerca:last-child) { border-bottom-left-radius: 4px; overflow: hidden; }
 .barra-mobile { display: none; }
 
 @media (max-width: 1100px) {
@@ -333,8 +338,6 @@ h1, h2, h3 { margin: 0; font-weight: 300; }
   html[data-con-barra] .testa__menu { max-height: calc(100vh - 76px - 63px); max-height: calc(100dvh - 76px - 63px); }
   html[data-con-barra].con-redazione body { padding-bottom: calc(115px + env(safe-area-inset-bottom)); }
   .con-redazione .barra-mobile { bottom: 52px; padding-bottom: 0; }
-  /* La ricerca sta già nella barra in basso: nel menu a panino non si ripete */
-  html[data-con-barra] .testa__cerca { display: none; }
 }
 /* Telefoni stretti (fino a 480 px): logo, lingue e panino stanno sempre sulla stessa riga */
 @media (max-width: 480px) {
