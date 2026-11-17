@@ -1,5 +1,5 @@
 /**
- * Lingue del sito e testi fissi dell'interfaccia (Version: 1.00).
+ * Lingue del sito e testi fissi dell'interfaccia (Version: 1.01: testi della ricerca).
  * I contenuti stanno nel CMS (un campo per lingua); qui solo le parole scritte nel codice.
  * La chiave è il testo italiano: se manca la traduzione resta l'italiano.
  */
@@ -248,6 +248,32 @@ const EN: Record<string, string> = {
   'Scegliete i cataloghi': 'Choose the catalogues',
   'Ecco i cataloghi scelti:': 'Here are the catalogues you chose:',
   'Hotel, ristoranti, studi di architettura, enti pubblici e rivenditori': 'Hotels, restaurants, architecture firms, public bodies and dealers',
+  // ricerca
+  'Cerca nel sito': 'Search the site',
+  'Cerca nel catalogo': 'Search the catalogue',
+  'Nome, designer o codice articolo': 'Name, designer or item code',
+  'Prodotti, designer, progetti, articoli…': 'Products, designers, projects, articles…',
+  Cancella: 'Clear',
+  'Risultati della ricerca': 'Search results',
+  Categorie: 'Categories',
+  Pagine: 'Pages',
+  'Ricerche recenti': 'Recent searches',
+  'Forse cercavi': 'Did you mean',
+  'Nessun risultato per': 'No results for',
+  'Vedi tutti i risultati': 'See all results',
+  'Cerca in tutto il sito': 'Search the whole site',
+  risultato: 'result',
+  risultati: 'results',
+  'La ricerca non è disponibile in questo momento.': 'Search is not available right now.',
+  'Nessun contenuto ha tutte le parole: ecco i più vicini.': 'Nothing contains all the words: here are the closest matches.',
+  'Anche con errori di battitura: proviamo a capire cosa cercate.': 'Typos are fine: we try to understand what you are looking for.',
+  'Risultati per': 'Results for',
+  'Cosa state cercando?': 'What are you looking for?',
+  'Filtra i risultati': 'Filter the results',
+  'Cerca prodotti, designer, progetti e articoli Serralunga: arredo outdoor di design per hôtellerie, contract e residenze.':
+    'Search Serralunga products, designers, projects and articles: outdoor design furniture for hospitality, contract and residences.',
+  'Provate con una parola sola, il nome di un designer o il codice articolo. Per richieste specifiche scriveteci: rispondiamo a studi, hotel e rivenditori.':
+    'Try a single word, a designer’s name or the item code. For specific requests write to us: we reply to studios, hotels and dealers.',
 }
 
 const DIZIONARI: Record<Lingua, Record<string, string>> = { it: {}, en: EN }

@@ -1,0 +1,67 @@
+---
+/**
+ * Campo di ricerca con anteprima dei risultati mentre si scrive (Version: 1.00).
+ * variante="finestra": dentro la finestra di ricerca (Ricerca.astro), su tutto il sito.
+ * variante="catalogo": in cima al catalogo, centrato sopra il menu delle categorie;
+ *   cerca prodotti, categorie e designer (anche per codice articolo).
+ * variante="pagina": in cima alla pagina dei risultati (/cerca/), con l'anteprima sotto al campo.
+ * Comportamento in scripts/ricerca.ts; senza JavaScript il modulo apre /cerca/?q=.
+ */
+import { percorso, traduttore } from '../lib/lingua'
+interface Props { variante?: 'finestra' | 'catalogo' | 'pagina'; valore?: string; ambito?: 'catalogo' }
+const { variante = 'finestra', valore = '' } = Astro.props
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const catalogo = variante === 'catalogo' || Astro.props.ambito === 'catalogo'
+const inLinea = variante !== 'finestra'
+const id = `cerca-${variante}`
+const testi = Object.fromEntries(
+  [
+    ['prodotto', 'Prodotti'], ['categoria', 'Categorie'], ['designer', 'Designer'], ['progetto', 'Progetti'],
+    ['spunto', 'Spunti e idee'], ['articolo', 'Journal'], ['pagina', 'Pagine'],
+    ...['Ricerche recenti', 'Categorie del catalogo', 'Forse cercavi', 'Nessun risultato per', 'Vedi tutti i risultati', 'Cerca in tutto il sito',
+      'risultato', 'risultati', 'La ricerca non è disponibile in questo momento.', 'Nessun contenuto ha tutte le parole: ecco i più vicini.'].map((k) => [k, k]),
+  ].map(([k, v]) => [k, t(v)]),
+)
+const etichetta = catalogo ? t('Cerca nel catalogo') : t('Cerca nel sito')
+const segnaposto = catalogo ? t('Nome, designer o codice articolo') : t('Prodotti, designer, progetti, articoli…')
+---
+<form
+  class:list={['cerca', `cerca--${variante}`]}
+  role="search"
+  action={percorso(L, '/cerca/')}
+  method="get"
+  data-cerca
+  data-cerca-campo={inLinea ? '' : undefined}
+  data-ambito={catalogo ? 'catalogo' : undefined}
+  data-lingua={L}
+  data-per-gruppo={variante === 'finestra' ? '3' : '4'}
+  data-testi={JSON.stringify(testi)}
+  aria-label={etichetta}
+>
+  <div class="cerca__campo">
+    <label for={id} class="sr-only">{etichetta}</label>
+    <svg class="cerca__lente" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <input
+      id={id}
+      name="q"
+      type="search"
+      value={valore}
+      placeholder={segnaposto}
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="search"
+      maxlength="80"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-expanded="false"
+      aria-controls={`${id}-lista`}
+    />
+    {catalogo && <input type="hidden" name="ambito" value="catalogo" />}
+    <button type="button" class="cerca__cancella" data-cerca-cancella aria-label={t('Cancella')}><span aria-hidden="true">×</span></button>
+    <button type="submit" class="cerca__invia">{t('Cerca')}</button>
+  </div>
+  <div class="cerca__lista" id={`${id}-lista`} role="listbox" aria-label={t('Risultati della ricerca')} data-cerca-lista></div>
+  <p class="sr-only" role="status" aria-live="polite" data-cerca-stato></p>
+</form>

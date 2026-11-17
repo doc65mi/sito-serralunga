@@ -21,6 +21,7 @@ import Footer from '../components/Footer.astro'
 import Blocchi from '../components/Blocchi.astro'
 import Tracciamento from '../components/Tracciamento.astro'
 import BannerCookie from '../components/BannerCookie.astro'
+import Ricerca from '../components/Ricerca.astro'
 import { env, impostazioni, SITO, spaziDi, type Doc } from '../lib/cms'
 import { isMedia, originale } from '../lib/media'
 import { piatto } from '../lib/testo'
@@ -192,6 +193,7 @@ const accento = imp.accento || '#A08A5F'
         </aside>
       )}
     </div>
+    <Ricerca />
     <BannerCookie imp={imp} />
     <script src="../scripts/site.ts"></script>
     <script src="../scripts/consenso.ts"></script>

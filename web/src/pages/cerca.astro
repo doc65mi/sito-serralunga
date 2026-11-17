@@ -1,0 +1,120 @@
+---
+/**
+ * Pagina dei risultati della ricerca (Version: 1.00): /cerca/?q=... e /en/cerca/?q=...
+ * Risultati raggruppati per tipo con i filtri (Tutti, Prodotti, Designer...); &ambito=catalogo
+ * limita a prodotti, categorie e designer (ricerca partita dal catalogo).
+ * Pagina noindex: i risultati di ricerca non vanno nei motori (file-md/seo.md).
+ */
+import Base from '../layouts/Base.astro'
+import CampoRicerca from '../components/CampoRicerca.astro'
+import { percorso, traduttore } from '../lib/lingua'
+import { AMBITO_CATALOGO, TIPI, cerca, type Esito, type Risultato, type Tipo } from '../lib/ricerca'
+
+const L = Astro.locals.lingua
+const t = traduttore(L)
+const u = (x?: string) => percorso(L, x)
+const q = (Astro.url.searchParams.get('q') || '').slice(0, 80).trim()
+const ambito = Astro.url.searchParams.get('ambito') === 'catalogo' ? 'catalogo' : undefined
+const filtro = TIPI.find((x) => x === Astro.url.searchParams.get('tipo'))
+const NOMI: Record<Tipo, string> = {
+  prodotto: t('Prodotti'), categoria: t('Categorie'), designer: t('Designer'), progetto: t('Progetti'),
+  spunto: t('Spunti e idee'), articolo: 'Journal', pagina: t('Pagine'),
+}
+let esito: Esito = { q, totale: 0, risultati: [], approssimata: false }
+let errore = false
+if (q) {
+  try {
+    esito = await cerca(q, L, { tipi: ambito ? AMBITO_CATALOGO : undefined, limite: 200 })
+  } catch (e) {
+    console.error('[ricerca]', e)
+    errore = true
+  }
+}
+const perTipo = new Map<Tipo, Risultato[]>()
+for (const r of esito.risultati) perTipo.set(r.tipo, [...(perTipo.get(r.tipo) || []), r])
+const tipiPresenti = TIPI.filter((x) => perTipo.has(x))
+const mostrati = filtro ? tipiPresenti.filter((x) => x === filtro) : tipiPresenti
+const link = (extra: Record<string, string | undefined>) => {
+  const p = new URLSearchParams()
+  for (const [k, v] of Object.entries({ q: q || undefined, ambito, ...extra })) if (v) p.set(k, v)
+  return `${u('/cerca/')}?${p}`
+}
+const titoloEvid = (r: Risultato) => {
+  const car = [...r.titolo]
+  const pezzi: { s: string; m: boolean }[] = []
+  let da = 0
+  for (const [a, b] of r.evid) {
+    if (a < da) continue
+    pezzi.push({ s: car.slice(da, a).join(''), m: false }, { s: car.slice(a, b).join(''), m: true })
+    da = b
+  }
+  pezzi.push({ s: car.slice(da).join(''), m: false })
+  return pezzi
+}
+const titolo = q ? `${t('Risultati per')} «${q}»` : t('Cerca nel sito')
+Astro.response.headers.set('X-Robots-Tag', 'noindex, follow')
+---
+<Base titolo={`${titolo} | Serralunga`} descrizione={t('Cerca prodotti, designer, progetti e articoli Serralunga: arredo outdoor di design per hôtellerie, contract e residenze.')} percorso={[{ nome: t('Cerca'), url: '/cerca/' }]} pagina="cerca" noindex>
+  <section class="risultati pad" data-cerca-pagina data-q={q || undefined}>
+    <div class="wrap">
+      <p class="kicker">{ambito ? t('Cerca nel catalogo') : t('Cerca nel sito')}</p>
+      <h1 class="risultati__titolo">{q ? <>{t('Risultati per')} <em class="acc">«{q}»</em></> : t('Cosa state cercando?')}</h1>
+      <div class="risultati__campo">
+        <CampoRicerca variante="pagina" valore={q} ambito={ambito} />
+      </div>
+
+      {errore && <p class="risultati__nota">{t('La ricerca non è disponibile in questo momento.')}</p>}
+
+      {q && !errore && (
+        <>
+          <p class="risultati__conteggio" role="status">
+            {esito.totale === 0 ? `${t('Nessun risultato per')} «${q}».` : `${esito.totale} ${esito.totale === 1 ? t('risultato') : t('risultati')}`}
+            {ambito && <> · <a href={`${u('/cerca/')}?q=${encodeURIComponent(q)}`}>{t('Cerca in tutto il sito')} →</a></>}
+          </p>
+          {esito.suggerimento && (
+            <p class="risultati__nota">{t('Forse cercavi')}: <a href={link({ q: esito.suggerimento, tipo: undefined })}><strong>{esito.suggerimento}</strong></a></p>
+          )}
+          {esito.approssimata && <p class="risultati__nota">{t('Nessun contenuto ha tutte le parole: ecco i più vicini.')}</p>}
+
+          {tipiPresenti.length > 1 && (
+            <nav class="risultati__filtri" aria-label={t('Filtra i risultati')}>
+              <ul>
+                <li><a href={link({ tipo: undefined })} aria-current={!filtro ? 'page' : undefined}>{t('Tutti')} <span>{esito.risultati.length}</span></a></li>
+                {tipiPresenti.map((x) => (
+                  <li><a href={link({ tipo: x })} aria-current={filtro === x ? 'page' : undefined}>{NOMI[x]} <span>{perTipo.get(x)!.length}</span></a></li>
+                ))}
+              </ul>
+            </nav>
+          )}
+
+          {mostrati.map((x) => (
+            <section class="risultati__gruppo" aria-labelledby={`gruppo-${x}`}>
+              <h2 id={`gruppo-${x}`} class="risultati__gruppo-titolo">{NOMI[x]} <span>{perTipo.get(x)!.length}</span></h2>
+              <ol class="risultati__elenco">
+                {perTipo.get(x)!.map((r) => (
+                  <li class="risultato">
+                    <a href={u(r.url)} class="risultato__link">
+                      {r.img ? <img class="risultato__foto" src={r.img} alt="" width="96" height="96" loading="lazy" decoding="async" /> : <span class="risultato__foto risultato__foto--vuota" aria-hidden="true"></span>}
+                      <span class="risultato__testo">
+                        <span class="risultato__titolo">{titoloEvid(r).map((p) => (p.m ? <mark>{p.s}</mark> : p.s))}</span>
+                        {r.sotto && <span class="risultato__sotto">{r.sotto}</span>}
+                        {r.estratto && <span class="risultato__estratto">{r.estratto}</span>}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+
+          {esito.totale === 0 && (
+            <div class="risultati__aiuto">
+              <p>{t('Provate con una parola sola, il nome di un designer o il codice articolo. Per richieste specifiche scriveteci: rispondiamo a studi, hotel e rivenditori.')}</p>
+              <p><a href={u('/catalogo/')}>{t('Tutto il catalogo')} →</a> &nbsp; <a href={u('/contatti/')}>{t('Contatti')} →</a></p>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  </section>
+</Base>

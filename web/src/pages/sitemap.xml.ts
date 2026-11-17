@@ -7,7 +7,7 @@ import { categorie, conteggi, urlCategoria, urlProdotto } from '../lib/catalogo'
 /** Sitemap con tutte le lingue: ogni indirizzo dichiara le versioni alternative (hreflang). */
 export const GET: APIRoute = async () => {
   const base = SITO
-  const [prodotti, casi, designer, spunti, articoli, pagine, materiali, contract, heritage] = await Promise.all([
+  const [prodotti, casi, designer, spunti, articoli, pagine, contract, materiali, heritage] = await Promise.all([
     elenco('prodotti', { depth: 0, limit: 2000, 'where[schedaPubblicata][equals]': 'true' }),
     elenco('case-history', { depth: 1 }),
     elenco('designer', { depth: 1, 'where[schedaPubblicata][equals]': 'true' }),

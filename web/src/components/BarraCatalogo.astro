@@ -1,8 +1,12 @@
 ---
-/** Barra delle categorie del Catalogo (Version: 1.00): macrocategorie con il numero di schede. */
+/**
+ * Barra delle categorie del Catalogo (Version: 1.01): macrocategorie con il numero di schede.
+ * 1.01: sopra la barra, centrato, il campo di ricerca del catalogo (prodotti, categorie, designer, codici).
+ */
 import type { Doc } from '../lib/cms'
 import { percorso, traduttore } from '../lib/lingua'
 import { macro, urlCategoria } from '../lib/catalogo'
+import CampoRicerca from './CampoRicerca.astro'
 interface Props { tutte: Doc[]; conteggi: Map<number | string, number>; corrente?: number | string | null }
 const { tutte, conteggi, corrente } = Astro.props
 const L = Astro.locals.lingua
@@ -10,6 +14,7 @@ const t = traduttore(L)
 const u = (x?: string) => percorso(L, x)
 const voci = macro(tutte).filter((c) => (conteggi.get(c.id) || 0) > 0)
 ---
+<div class="cerca-catalogo pad"><CampoRicerca variante="catalogo" /></div>
 {voci.length > 0 && (
   <nav class="barra-catalogo pad" aria-label={t('Categorie del catalogo')}>
     <ul class="wrap barra-catalogo__elenco">

@@ -1,0 +1,22 @@
+---
+/**
+ * Finestra di ricerca su tutto il sito (Version: 1.00), presente in ogni pagina.
+ * Si apre con [data-cerca-apri] (lente in testata, «Cerca» della barra mobile), con l'evento
+ * document 'serralunga:cerca' oppure con «/» e Ctrl/Cmd+K. Vedi scripts/ricerca.ts.
+ */
+import CampoRicerca from './CampoRicerca.astro'
+import { traduttore } from '../lib/lingua'
+import '../styles/ricerca.css'
+const t = traduttore(Astro.locals.lingua)
+---
+<dialog class="cerca-finestra" data-cerca-finestra aria-label={t('Cerca nel sito')}>
+  <div class="cerca-finestra__dentro">
+    <div class="cerca-finestra__testa">
+      <p class="cerca-finestra__titolo">{t('Cerca nel sito')}</p>
+      <button type="button" class="cerca-finestra__chiudi" data-cerca-chiudi>{t('Chiudi')} <span aria-hidden="true">×</span></button>
+    </div>
+    <CampoRicerca variante="finestra" />
+    <p class="cerca-finestra__aiuto">{t('Anche con errori di battitura: proviamo a capire cosa cercate.')}</p>
+  </div>
+</dialog>
+<script src="../scripts/ricerca.ts"></script>
