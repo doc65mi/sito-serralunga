@@ -1,5 +1,5 @@
 /**
- * Version: 1.01
+ * Version: 1.02
  * API interne per la modifica dalla pagina e per gli articoli in arrivo.
  * Tutte chiedono un utente della redazione, tranne /ricevi-articoli che chiede il token.
  * Le chiavi dei fornitori restano sul server: il browser non le riceve mai.
@@ -15,6 +15,7 @@ import sharp from 'sharp'
 import { formatSlug } from '../fields'
 import { chiediTesto, configAi, elencoModelli, ErroreAi, generaImmagine, ritoccaImmagine, type Fornitore } from './fornitori'
 import { uguali } from './segreto'
+import { tipologiaIt } from '../seed/correzioni-shop'
 
 const json = (dati: unknown, status = 200) => Response.json(dati, { status, headers: { 'cache-control': 'no-store' } })
 const errore = (messaggio: string, status = 400) => json({ errore: messaggio }, status)
@@ -363,7 +364,7 @@ async function prodottiDaUrl(req: PayloadRequest, indirizzi: string[]) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const p = ((await res.json()) as { product?: { title?: string; product_type?: string; images?: { src?: string }[] } }).product
         if (!p?.title) throw new Error('scheda vuota')
-        const voce: Voce = { url: `https://serralunga.com${u.pathname}`, nome: p.title, tipo: p.product_type || undefined }
+        const voce: Voce = { url: `https://serralunga.com${u.pathname}`, nome: p.title, tipo: tipologiaIt(p.product_type) || undefined }
         const foto = p.images?.[0]?.src
         if (foto) {
           const doc = await salvaFoto(req, await scaricaFoto(foto), p.title, p.title, 'Serralunga')

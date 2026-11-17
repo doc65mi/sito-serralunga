@@ -1,11 +1,14 @@
 /**
- * Creazioni dei designer prese dal catalogo di serralunga.com (Version: 1.00).
+ * Creazioni dei designer prese dal catalogo di serralunga.com (Version: 1.01).
+ * 1.01: tipologie corrette all'origine (correzioni-shop.ts: "pentola" → "vaso").
  * Si legge l'elenco pubblico dei prodotti (products.json di Shopify): ogni prodotto porta
  * tra le etichette il nome del designer. Per ogni designer si scelgono le foto di prodotto
  * e quelle ambientate dei suoi pezzi. Non si genera né si ritocca nulla: nomi, tipologie
  * e immagini sono quelli pubblicati sul sito.
  */
 import sharp from 'sharp'
+
+import { tipologiaEn, tipologiaIt } from './correzioni-shop'
 
 const SITO = 'https://serralunga.com'
 
@@ -73,11 +76,13 @@ export async function catalogo(): Promise<ProdottoShop[]> {
     // senza la versione inglese restano i nomi italiani
   }
   const perHandle = new Map(en.map((p) => [p.handle, p]))
+  // Tipologie corrette all'origine: su serralunga.com "pot" è tradotto "pentola" (correzioni-shop.ts).
   catalogoCache = it.map((p) => ({
     ...p,
+    product_type: tipologiaIt(p.product_type),
     tags: Array.isArray(p.tags) ? p.tags : String(p.tags || '').split(',').map((x) => x.trim()),
     titoloEn: perHandle.get(p.handle)?.title,
-    tipoEn: perHandle.get(p.handle)?.product_type,
+    tipoEn: tipologiaEn(perHandle.get(p.handle)?.product_type) || undefined,
     bodyEn: perHandle.get(p.handle)?.body_html,
     variantiEn: perHandle.get(p.handle)?.variants,
     opzioniEn: perHandle.get(p.handle)?.options,
