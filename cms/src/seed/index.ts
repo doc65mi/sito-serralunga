@@ -304,6 +304,20 @@ async function completaPagine() {
     const imp2 = (await payload.findGlobal({ slug: 'impostazioni', depth: 0 })) as unknown as { menu?: Voce[] }
     let menu2: Voce[] = JSON.parse(JSON.stringify(imp2.menu || []))
     const aggiunte: string[] = []
+    // Menu 1.01: voci nuove del modello (es. Contract > Su misura) aggiunte una sola volta per sito.
+    // Prima finivano tra le proposte in modalità prudente, quindi su Coolify la pagina c'era ma nel menu no.
+    const fileVoci = path.join(process.env.MEDIA_DIR || path.resolve(process.cwd(), 'media'), '.compiti', 'menu-voci-aggiunte.json')
+    let giaAggiunte: string[] = []
+    try {
+      giaAggiunte = JSON.parse(fs.readFileSync(fileVoci, 'utf8')) as string[]
+    } catch {
+      /* primo aggiornamento con questo registro */
+    }
+    // Voci già presenti oggi: contano come aggiunte, così se in futuro si tolgono dal pannello non tornano.
+    for (const modello of MENU)
+      for (const x of modello.voci || [])
+        if (menu2.find((v) => v.link === modello.link)?.voci?.some((y) => y.link === x.link) && !giaAggiunte.includes(`${modello.link} > ${x.link}`))
+          giaAggiunte.push(`${modello.link} > ${x.link}`)
     // Voce "Spunti e idee" di primo livello aggiunta per errore dal vecchio aggiornamento: ora è una sottovoce.
     const prima = menu2.length
     menu2 = menu2.filter((v) => !(v.link === '/spunti-e-idee/' && !v.voci?.length))
@@ -324,7 +338,11 @@ async function completaPagine() {
       if (!voce) continue
       voce.voci = voce.voci || []
       for (const x of modello.voci || []) {
+        const chiave = `${modello.link} > ${x.link}`
         if (!voce.voci.some((y) => y.link === x.link)) {
+          // Già aggiunta una volta e poi tolta dal pannello: è una scelta della redazione, non si rimette.
+          if (giaAggiunte.includes(chiave)) continue
+          giaAggiunte.push(chiave)
           // Al suo posto: subito dopo la voce che la precede nel modello (es. Su misura dopo Urbano), altrimenti in fondo.
           const pos = (modello.voci || []).indexOf(x)
           const prec = pos > 0 ? voce.voci.findIndex((y) => y.link === modello.voci![pos - 1].link) : -1
@@ -334,9 +352,12 @@ async function completaPagine() {
       }
     }
     if (aggiunte.length) {
-      await payload.updateGlobal({ slug: 'impostazioni', data: { menu: menu2 } as never })
+      // Cambio di struttura: si applica anche in modalità prudente, con copia di sicurezza (prudenza.ts).
+      await cambiaStruttura({ slug: 'impostazioni', data: { menu: menu2 } as never })
       log(`menu: ${aggiunte.join(', ')}`)
     }
+    fs.mkdirSync(path.dirname(fileVoci), { recursive: true })
+    fs.writeFileSync(fileVoci, JSON.stringify(giaAggiunte, null, 2))
   }
   // Pagine di servizio (Contatti, Listino, FAQ): si creano solo se mancano.
   for (const pg of PAGINE) {
