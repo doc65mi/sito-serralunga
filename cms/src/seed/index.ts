@@ -32,6 +32,7 @@ import { completaMateriali } from './materiali'
 import { nomeFile } from '../collections/Media'
 import { proteggi } from './prudenza'
 import { completaSchedeEsempio } from './schede-esempio'
+import { completaCaseHistory } from './case-history'
 import { completato, fase, fatto, giaFatti, segna } from './punto'
 
 const payload = await getPayload({ config })
@@ -429,6 +430,7 @@ if (process.env.SEED_SOLO === 'catalogo') {
   await fase('prodotti', () => importaCatalogo(payload, media, log), log)
   await fase('disegni-e-campioni', () => completaSchedeEsempio(payload, riempiVuoti, log), log)
   await fase('correzioni-shop', () => correggiImportati(payload, log, { aggiorna: correggi }), log)
+  await fase('case-history', () => completaCaseHistory(payload, media, { aggiorna: correggi, riempiVuoti }, log), log)
   await fase('foto-avif', () => rigeneraFormati(payload, log), log)
   const saltate = [...mediaCache.entries()].filter(([, id]) => id === null).map(([s]) => s)
   if (saltate.length) log(`${saltate.length} foto non caricate (si possono aggiungere dal pannello Media)`)
@@ -468,6 +470,8 @@ if (process.env.SEED_SOLO === 'aggiorna' || process.env.SEED_SOLO === 'designer'
   await fase('materiali', () => completaMateriali(payload, media, log), log)
   await fase('disegni-e-campioni', () => completaSchedeEsempio(payload, riempiVuoti, log), log)
   await fase('correzioni-shop', () => correggiImportati(payload, log, { aggiorna: correggi }), log)
+  // Case history 1.00: Vivienda Residences e prodotti utilizzati collegati alle schede del Catalogo.
+  await fase('case-history', () => completaCaseHistory(payload, media, { aggiorna: correggi, riempiVuoti }, log), log)
   // Con tutte le schede presenti non servono più le card vuote in fondo all'elenco.
   await fase('segnaposto-designer', () => payload.updateGlobal({ slug: 'pagina-designer', data: { segnaposto: 0 } as never }), log)
   await fase('testi-inglesi', () => applicaInglese(payload, log, { globali: ['impostazioni', 'pagina-installazioni', 'pagina-spunti'], collezioni: ['designer', 'pagine'] }), log)
@@ -536,6 +540,7 @@ await completaDesigner()
 // 5c. Catalogo B2B (categorie e schede prodotto da serralunga.com)
 await importaCatalogo(payload, media, log)
 await completaSchedeEsempio(payload, riempiVuoti, log)
+await completaCaseHistory(payload, media, { aggiorna: correggi, riempiVuoti }, log)
 
 // 6. Inglese: riempie i campi ancora vuoti con le traduzioni di partenza
 await applicaInglese(payload, log)

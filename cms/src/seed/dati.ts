@@ -171,18 +171,12 @@ export const caseLoge = async (m: Media) => ({
     titolo: "Cosa c'è\nsu questa terrazza",
     testo:
       'La fornitura per La Loge du Massif: le poltrone Canisse in antracite, disposte a corona intorno al braciere e sui tavoli del dehors.',
+    // Il collegamento alla scheda del Catalogo (Poltrona Canisse) lo fa case-history.ts dopo l'importazione.
     voci: [
       {
         nome: 'Poltrona Canisse',
         sottotitolo: 'Arredo outdoor · LLDPE tinto in massa · antracite',
-        nota: 'quantità in opera da confermare',
         immagine: await m('assets/loge-10.jpg', 'Le poltrone Canisse in corona attorno al braciere'),
-      },
-      {
-        nome: 'Cuscini di seduta',
-        sottotitolo: 'Complemento · tessuto outdoor sfoderabile',
-        nota: 'codice e quantità da confermare',
-        segnapostoImmagine: 'immagine prodotto\ncuscino di seduta — da fornire',
       },
     ],
   },
