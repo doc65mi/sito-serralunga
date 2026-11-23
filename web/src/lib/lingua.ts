@@ -1,5 +1,5 @@
 /**
- * Lingue del sito e testi fissi dell'interfaccia (Version: 1.02: testi della CMP privacy e cookie).
+ * Lingue del sito e testi fissi dell'interfaccia (Version: 1.03: tendine della scheda prodotto; 1.02: testi della CMP privacy e cookie).
  * I contenuti stanno nel CMS (un campo per lingua); qui solo le parole scritte nel codice.
  * La chiave è il testo italiano: se manca la traduzione resta l'italiano.
  */
@@ -254,6 +254,15 @@ const EN: Record<string, string> = {
   'Nome del prodotto': 'Product name',
   'Tipologia': 'Type',
   'Materiale e finitura': 'Material and finish',
+  // Scheda prodotto 1.04
+  Caratteristiche: 'Features',
+  Dimensioni: 'Dimensions',
+  'Istruzioni per la cura': 'Care instructions',
+  'Informazioni sulla spedizione': 'Shipping information',
+  'Sistema di illuminazione': 'Light system',
+  'installazione, materiale e manutenzione': 'installation, material and care',
+  'Risposte tratte dalla documentazione tecnica Serralunga.': 'Answers taken from Serralunga technical documentation.',
+  'Illustrazione dal catalogo Serralunga': 'Illustration from the Serralunga catalogue',
   'Luce': 'Light',
   'Con e senza luce': 'With and without light',
   'Con luce': 'With light',

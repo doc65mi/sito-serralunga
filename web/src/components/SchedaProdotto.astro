@@ -1,7 +1,13 @@
 ---
 /**
- * Scheda prodotto — Version: 1.03. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * Scheda prodotto — Version: 1.04. Template: template/Aqua Lounger - Scheda tecnica.dc.html
  * Usata dalle schede del Catalogo (/catalogo/{categoria}/{slug}/) e dal vecchio /prodotti/{slug}/.
+ * 1.04: "Materiale e finitura" subito sotto i colori; tendine (Caratteristiche, Dimensioni con
+ *       disegno quotato e disegno tecnico, Istruzioni per la cura, Informazioni sulla spedizione,
+ *       Sistema di illuminazione se c'è) con i testi della scheda serralunga.com o del pannello;
+ *       icone del catalogo (uso esterno, ambienti salini, Clean Fighter, UL94-V2) e domande
+ *       frequenti con dati strutturati FAQPage, solo dove la scheda tecnica le prevede
+ *       (lib/specifiche.ts). Domande e icone per ora solo in italiano.
  * 1.03: sotto ogni miniatura nome del colore e codice articolo della variante fotografata (anche
  *       sulla foto in evidenza, nel testo alternativo e nella lightbox): vedi coloreDellaFoto().
  * 1.02: foto in evidenza a slider con dissolvenza (frecce, punti-miniatura, swipe, tastiera, pausa)
@@ -23,6 +29,7 @@ import { isMedia, src, urlFile } from '../lib/media'
 import { chiaro, piatto } from '../lib/testo'
 import { percorso, traduttore } from '../lib/lingua'
 import { urlProdotto } from '../lib/catalogo'
+import { cleanFighter, righeMisure, specifiche, testiScheda } from '../lib/specifiche'
 
 interface Props {
   p: Doc
@@ -96,6 +103,21 @@ const tondo = q.forma === 'cilindro' || q.forma === 'troncoConico'
 const cmq = (v: number) => ({ '@type': 'QuantitativeValue', value: v, unitCode: 'CMT' })
 const descrizione = p.seo?.descrizione || piatto(p.descrizione || '').slice(0, 158)
 
+// 1.04 Tendine, icone e domande frequenti.
+const scheda = testiScheda(p, L)
+const misureScheda = righeMisure(scheda.dimensioni)
+const misureLibere = scheda.dimensioni && !misureScheda.length ? scheda.dimensioni : ''
+const spec = L === 'it' ? specifiche(p, scheda, campioni) : { icone: [], faq: [] }
+const icone = p.scheda?.iconeAutomatiche === false ? [] : spec.icone
+const faqManuali: Doc[] = (p.scheda?.faq || []).filter((f: Doc) => f?.domanda && f?.risposta)
+const faq = [
+  ...faqManuali.map((f, k) => ({ domanda: f.domanda, risposta: f.risposta, campo: `scheda.faq.${k}`, immagine: undefined })),
+  ...(p.scheda?.faqAutomatiche === false ? [] : spec.faq.map((f) => ({ ...f, campo: undefined }))),
+]
+const conDimensioni = misureScheda.length > 0 || !!misureLibere || (p.dimensioni || []).length > 0 || conQuote || isMedia(p.disegno?.immagine)
+const tendine = !!(scheda.caratteristiche || icone.length || conDimensioni || scheda.cura || scheda.spedizione || scheda.illuminazione)
+const ico = (f: string) => `/specifiche/${f}`
+
 const jsonld = [{
   '@type': 'Product',
   '@id': `${SITO}${u(qui)}#prodotto`,
@@ -120,7 +142,19 @@ const jsonld = [{
       }
     : {}),
   ...(d ? { creator: { '@type': 'Person', name: d.nome } } : {}),
-}]
+}, ...(faq.length
+  ? [{
+      '@type': 'FAQPage',
+      '@id': `${SITO}${u(qui)}#domande`,
+      about: { '@id': `${SITO}${u(qui)}#prodotto` },
+      inLanguage: L,
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: piatto(f.domanda),
+        acceptedAnswer: { '@type': 'Answer', text: piatto(f.risposta) },
+      })),
+    }]
+  : [])]
 ---
 <Base
   titolo={p.seo?.titolo || `${p.nome} | Serralunga`}
@@ -217,7 +251,7 @@ const jsonld = [{
                     style={c.hex ? `background:${c.hex}` : undefined}
                     aria-hidden="true"
                   >{!c.hex && <Img media={c.campione} alt="" sizes="30px" larghezza={400} />}</span>
-                  <span class="campioni__codice">{c.codice}</span>
+                  <span class="campioni__codice">{c.codice}{L === 'it' && cleanFighter(c.codice) === false && <img class="campioni__cf" src={ico('non-clean-fighter.png')} alt="" title="Non Clean Fighter" width="14" height="14" loading="lazy" />}</span>
                   <span class="campioni__nome">{c.nome}</span>
                 </li>
               ))}
@@ -225,12 +259,77 @@ const jsonld = [{
             <a class="campioni__link" href={u('/materiali/colori/')}>{t('Cartella colori completa')}</a>
           </div>
         )}
-        {(p.dimensioni || []).length > 0 && (
-          <dl class="misure">
-            {p.dimensioni.map((m: Doc) => <div><dt>{m.etichetta}</dt><dd>{m.valore}</dd></div>)}
+        {(materiali.length > 0 || d) && (
+          <dl class="misure misure--info">
+            {materiali.length > 0 && <div><dt>{t('Materiale e finitura')}</dt><dd>{materiali.join(', ')}</dd></div>}
+            {d && <div><dt>{t('Design')}</dt><dd>{d.nome}</dd></div>}
           </dl>
         )}
-        {conQuote && <DisegnoQuotato q={q} nome={p.nome} />}
+        {tendine && (
+          <div class="tendine" id="prodotto-scheda-tecnica">
+            {(scheda.caratteristiche || icone.length > 0) && (
+              <details class="tendina" name="scheda-prodotto" id="caratteristiche" open>
+                <summary>{t('Caratteristiche')}</summary>
+                <div class="tendina__corpo">
+                  <Testo class="tendina__testo" campo="scheda.caratteristiche" t={scheda.caratteristiche} />
+                  {icone.length > 0 && (
+                    <ul class="icone-tec" aria-label="Specifiche dal catalogo Serralunga">
+                      {icone.map((i) => (
+                        <li class="icone-tec__voce">
+                          <picture><source srcset={ico(`${i.file}.avif`)} type="image/avif" /><img src={ico(`${i.file}.png`)} alt="" width="44" height="44" loading="lazy" decoding="async" /></picture>
+                          <span class="icone-tec__testo">{i.testo}{i.nota && <span class="icone-tec__nota">{i.nota}</span>}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </details>
+            )}
+            {conDimensioni && (
+              <details class="tendina" name="scheda-prodotto" id="disegno">
+                <summary>{t('Dimensioni')}</summary>
+                <div class="tendina__corpo">
+                  {misureScheda.length > 0 && !conQuote && (
+                    <dl class="misure">
+                      {misureScheda.map((m) => <div><dt>{m.etichetta}</dt><dd>{m.valore}</dd></div>)}
+                    </dl>
+                  )}
+                  {misureLibere && <Testo class="tendina__testo" campo="scheda.dimensioni" t={misureLibere} />}
+                  {(p.dimensioni || []).length > 0 && (
+                    <dl class="misure">
+                      {p.dimensioni.map((m: Doc) => <div><dt>{m.etichetta}</dt><dd>{m.valore}</dd></div>)}
+                    </dl>
+                  )}
+                  {conQuote && <DisegnoQuotato q={q} nome={p.nome} />}
+                  {isMedia(p.disegno?.immagine) && (
+                    <figure class="tendina__disegno">
+                      <Img campo="disegno.immagine" media={p.disegno.immagine} sizes="(max-width: 900px) 100vw, 40vw" larghezza={1800} data-lb="prodotto" />
+                      {p.disegno?.testo && <Testo as="figcaption" class="tendina__nota" campo="disegno.testo" t={p.disegno.testo} />}
+                    </figure>
+                  )}
+                </div>
+              </details>
+            )}
+            {scheda.illuminazione && (
+              <details class="tendina" name="scheda-prodotto" id="illuminazione">
+                <summary>{t('Sistema di illuminazione')}</summary>
+                <div class="tendina__corpo"><Testo class="tendina__testo" campo="scheda.illuminazione" t={scheda.illuminazione} /></div>
+              </details>
+            )}
+            {scheda.cura && (
+              <details class="tendina" name="scheda-prodotto" id="cura">
+                <summary>{t('Istruzioni per la cura')}</summary>
+                <div class="tendina__corpo"><Testo class="tendina__testo" campo="scheda.cura" t={scheda.cura} /></div>
+              </details>
+            )}
+            {scheda.spedizione && (
+              <details class="tendina" name="scheda-prodotto" id="spedizione">
+                <summary>{t('Informazioni sulla spedizione')}</summary>
+                <div class="tendina__corpo"><Testo class="tendina__testo" campo="scheda.spedizione" t={scheda.spedizione} /></div>
+              </details>
+            )}
+          </div>
+        )}
         {finiture.length > 0 && (
           <details class="varianti" open={finiture.length <= 12}>
             <summary><span class="etichetta">{t('Varianti disponibili')}</span> <span class="varianti__n">{finiture.length}</span></summary>
@@ -240,15 +339,9 @@ const jsonld = [{
             </table>
           </details>
         )}
-        {(materiali.length > 0 || d) && (
-          <dl class="misure misure--info">
-            {materiali.length > 0 && <div><dt>{t('Materiale e finitura')}</dt><dd>{materiali.join(', ')}</dd></div>}
-            {d && <div><dt>{t('Design')}</dt><dd>{d.nome}</dd></div>}
-          </dl>
-        )}
         <div class="btn-riga">
           <a href="#richiesta" class="btn btn--scuro">{p.pulsante || t('Richiedi scheda e campionatura')}</a>
-          {(p.disegno?.immagine || pdf) && <a href={pdf || '#disegno'} class="btn btn--bordo" download={pdf ? '' : undefined}>{t('Disegno tecnico')}</a>}
+          {(p.disegno?.immagine || pdf) && <a href={pdf || '#disegno'} class="btn btn--bordo" download={pdf ? '' : undefined} data-apri-tendina={pdf ? undefined : 'disegno'}>{t('Disegno tecnico')}</a>}
         </div>
       </div>
     </div>
@@ -262,14 +355,31 @@ const jsonld = [{
     </section>
   )}
 
-  {isMedia(p.disegno?.immagine) && (
-    <section id="disegno" class="sez-int pad">
-      <div class="disegno">
+
+  {faq.length > 0 && (
+    <section class="sez-int pad fondo-chiaro faq-prodotto" id="domande" aria-labelledby="domande-titolo">
+      <div class="wrap faq-prodotto__griglia">
         <div class="intesta">
-          <Testo as="h2" class="titolo" campo="disegno.titolo" t={p.disegno.titolo} />
-          <Testo class="testo testo--s" campo="disegno.testo" t={p.disegno.testo} />
+          <span class="kicker">{t('Domande frequenti')}</span>
+          <h2 class="titolo titolo--m" id="domande-titolo">{`${p.nome}: ${t('installazione, materiale e manutenzione')}`}</h2>
+          <p class="testo testo--s">{t('Risposte tratte dalla documentazione tecnica Serralunga.')}</p>
         </div>
-        <div class="disegno__tavola"><Img campo="disegno.immagine" media={p.disegno.immagine} sizes="(max-width: 1180px) 100vw, 1060px" larghezza={1800} data-lb="prodotto" /></div>
+        <div class="faq-prodotto__elenco">
+          {faq.map((f, k) => (
+            <details class="tendina tendina--faq" name="faq-prodotto" open={k === 0}>
+              <summary><h3 class="tendina__domanda" data-campo={f.campo ? `${f.campo}.domanda` : undefined}>{f.domanda}</h3></summary>
+              <div class="tendina__corpo">
+                <Testo class="tendina__testo" campo={f.campo ? `${f.campo}.risposta` : undefined} t={f.risposta} />
+                {f.immagine && (
+                  <figure class="tendina__figura">
+                    <picture><source srcset={ico(`${f.immagine.file}.avif`)} type="image/avif" /><img src={ico(`${f.immagine.file}.png`)} alt={f.immagine.alt} width={f.immagine.w} height={f.immagine.h} loading="lazy" decoding="async" /></picture>
+                    <figcaption class="tendina__nota">{t('Illustrazione dal catalogo Serralunga')}</figcaption>
+                  </figure>
+                )}
+              </div>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
   )}
@@ -385,4 +495,15 @@ const jsonld = [{
       </div>
     </div>
   </section>
+  <script>
+    // Il pulsante "Disegno tecnico" e i link #disegno, #cura… aprono la tendina corrispondente.
+    const apri = (id: string) => {
+      const el = document.getElementById(id)
+      if (el instanceof HTMLDetailsElement) { el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+    }
+    document.querySelectorAll<HTMLElement>('[data-apri-tendina]').forEach((b) =>
+      b.addEventListener('click', (e) => { e.preventDefault(); apri(b.dataset.apriTendina!) }),
+    )
+    if (location.hash.length > 1) apri(decodeURIComponent(location.hash.slice(1)))
+  </script>
 </Base>

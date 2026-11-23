@@ -16,6 +16,7 @@ import * as migration_20261117_155756_cmp_privacy_cookies from './20261117_15575
 import * as migration_20261117_163619_contract_su_misura from './20261117_163619_contract_su_misura';
 import * as migration_20261117_170711_indicizzazione from './20261117_170711_indicizzazione';
 import * as migration_20261117_174014_cmp_banner_sempre from './20261117_174014_cmp_banner_sempre';
+import * as migration_20261123_140945_scheda_tecnica_faq from './20261123_140945_scheda_tecnica_faq';
 
 export const migrations = [
   {
@@ -106,6 +107,11 @@ export const migrations = [
   {
     up: migration_20261117_174014_cmp_banner_sempre.up,
     down: migration_20261117_174014_cmp_banner_sempre.down,
-    name: '20261117_174014_cmp_banner_sempre'
+    name: '20261117_174014_cmp_banner_sempre',
+  },
+  {
+    up: migration_20261123_140945_scheda_tecnica_faq.up,
+    down: migration_20261123_140945_scheda_tecnica_faq.down,
+    name: '20261123_140945_scheda_tecnica_faq'
   },
 ];

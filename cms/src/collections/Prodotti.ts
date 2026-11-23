@@ -22,7 +22,8 @@ export const MATERIALI = [
 ]
 
 /**
- * Version: 1.01. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * Version: 1.04. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * 1.04: scheda tecnica (testi delle tendine, domande frequenti, icone automatiche).
  * 1.01: campioni dalla cartella colori (quadrati 30×30) e disegno quotato generato dalle misure.
  */
 
@@ -290,6 +291,40 @@ export const Prodotti: CollectionConfig = {
                   label: 'Immagini (4:3)',
                   maxRows: 3,
                   fields: [immagine('immagine', 'Immagine', { required: true })],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Scheda tecnica e FAQ',
+          description:
+            'Tendine della scheda (Caratteristiche, Dimensioni, Istruzioni per la cura, Informazioni sulla spedizione). Un campo vuoto mostra il testo della scheda serralunga.com, se presente. Domande e icone automatiche vengono dalla scheda tecnica Serralunga (web/src/lib/specifiche.ts) e compaiono solo dove si applicano.',
+          fields: [
+            {
+              name: 'scheda',
+              type: 'group',
+              label: 'Scheda tecnica',
+              fields: [
+                area('caratteristiche', 'Caratteristiche', { admin: { description: 'Vuoto = testo di serralunga.com. ' + 'Un a capo resta un a capo.' } }),
+                area('dimensioni', 'Dimensioni (testo)', { admin: { description: 'Una misura per riga, es. "altezza: 90 cm". Vuoto = misure di serralunga.com. Con il disegno quotato le misure compaiono nel disegno.' } }),
+                area('cura', 'Istruzioni per la cura', { admin: { description: 'Vuoto = testo di serralunga.com.' } }),
+                area('spedizione', 'Informazioni sulla spedizione', { admin: { description: 'Vuoto = testo di serralunga.com.' } }),
+                area('illuminazione', 'Sistema di illuminazione', { admin: { description: 'Solo per i prodotti con luce. Vuoto = testo di serralunga.com.' } }),
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'iconeAutomatiche', type: 'checkbox', label: 'Icone del catalogo (uso esterno, Clean Fighter, UL94-V2…)', defaultValue: true },
+                    { name: 'faqAutomatiche', type: 'checkbox', label: 'Domande frequenti dalla scheda tecnica', defaultValue: true },
+                  ],
+                },
+                {
+                  name: 'faq',
+                  type: 'array',
+                  label: 'Domande frequenti aggiunte a mano',
+                  labels: { singular: 'Domanda', plural: 'Domande' },
+                  admin: { description: 'Compaiono prima di quelle automatiche e nei dati strutturati FAQPage. Solo informazioni verificate, niente prezzi.' },
+                  fields: [testo('domanda', 'Domanda', { required: true }), area('risposta', 'Risposta', { required: true })],
                 },
               ],
             },

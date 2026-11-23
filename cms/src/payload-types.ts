@@ -330,6 +330,43 @@ export interface Prodotti {
         }[]
       | null;
   };
+  scheda?: {
+    /**
+     * Vuoto = testo di serralunga.com. Un a capo resta un a capo.
+     */
+    caratteristiche?: string | null;
+    /**
+     * Una misura per riga, es. "altezza: 90 cm". Vuoto = misure di serralunga.com. Con il disegno quotato le misure compaiono nel disegno.
+     */
+    dimensioni?: string | null;
+    /**
+     * Vuoto = testo di serralunga.com.
+     */
+    cura?: string | null;
+    /**
+     * Vuoto = testo di serralunga.com.
+     */
+    spedizione?: string | null;
+    /**
+     * Solo per i prodotti con luce. Vuoto = testo di serralunga.com.
+     */
+    illuminazione?: string | null;
+    iconeAutomatiche?: boolean | null;
+    faqAutomatiche?: boolean | null;
+    /**
+     * Compaiono prima di quelle automatiche e nei dati strutturati FAQPage. Solo informazioni verificate, niente prezzi.
+     */
+    faq?:
+      | {
+          domanda: string;
+          /**
+           * Un a capo resta un a capo. Le parole tra _trattini bassi_ diventano corsivo color oro.
+           */
+          risposta: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   /**
    * Ritratto, nome e numeri arrivano dalla scheda del designer.
    */
@@ -3398,6 +3435,24 @@ export interface ProdottiSelect<T extends boolean = true> {
           | T
           | {
               immagine?: T;
+              id?: T;
+            };
+      };
+  scheda?:
+    | T
+    | {
+        caratteristiche?: T;
+        dimensioni?: T;
+        cura?: T;
+        spedizione?: T;
+        illuminazione?: T;
+        iconeAutomatiche?: T;
+        faqAutomatiche?: T;
+        faq?:
+          | T
+          | {
+              domanda?: T;
+              risposta?: T;
               id?: T;
             };
       };
