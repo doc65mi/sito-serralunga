@@ -1,6 +1,6 @@
 ---
 /**
- * Disegno quotato (Version: 1.00).
+ * Disegno quotato (Version: 1.01: sul telefono le etichette Prospetto/Pianta escono dal disegno, testi ≥16px).
  * Prospetto e pianta in scala, disegnati in SVG dalle misure della scheda prodotto
  * (Payload: prodotti › Specifiche e disegno › Disegno quotato automatico).
  * Sagome: parallelepipedo (L × P × H), cilindro (Ø × H), troncoConico (Ø in alto, Ø base facoltativo, H).
@@ -86,6 +86,7 @@ const nota = [
   <figure class="quotato" id={id}>
     <span class="etichetta">{tt('Dimensioni', 'Dimensions')}</span>
     <div class="quotato__tavola">
+    <p class="quotato__legenda" aria-hidden="true">{tt('Prospetto · Pianta', 'Elevation · Plan')}</p>
     <svg class="quotato__svg" viewBox={`0 0 ${Math.round(larg)} ${Math.round(alt)}`} style={`max-width:${Math.round(larg)}px`} role="img" aria-labelledby={`${id}-t ${id}-d`} xmlns="http://www.w3.org/2000/svg">
       <title id={`${id}-t`}>{`${tt('Disegno quotato', 'Dimensioned drawing')} — ${nome}`}</title>
       <desc id={`${id}-d`}>{descr}</desc>
