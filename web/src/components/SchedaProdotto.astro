@@ -1,6 +1,6 @@
 ---
 /**
- * Scheda prodotto — Version: 1.04. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * Scheda prodotto — Version: 1.05. Template: template/Aqua Lounger - Scheda tecnica.dc.html
  * Usata dalle schede del Catalogo (/catalogo/{categoria}/{slug}/) e dal vecchio /prodotti/{slug}/.
  * 1.04: "Materiale e finitura" subito sotto i colori; tendine (Caratteristiche, Dimensioni con
  *       disegno quotato e disegno tecnico, Istruzioni per la cura, Informazioni sulla spedizione,
@@ -115,8 +115,17 @@ const faq = [
   ...(p.scheda?.faqAutomatiche === false ? [] : spec.faq.map((f) => ({ ...f, campo: undefined }))),
 ]
 const conDimensioni = misureScheda.length > 0 || !!misureLibere || (p.dimensioni || []).length > 0 || conQuote || isMedia(p.disegno?.immagine)
-const tendine = !!(scheda.caratteristiche || icone.length || conDimensioni || scheda.cura || scheda.spedizione || scheda.illuminazione)
+const tendine = !!(finiture.length || scheda.caratteristiche || icone.length || conDimensioni || scheda.cura || scheda.spedizione || scheda.illuminazione)
 const ico = (f: string) => `/specifiche/${f}`
+/** Elenchi puntati: una voce per riga; per le Caratteristiche anche una voce per frase. */
+const voci = (x?: string, frasi = false) =>
+  (x || '')
+    .split('\n')
+    .flatMap((r) => (frasi && !/^[^:]{2,30}:/.test(r) ? r.split(/(?<=[a-zà-ù0-9%)°C])\.\s+(?=[A-ZÀ-Ú])/) : [r]))
+    .map((r) => r.trim().replace(/\.$/, ''))
+    .filter(Boolean)
+const puntiCar = voci(scheda.caratteristiche, true)
+const puntiCura = voci(scheda.cura)
 
 const jsonld = [{
   '@type': 'Product',
@@ -231,7 +240,7 @@ const jsonld = [{
         <Testo class="prodotto__descr" campo="descrizione" t={p.descrizione} />
         {(p.colori || []).length > 0 && (
           <div class="colori">
-            <span class="etichetta">{t('Cartella colori')}</span>
+            <span class="etichetta titolo-spec">{t('Cartella colori')}</span>
             <ul class="colori__elenco">
               {p.colori.map((c: Doc) => (
                 <li title={c.nome} class={chiaro(c.hex) ? 'chiaro' : undefined} style={`background:${c.hex}`}><span class="sr-only">{c.nome}</span></li>
@@ -242,7 +251,7 @@ const jsonld = [{
         )}
         {campioni.length > 0 && (
           <div class="campioni" id="prodotto-colori">
-            <span class="etichetta">{t('Colori disponibili')}</span>
+            <h2 class="etichetta titolo-spec">{t('Colori disponibili')}</h2>
             <ul class="campioni__elenco">
               {campioni.map((c) => (
                 <li class="campioni__voce">
@@ -271,12 +280,16 @@ const jsonld = [{
               <details class="tendina" name="scheda-prodotto" id="caratteristiche" open>
                 <summary>{t('Caratteristiche')}</summary>
                 <div class="tendina__corpo">
-                  <Testo class="tendina__testo" campo="scheda.caratteristiche" t={scheda.caratteristiche} />
+                  {puntiCar.length > 1 ? (
+                    <ul class="tendina__punti" data-campo-elenco="scheda.caratteristiche">{puntiCar.map((v) => <li>{v}</li>)}</ul>
+                  ) : (
+                    <Testo class="tendina__testo" campo="scheda.caratteristiche" t={scheda.caratteristiche} />
+                  )}
                   {icone.length > 0 && (
                     <ul class="icone-tec" aria-label="Specifiche dal catalogo Serralunga">
                       {icone.map((i) => (
                         <li class="icone-tec__voce">
-                          <picture><source srcset={ico(`${i.file}.avif`)} type="image/avif" /><img src={ico(`${i.file}.png`)} alt="" width="44" height="44" loading="lazy" decoding="async" /></picture>
+                          <picture><source srcset={ico(`${i.file}.avif`)} type="image/avif" /><img src={ico(`${i.file}.png`)} alt="" width="50" height="50" loading="lazy" decoding="async" /></picture>
                           <span class="icone-tec__testo">{i.testo}{i.nota && <span class="icone-tec__nota">{i.nota}</span>}</span>
                         </li>
                       ))}
@@ -310,6 +323,17 @@ const jsonld = [{
                 </div>
               </details>
             )}
+            {finiture.length > 0 && (
+              <details class="tendina" name="scheda-prodotto" id="varianti">
+                <summary>{t('Varianti disponibili')} <span class="varianti__n">{finiture.length}</span></summary>
+                <div class="tendina__corpo">
+                  <table class="varianti__tabella">
+                    <thead><tr><th scope="col">{t('Variante')}</th><th scope="col">{t('Codice articolo')}</th></tr></thead>
+                    <tbody>{finiture.map((f) => <tr><td>{f.nome}</td><td>{f.codice || '—'}</td></tr>)}</tbody>
+                  </table>
+                </div>
+              </details>
+            )}
             {scheda.illuminazione && (
               <details class="tendina" name="scheda-prodotto" id="illuminazione">
                 <summary>{t('Sistema di illuminazione')}</summary>
@@ -319,7 +343,13 @@ const jsonld = [{
             {scheda.cura && (
               <details class="tendina" name="scheda-prodotto" id="cura">
                 <summary>{t('Istruzioni per la cura')}</summary>
-                <div class="tendina__corpo"><Testo class="tendina__testo" campo="scheda.cura" t={scheda.cura} /></div>
+                <div class="tendina__corpo">
+                  {puntiCura.length > 1 ? (
+                    <ul class="tendina__punti" data-campo-elenco="scheda.cura">{puntiCura.map((v) => <li>{v}</li>)}</ul>
+                  ) : (
+                    <Testo class="tendina__testo" campo="scheda.cura" t={scheda.cura} />
+                  )}
+                </div>
               </details>
             )}
             {scheda.spedizione && (
@@ -329,15 +359,6 @@ const jsonld = [{
               </details>
             )}
           </div>
-        )}
-        {finiture.length > 0 && (
-          <details class="varianti" open={finiture.length <= 12}>
-            <summary><span class="etichetta">{t('Varianti disponibili')}</span> <span class="varianti__n">{finiture.length}</span></summary>
-            <table class="varianti__tabella">
-              <thead><tr><th scope="col">{t('Variante')}</th><th scope="col">{t('Codice articolo')}</th></tr></thead>
-              <tbody>{finiture.map((f) => <tr><td>{f.nome}</td><td>{f.codice || '—'}</td></tr>)}</tbody>
-            </table>
-          </details>
         )}
         <div class="btn-riga">
           <a href="#richiesta" class="btn btn--scuro">{p.pulsante || t('Richiedi scheda e campionatura')}</a>
