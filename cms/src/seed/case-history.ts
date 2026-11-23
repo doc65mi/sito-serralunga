@@ -1,5 +1,7 @@
 /**
- * Version: 1.00
+ * Version: 1.01
+ * 1.01: Vivienda Residences nella sezione «Hotel e resort» di Installazioni (prima in «Residenze»): è una struttura
+ *       ricettiva (hotel residence). Sui siti già avviati si sposta solo se categoria ed etichetta sono ancora quelle di partenza.
  * Case history aggiunte dopo il primo avvio e collegamento dei "Prodotti utilizzati" alle schede del Catalogo.
  *
  * - Vivienda Residences (Arabia Saudita): seconda case history (ordine 2), IT + EN. Foto: cartella del cliente
@@ -41,7 +43,7 @@ async function viviendaIt(m: Media) {
     nome: 'Vivienda Residences',
     slug: 'vivienda-residences',
     ordine: 2,
-    categoria: 'resid',
+    categoria: 'hotel',
     kicker: 'Case history — Arabia Saudita',
     titolo: 'Vivienda\nResidences',
     introduzione:
@@ -49,7 +51,7 @@ async function viviendaIt(m: Media) {
     etichetta: 'Vasi con luce, sedute e lettini',
     immagine: await f('vivienda-corte-vasi-ming.jpg', 'Vivienda Residences, corte interna con file di vasi Ming illuminati'),
     card: {
-      etichetta: 'Residenze · Arabia Saudita',
+      etichetta: 'Hotel e residenze · Arabia Saudita',
       titolo: 'Vivienda Residences: corti e piscine arredate con vasi e sedute Serralunga',
       immagine: await f('vivienda-piscina-palme-vista-alto.jpg', 'Vivienda Residences, piscina tra le palme vista dall’alto'),
     },
@@ -169,7 +171,7 @@ const viviendaEn = {
     'Courtyards, pools and private terraces in a residential complex in Saudi Arabia: Serralunga planters, including light-up versions, seating and sunbeds shape the outdoor spaces from day into evening.',
   etichetta: 'Light-up planters, seating and sunbeds',
   card: {
-    etichetta: 'Residences · Saudi Arabia',
+    etichetta: 'Hotels and residences · Saudi Arabia',
     titolo: 'Vivienda Residences: courtyards and pools furnished with Serralunga planters and seating',
   },
   progetto: {
@@ -271,6 +273,18 @@ export async function completaCaseHistory(
     vivienda = doc.id as number
     await payload.update({ collection: 'case-history', id: vivienda, locale: 'en', depth: 0, data: { ...(conIdRighe(viviendaEn, doc) as object), _status: 'published' } as never })
     log('creata la case history Vivienda Residences (IT + EN)')
+  }
+
+  // 1b. Case history 1.01: da «Residenze» a «Hotel e resort», solo se nessuno ha cambiato categoria o etichetta.
+  {
+    const it = (await payload.findByID({ collection: 'case-history', id: vivienda, depth: 0, draft: true })) as unknown as { categoria?: string; card?: Record<string, unknown> }
+    if (it.categoria === 'resid') {
+      await opz.aggiorna({ collection: 'case-history', id: vivienda, depth: 0, data: { categoria: 'hotel', ...(it.card?.etichetta === 'Residenze · Arabia Saudita' ? { card: { ...it.card, etichetta: 'Hotel e residenze · Arabia Saudita' } } : {}) } })
+      const en = (await payload.findByID({ collection: 'case-history', id: vivienda, locale: 'en', fallbackLocale: false as never, depth: 0, draft: true })) as unknown as { card?: Record<string, unknown> }
+      if (en.card?.etichetta === 'Residences · Saudi Arabia')
+        await opz.aggiorna({ collection: 'case-history', id: vivienda, locale: 'en', depth: 0, data: { card: { ...en.card, etichetta: 'Hotels and residences · Saudi Arabia' } } })
+      log('Vivienda Residences: spostata in Installazioni › Hotel e resort')
+    }
   }
 
   // 2. Vivienda: voci collegate alle schede del Catalogo (solo le voci ancora senza scheda, con lo stesso nome di partenza).
