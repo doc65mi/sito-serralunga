@@ -723,7 +723,6 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
 .campioni__quadrato img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .campioni__codice { font: 400 17px/1.2 var(--condensed); letter-spacing: .08em; color: #000; }
 .campioni__nome { font-family: var(--condensed); font-weight: 300; font-size: 18px; line-height: 1.25; color: #000; }
-.campioni__link { align-self: flex-start; font-size: 16px; color: #000; text-decoration: underline; text-underline-offset: 3px; }
 .campioni__codice { display: inline-flex; align-items: center; gap: 6px; }
 .campioni__cf { width: 14px; height: 14px; }
 
@@ -1483,6 +1482,7 @@ a.redazione-ai__vai { text-decoration: none; display: inline-flex; align-items: 
 .varianti__tabella td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line-soft); }
 .varianti__tabella td + td, .varianti__tabella th + th { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 16px; letter-spacing: .04em; text-align: right; padding-right: 0; }
 .misure--info { margin-top: -10px; }
+.tendine--varianti + .misure--info { border-top: 0; margin-top: 0; }
 .fascia-finale .modulo { margin-left: auto; margin-right: auto; }
 @media (max-width: 1100px) { .catalogo__riquadri { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) {

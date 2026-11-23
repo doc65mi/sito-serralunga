@@ -1,6 +1,6 @@
 ---
 /**
- * Scheda prodotto — Version: 1.05. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * Scheda prodotto — Version: 1.06. Template: template/Aqua Lounger - Scheda tecnica.dc.html
  * Usata dalle schede del Catalogo (/catalogo/{categoria}/{slug}/) e dal vecchio /prodotti/{slug}/.
  * 1.04: "Materiale e finitura" subito sotto i colori; tendine (Caratteristiche, Dimensioni con
  *       disegno quotato e disegno tecnico, Istruzioni per la cura, Informazioni sulla spedizione,
@@ -115,7 +115,7 @@ const faq = [
   ...(p.scheda?.faqAutomatiche === false ? [] : spec.faq.map((f) => ({ ...f, campo: undefined }))),
 ]
 const conDimensioni = misureScheda.length > 0 || !!misureLibere || (p.dimensioni || []).length > 0 || conQuote || isMedia(p.disegno?.immagine)
-const tendine = !!(finiture.length || scheda.caratteristiche || icone.length || conDimensioni || scheda.cura || scheda.spedizione || scheda.illuminazione)
+const tendine = !!(scheda.caratteristiche || icone.length || conDimensioni || scheda.cura || scheda.spedizione || scheda.illuminazione)
 const ico = (f: string) => `/specifiche/${f}`
 /** Elenchi puntati: una voce per riga; per le Caratteristiche anche una voce per frase. */
 const voci = (x?: string, frasi = false) =>
@@ -265,7 +265,19 @@ const jsonld = [{
                 </li>
               ))}
             </ul>
-            <a class="campioni__link" href={u('/materiali/colori/')}>{t('Cartella colori completa')}</a>
+          </div>
+        )}
+        {finiture.length > 0 && (
+          <div class="tendine tendine--varianti">
+            <details class="tendina" id="varianti">
+              <summary>{t('Varianti disponibili')} <span class="varianti__n">{finiture.length}</span></summary>
+              <div class="tendina__corpo">
+                <table class="varianti__tabella">
+                  <thead><tr><th scope="col">{t('Variante')}</th><th scope="col">{t('Codice articolo')}</th></tr></thead>
+                  <tbody>{finiture.map((f) => <tr><td>{f.nome}</td><td>{f.codice || '—'}</td></tr>)}</tbody>
+                </table>
+              </div>
+            </details>
           </div>
         )}
         {(materiali.length > 0 || d) && (
@@ -320,17 +332,6 @@ const jsonld = [{
                       {p.disegno?.testo && <Testo as="figcaption" class="tendina__nota" campo="disegno.testo" t={p.disegno.testo} />}
                     </figure>
                   )}
-                </div>
-              </details>
-            )}
-            {finiture.length > 0 && (
-              <details class="tendina" name="scheda-prodotto" id="varianti">
-                <summary>{t('Varianti disponibili')} <span class="varianti__n">{finiture.length}</span></summary>
-                <div class="tendina__corpo">
-                  <table class="varianti__tabella">
-                    <thead><tr><th scope="col">{t('Variante')}</th><th scope="col">{t('Codice articolo')}</th></tr></thead>
-                    <tbody>{finiture.map((f) => <tr><td>{f.nome}</td><td>{f.codice || '—'}</td></tr>)}</tbody>
-                  </table>
                 </div>
               </details>
             )}
