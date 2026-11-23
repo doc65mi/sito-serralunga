@@ -36,6 +36,7 @@
 
   --serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --sans: 'Jost', system-ui, sans-serif;
+  --condensed: 'Barlow Condensed', 'Jost', system-ui, sans-serif; /* nomi e codici dei colori */
   --mono: ui-monospace, Menlo, monospace;
 
   --wrap: 1560px;
@@ -688,12 +689,12 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
 .galleria__miniature button[aria-current='true'] .galleria__mini-foto { border-color: #000; box-shadow: inset 0 0 0 1px #000; }
 .galleria__mini-foto .im, .galleria__mini-foto img { display: block; width: 100%; height: 100%; object-fit: cover; }
 /* Nome del colore e codice articolo sotto ogni miniatura (Scheda prodotto 1.03): testo nero, 14px */
-.galleria__mini-testo { display: flex; flex-direction: column; gap: 2px; font-size: 16px; line-height: 1.25; color: #000; overflow-wrap: anywhere; }
+.galleria__mini-testo { display: flex; flex-direction: column; gap: 2px; font-family: var(--condensed); font-weight: 300; font-size: 17px; letter-spacing: 0; line-height: 1.25; color: #000; overflow-wrap: anywhere; }
 .galleria__mini-nome { font-weight: 500; }
 .galleria__mini-codice { letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 .galleria__miniature button[aria-current='true'] .galleria__mini-nome { text-decoration: underline; text-underline-offset: 3px; }
 /* Colore della foto in evidenza */
-.galleria__colore { position: absolute; left: 14px; top: 14px; z-index: 5; margin: 0; padding: 10px 14px; background: rgba(255, 255, 255, .92); color: #000; font-size: 16px; line-height: 1.2; display: flex; gap: 10px; align-items: baseline; max-width: calc(100% - 86px); }
+.galleria__colore { position: absolute; left: 14px; top: 14px; z-index: 5; margin: 0; padding: 10px 14px; background: rgba(255, 255, 255, .92); color: #000; font-family: var(--condensed); font-weight: 300; font-size: 18px; line-height: 1.2; display: flex; gap: 10px; align-items: baseline; max-width: calc(100% - 86px); }
 .galleria__colore[hidden] { display: none; }
 .galleria__colore-nome { font-weight: 500; }
 .galleria__colore-codice { letter-spacing: .06em; }
@@ -715,13 +716,13 @@ a:hover .zoom img, .zoom:hover img { transform: scale(1.05); }
 .colori__nota { font-size: 13px; color: var(--muted); }
 /* Colori disponibili dalla cartella colori: quadrati 30×30 (Scheda prodotto 1.01) */
 .campioni { display: flex; flex-direction: column; gap: 16px; }
-.campioni__elenco { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 18px; list-style: none; margin: 0; padding: 0; }
+.campioni__elenco { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px 18px; list-style: none; margin: 0; padding: 0; }
 .campioni__voce { display: grid; grid-template-columns: 30px 1fr; column-gap: 10px; align-items: center; color: #000; }
 .campioni__quadrato { grid-row: span 2; display: block; width: 30px; height: 30px; overflow: hidden; border: 1px solid transparent; }
 .campioni__quadrato.chiaro { border-color: var(--line-strong); }
 .campioni__quadrato img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.campioni__codice { font: 500 16px/1.2 var(--sans); letter-spacing: .14em; color: #000; }
-.campioni__nome { font-size: 16px; line-height: 1.25; color: #000; }
+.campioni__codice { font: 400 17px/1.2 var(--condensed); letter-spacing: .08em; color: #000; }
+.campioni__nome { font-family: var(--condensed); font-weight: 300; font-size: 18px; line-height: 1.25; color: #000; }
 .campioni__link { align-self: flex-start; font-size: 16px; color: #000; text-decoration: underline; text-underline-offset: 3px; }
 .campioni__codice { display: inline-flex; align-items: center; gap: 6px; }
 .campioni__cf { width: 14px; height: 14px; }
