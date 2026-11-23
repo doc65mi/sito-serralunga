@@ -14,6 +14,23 @@
       "dimensioni": "lunghezza: 37 cm\n\nlarghezza: 37 cm\n\naltezza: 90 cm\n\npeso: 8,5 kg",
       "cura": "Per rimuovere polvere e sporco dalle superfici del prodotto sarà necessario pulire periodicamente con un panno umido imbevuto di comune detergente o sapone e risciacquato con acqua.\n\nI prodotti con finitura laccata sono più sensibili ai graffi; per questo motivo utilizzare un detergente per lucidare, pulendo delicatamente con un panno morbido.\n\nEvitare l'uso di prodotti chimici pesanti. Evitare l'uso di etanolo o qualsiasi liquido contenente, anche in piccole quantità, acetone, tricloroetilene e ammoniaca (solventi in genere).",
       "spedizione": "I nostri prodotti sono realizzati su richiesta. Il tempo medio di produzione è di 10 giorni lavorativi per i prodotti standard e di 20-25 giorni lavorativi per prodotti con finitura laccata/metallizzata, finitura Moleskin e prodotti con imbottiti.\n\n Una volta che i prodotti sono pronti, vengono spediti o con scatole standard o su bancale singolo o doppio a seconda delle dimensioni.\n\n Tempi di consegna standard: 4-5 giorni a seconda della località.\n\n Con questo approccio Serralunga segue un approccio sostenibile alla produzione e alla gestione delle scorte."
-    }
+    },
+    "campioniAggiunti": [
+      {
+        "codice": "COR",
+        "nome": "Corten",
+        "immagine": "/prodotti-foto/campione-cor",
+        "fonte": "CATALOGUE_POOL.pdf p. 57, Special nuance Corten / COR; variante 335-COR su serralunga.com"
+      }
+    ],
+    "galleriaAggiunta": [
+      {
+        "file": "cubotti-alto-planter-355-vb",
+        "larghezza": 1254,
+        "altezza": 1254,
+        "fonte": "foto fornita dal cliente il 2026-11-23 (Verde British)"
+      }
+    ],
+    "moduloColori": true
   }
 }

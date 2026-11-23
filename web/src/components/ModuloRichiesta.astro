@@ -1,6 +1,7 @@
 ---
 /**
- * Version: 1.02 (consensi privacy e newsletter, reCAPTCHA, cataloghi con link nell'email di conferma)
+ * Version: 1.03 (scelta multipla dei colori della scheda prodotto e campo richieste)
+ * 1.02: consensi privacy e newsletter, reCAPTCHA, cataloghi con link nell'email di conferma
  * Modulo di richiesta (template: Home v2 #listino). Invia a /api/richiesta, che salva in Payload.
  * Con `cataloghi` (pagina Contract > Cataloghi) chi compila sceglie i PDF: la richiesta li registra
  * e, dopo l'invio, la pagina mostra i link per scaricarli (raccolta contatti, alberatura B2C).
@@ -10,10 +11,10 @@ import Consensi from './Consensi.astro'
 import { impostazioni, type Doc } from '../lib/cms'
 import { percorso, traduttore } from '../lib/lingua'
 import { fmt } from '../lib/testo'
-interface Props { pulsante?: string; grazie?: string; pagina?: string; cataloghi?: Doc[]; dopoInvio?: string; campoDopoInvio?: string }
+interface Props { colori?: Doc[]; richieste?: boolean; pulsante?: string; grazie?: string; pagina?: string; cataloghi?: Doc[]; dopoInvio?: string; campoDopoInvio?: string }
 const L = Astro.locals.lingua
 const t = traduttore(L)
-const { pulsante = t('Invia la richiesta'), grazie, pagina = '', cataloghi = [], dopoInvio, campoDopoInvio } = Astro.props
+const { colori = [], richieste = false, pulsante = t('Invia la richiesta'), grazie, pagina = '', cataloghi = [], dopoInvio, campoDopoInvio } = Astro.props
 const imp = await impostazioni(L)
 const email = imp.azienda?.email || 'info@serralunga.com'
 ---
@@ -41,6 +42,25 @@ const email = imp.azienda?.email || 'info@serralunga.com'
     <label><span class="sr-only">{t('Email (obbligatoria)')}</span><input type="email" name="email" placeholder={t('Email')} autocomplete="email" required maxlength="200" /></label>
     <label><span class="sr-only">{t('Città del progetto')}</span><input type="text" name="citta" placeholder={t('Città del progetto')} autocomplete="address-level2" maxlength="200" /></label>
   </div>
+  {colori.length > 0 && (
+    <fieldset class="modulo__colori">
+      <legend>{t('Colori di interesse')}</legend>
+      <ul>
+        {colori.map((c) => (
+          <li>
+            <label class="scelta-colore">
+              <input type="checkbox" name="colore" value={`${c.nome} (${c.articolo || c.codice})`} />
+              <span class="scelta-colore__quadrato" style={c.hex ? `background:${c.hex}` : undefined} aria-hidden="true">{!c.hex && c.campione?.url && <img src={c.campione.url} alt="" width="22" height="22" loading="lazy" />}</span>
+              <span class="scelta-colore__testo"><span class="scelta-colore__codice">{c.codice}</span> {c.nome}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </fieldset>
+  )}
+  {richieste && (
+    <label class="modulo__richieste"><span class="sr-only">{t('Richieste particolari')}</span><textarea name="messaggio" rows="4" maxlength="4000" placeholder={t('Richieste particolari (quantità, misure, finiture, tempi…)')}></textarea></label>
+  )}
   <label class="modulo__trappola" aria-hidden="true">{t('Non compilare')}<input type="text" name="sito_web" tabindex="-1" autocomplete="off" /></label>
   <input type="hidden" name="pagina" value={L === 'it' ? pagina : `${pagina} (${L.toUpperCase()})`} />
   <input type="hidden" name="lingua" value={L} />

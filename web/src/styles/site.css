@@ -1669,3 +1669,17 @@ a.redazione-ai__vai { text-decoration: none; display: inline-flex; align-items: 
 .pagina-legale__cookie { margin-top: 40px; }
 .pagina-legale__cookie h3 { font-family: var(--sans); font-size: 17px; font-weight: 500; color: #000; margin: 28px 0 6px; }
 .pagina-legale__aggiornata { font-size: 16px; color: #000; margin-top: 32px; }
+
+/* Modulo richiesta 1.03: scelta multipla dei colori e campo richieste (scheda prodotto) */
+.modulo__colori { width: 100%; margin: 0; padding: 0; border: 0; text-align: left; }
+.modulo__colori legend { padding: 0; margin-bottom: 14px; font: 500 16px/1.3 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--on-dark); }
+.modulo__colori ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 18px; }
+.scelta-colore { display: flex !important; flex-direction: row !important; align-items: center; gap: 10px; cursor: pointer; font-size: 16px; color: var(--on-dark); }
+.scelta-colore input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--accent); }
+.scelta-colore__quadrato { width: 22px; height: 22px; flex: none; overflow: hidden; outline: 1px solid rgba(243, 240, 234, .34); }
+.scelta-colore__quadrato img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.scelta-colore__testo { font-family: var(--condensed); font-weight: 300; font-size: 18px; line-height: 1.2; }
+.scelta-colore__codice { font-weight: 400; letter-spacing: .06em; }
+.modulo__richieste { width: 100%; }
+.modulo__richieste textarea { width: 100%; resize: vertical; min-height: 110px; }
+.modulo textarea:focus { border-bottom-color: var(--accent); outline: none; }

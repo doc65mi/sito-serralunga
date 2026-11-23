@@ -15,6 +15,8 @@ export type Media = {
 
 const pubblico = (u?: string | null) => {
   if (!u) return ''
+  // Foto statiche del sito (web/public/prodotti-foto), non del CMS.
+  if (u.startsWith('/prodotti-foto/')) return u
   try {
     const p = new URL(u, 'http://x')
     return `${CMS_PUBLIC}${p.pathname}${p.search}`

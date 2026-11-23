@@ -3,7 +3,7 @@ import { lingua, traduttore } from '../../lib/lingua'
 import { aPayload, ipDi, stessoSito } from '../../lib/moduli'
 
 /**
- * Version: 1.01
+ * Version: 1.02 (colori scelti nella scheda prodotto: vanno in testa al messaggio)
  * Riceve i moduli di richiesta del sito e li passa a Payload (/api/moduli/richiesta), che
  * controlla privacy e reCAPTCHA, salva la richiesta, iscrive alla newsletter se richiesto
  * e invia l'email di conferma al cliente e l'avviso alla redazione.
@@ -56,6 +56,15 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
     })
     .filter((c) => c.titolo)
 
+  // Colori scelti nel modulo della scheda prodotto: in testa al messaggio, così arrivano
+  // nella richiesta salvata e nelle email senza campi nuovi nel CMS.
+  const colori = dati.getAll('colore').slice(0, 60).map((v) => String(v).trim().slice(0, 120)).filter(Boolean)
+  const messaggio = () => {
+    const testo = campo('messaggio', 4000)
+    if (!colori.length) return testo
+    return `${t('Colori di interesse')}: ${colori.join(', ')}${testo ? `\n\n${testo}` : ''}`.slice(0, 4000)
+  }
+
   try {
     const { stato, dati: esito } = await aPayload('richiesta', {
       lingua: L,
@@ -64,7 +73,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
       email,
       citta: campo('citta', 200),
       tipologia: campo('tipologia', 200),
-      messaggio: campo('messaggio', 4000),
+      messaggio: messaggio(),
       pagina: campo('pagina', 300),
       cataloghi,
       privacy: true,

@@ -1,5 +1,5 @@
 /**
- * Specifiche tecniche della scheda prodotto — Version: 1.04.
+ * Specifiche tecniche della scheda prodotto — Version: 1.07.
  *
  * Fonti, senza aggiunte:
  * - progetto/specifiche/Specifiche_Tecniche_Serralunga.txt (estratto da "Technical Details" e
@@ -25,7 +25,7 @@ export interface TestiScheda {
 export interface Icona { file: string; testo: string; nota?: string }
 export interface Domanda { domanda: string; risposta: string; immagine?: { file: string; alt: string; w: number; h: number } }
 
-type Scheda = { fonte: string; tag?: string[]; it?: TestiScheda; en?: TestiScheda }
+type Scheda = { fonte?: string; tag?: string[]; it?: TestiScheda; en?: TestiScheda; campioniAggiunti?: Doc[]; galleriaAggiunta?: Doc[]; moduloColori?: boolean }
 const DATI = SCHEDE as unknown as Record<string, Scheda>
 
 /** Testi delle tendine: campo del CMS se scritto, altrimenti scheda serralunga.com. */
@@ -42,6 +42,30 @@ export function testiScheda(p: Doc, lingua: Lingua): TestiScheda & { tag: string
     illuminazione: pulito(cms.illuminazione || da.illuminazione),
     tag: s?.tag || [],
   }
+}
+
+/**
+ * 1.07 Aggiunte statiche alla scheda (web/src/data/schede-serralunga.json), per ora solo Cubotti Alto:
+ * colori della cartella che mancano nel CMS (campione ritagliato dal catalogo PDF), foto fornite dal
+ * cliente e modulo con scelta dei colori. Le foto sono in web/public/prodotti-foto (AVIF + JPEG).
+ * Quello che è già nel CMS (stesso codice colore, stesso nome file) non si ripete.
+ */
+export function aggiunteScheda(p: Doc, campioniCms: Doc[], galleriaCms: Doc[]) {
+  const s: Scheda = DATI[p.fonteShopify || p.slug] || DATI[p.slug] || {}
+  const codici = new Set(campioniCms.map((c) => String(c.codice || '').toUpperCase()))
+  const campioni = ((s.campioniAggiunti || []) as Doc[])
+    .filter((c) => !codici.has(String(c.codice).toUpperCase()))
+    .map((c) => ({ codice: c.codice, nome: c.nome, campione: { url: `${c.immagine}.png`, filename: `${c.immagine.split('/').pop()}.png`, mimeType: 'image/png', width: 200, height: 200, sizes: { quadrato: { url: `${c.immagine}.avif`, width: 200, height: 200 } } } }))
+  const nomi = new Set(galleriaCms.map((g) => String(g.immagine?.filename || '').replace(/\.[a-z0-9]+$/i, '').toLowerCase()))
+  const galleria = ((s.galleriaAggiunta || []) as Doc[])
+    .filter((g) => !nomi.has(String(g.file).toLowerCase()))
+    .map((g) => ({
+      immagine: {
+        url: `/prodotti-foto/${g.file}.jpg`, filename: `${g.file}.jpg`, mimeType: 'image/jpeg', width: g.larghezza, height: g.altezza,
+        sizes: { media: { url: `/prodotti-foto/${g.file}-600.avif`, width: 600, height: Math.round((600 * g.altezza) / g.larghezza) }, grande: { url: `/prodotti-foto/${g.file}-${g.larghezza}.avif`, width: g.larghezza, height: g.altezza } },
+      },
+    }))
+  return { campioni, galleria, moduloColori: !!s.moduloColori }
 }
 
 /** "lunghezza: 37 cm" → coppie etichetta/valore; righe senza ":" restano testo. */

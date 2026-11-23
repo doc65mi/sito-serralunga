@@ -1,7 +1,11 @@
 ---
 /**
- * Scheda prodotto — Version: 1.06. Template: template/Aqua Lounger - Scheda tecnica.dc.html
+ * Scheda prodotto — Version: 1.07. Template: template/Aqua Lounger - Scheda tecnica.dc.html
  * Usata dalle schede del Catalogo (/catalogo/{categoria}/{slug}/) e dal vecchio /prodotti/{slug}/.
+ * 1.07: tutti i colori della variante (Corten dal catalogo PDF), foto aggiunte in galleria e modulo
+ *       con scelta multipla dei colori e campo richieste (lib/specifiche.ts aggiunteScheda, per ora
+ *       solo Cubotti Alto); tolta la tabella "Varianti disponibili" (i codici restano nei dati strutturati).
+ * 1.05-1.06: titoli specifiche a 500, punti elenco, icone tonde, tendine riordinate.
  * 1.04: "Materiale e finitura" subito sotto i colori; tendine (Caratteristiche, Dimensioni con
  *       disegno quotato e disegno tecnico, Istruzioni per la cura, Informazioni sulla spedizione,
  *       Sistema di illuminazione se c'è) con i testi della scheda serralunga.com o del pannello;
@@ -29,7 +33,7 @@ import { isMedia, src, urlFile } from '../lib/media'
 import { chiaro, piatto } from '../lib/testo'
 import { percorso, traduttore } from '../lib/lingua'
 import { urlProdotto } from '../lib/catalogo'
-import { cleanFighter, righeMisure, specifiche, testiScheda } from '../lib/specifiche'
+import { aggiunteScheda, cleanFighter, righeMisure, specifiche, testiScheda } from '../lib/specifiche'
 
 interface Props {
   p: Doc
@@ -46,7 +50,13 @@ const u = (x?: string) => percorso(L, x)
 const qui = urlProdotto(p, tutte)
 
 const d: Doc | null = typeof p.designer === 'object' ? p.designer : null
-const galleria: Doc[] = (p.galleria || []).filter((g: Doc) => isMedia(g.immagine))
+const galleriaCms: Doc[] = (p.galleria || []).filter((g: Doc) => isMedia(g.immagine))
+// 1.07 Colori e foto aggiunti fuori dal CMS (schede-serralunga.json): per ora solo Cubotti Alto.
+const campioniCms: Doc[] = (p.campioni || []).filter((c: unknown) => c && typeof c === 'object' && ((c as Doc).hex || isMedia((c as Doc).campione)))
+const aggiunte = aggiunteScheda(p, campioniCms, galleriaCms)
+const codiceFoto = (g: Doc) => /-[0-9]{3}-[a-z0-9]+$/i.test(String(g.immagine?.filename || '').replace(/\.[a-z0-9]+$/i, ''))
+const ultimaColore = galleriaCms.reduce((k, g, i) => (codiceFoto(g) ? i : k), galleriaCms.length - 1)
+const galleria: Doc[] = [...galleriaCms.slice(0, ultimaColore + 1), ...aggiunte.galleria, ...galleriaCms.slice(ultimaColore + 1)]
 const viste = galleria.length ? galleria.map((g) => g.immagine) : [p.immagine]
 const casi: Doc[] = (p.caseHistory || []).filter((c: unknown) => typeof c === 'object')
 const correlati: Doc[] = (p.correlati || []).map((c: Doc) => {
@@ -64,7 +74,9 @@ const codici = finiture.map((f) => f.codice).filter(Boolean)
 const MATERIALI: Record<string, string> = { polietilene: t('Polietilene'), moleskin: 'Moleskin', corten: 'Corten', laccato: t('Laccato'), vellutato: t('Vellutato'), decorato: t('Decorato') }
 const materiali = (p.materiali || []).map((m: string) => MATERIALI[m] || m)
 // Colori scelti dalla cartella colori (collezione "colori"): quadrati 30×30 col colore pieno del campione.
-const campioni: Doc[] = (p.campioni || []).filter((c: unknown) => c && typeof c === 'object' && ((c as Doc).hex || isMedia((c as Doc).campione)))
+const campioni: Doc[] = [...campioniCms, ...aggiunte.campioni]
+// Colori del modulo di richiesta con il codice articolo della variante (WH → 335-WH).
+const coloriModulo = campioni.map((c) => ({ ...c, articolo: finiture.find((f) => String(f.codice || '').toUpperCase().endsWith(`-${String(c.codice).toUpperCase()}`))?.codice }))
 /*
  * Colore della foto: le foto importate da serralunga.com si chiamano col codice della variante
  * (Cubotti_Alto_Planter_335-WH.jpg, collegata alla variante BIANCO 335-WH). Si cerca nel nome
@@ -265,19 +277,6 @@ const jsonld = [{
                 </li>
               ))}
             </ul>
-          </div>
-        )}
-        {finiture.length > 0 && (
-          <div class="tendine tendine--varianti">
-            <details class="tendina" id="varianti">
-              <summary>{t('Varianti disponibili')} <span class="varianti__n">{finiture.length}</span></summary>
-              <div class="tendina__corpo">
-                <table class="varianti__tabella">
-                  <thead><tr><th scope="col">{t('Variante')}</th><th scope="col">{t('Codice articolo')}</th></tr></thead>
-                  <tbody>{finiture.map((f) => <tr><td>{f.nome}</td><td>{f.codice || '—'}</td></tr>)}</tbody>
-                </table>
-              </div>
-            </details>
           </div>
         )}
         {(materiali.length > 0 || d) && (
@@ -513,7 +512,7 @@ const jsonld = [{
         <span class="kicker kicker--largo">{p.richiesta?.kicker || t('Documentazione contract')}</span>
         <Testo as="h2" class="titolo" campo="richiesta.titolo" t={p.richiesta?.titolo || t('Scheda tecnica,\ndisegni e campioni')} />
         <Testo class="testo" campo="richiesta.testo" t={p.richiesta?.testo} />
-        <ModuloRichiesta pulsante={t('Richiedi informazioni')} pagina={`${t('Richiesta')}: ${p.nome}${codici[0] ? ` (${codici[0]})` : ''} — ${qui}`} />
+        <ModuloRichiesta colori={aggiunte.moduloColori ? coloriModulo : undefined} richieste={aggiunte.moduloColori} pulsante={t('Richiedi informazioni')} pagina={`${t('Richiesta')}: ${p.nome}${codici[0] ? ` (${codici[0]})` : ''} — ${qui}`} />
       </div>
     </div>
   </section>
