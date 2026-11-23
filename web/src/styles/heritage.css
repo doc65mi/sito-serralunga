@@ -39,7 +39,7 @@
 .her-voci { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--colonne, 3), 1fr); gap: clamp(28px, 3vw, 48px) clamp(20px, 2.4vw, 40px); counter-reset: hervoce; }
 .her-voce { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--line-strong); padding-top: 22px; counter-increment: hervoce; }
 .scuro .her-voce { border-top-color: var(--line-dark); }
-.her-voce::before { content: counter(hervoce, decimal-leading-zero); font-size: 11px; letter-spacing: .24em; color: var(--accent-testo); }
+.her-voce::before { content: counter(hervoce, decimal-leading-zero); font-size: 16px; letter-spacing: .24em; color: var(--accent-testo); }
 .her-voce__titolo { font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.2; margin: 0; }
 .her-voce .testo { margin: 0; }
 .her-voci--due { --colonne: 2; }
@@ -54,7 +54,7 @@
 
 /* Capitoli con elenco di punti */
 .her-punti { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.her-punti li { display: flex; gap: 14px; align-items: baseline; font-size: 15px; line-height: 1.7; color: var(--text-strong); }
+.her-punti li { display: flex; gap: 14px; align-items: baseline; font-size: 16px; line-height: 1.7; color: var(--text-strong); }
 .her-punti li::before { content: ''; flex: 0 0 18px; height: 1px; background: var(--accent); transform: translateY(-4px); }
 .capitolo .her-voci { --colonne: 2; }
 
@@ -63,12 +63,12 @@
 .card-her__nome { font-family: var(--serif); font-size: 28px; font-weight: 300; }
 .card-her:hover .card-her__nome, .card-her:focus-visible .card-her__nome { color: var(--accent-testo); }
 .card-her .testo { margin: 0; }
-.tessera small { position: absolute; left: 26px; bottom: 64px; z-index: 1; color: var(--on-dark); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; }
+.tessera small { position: absolute; left: 26px; bottom: 64px; z-index: 1; color: var(--on-dark); font-size: 16px; letter-spacing: .22em; text-transform: uppercase; }
 
 /* Citazione a tutto schermo con autore */
-.citazione-foto figcaption { position: absolute; left: var(--gut); bottom: 24px; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--on-dark-label); }
+.citazione-foto figcaption { position: absolute; left: var(--gut); bottom: 24px; font-size: 16px; letter-spacing: .24em; text-transform: uppercase; color: var(--on-dark-label); }
 .citazione-sola { padding: clamp(90px, 11vw, 150px) var(--gut); }
 .citazione-sola blockquote { max-width: 1000px; margin: 0 auto; text-align: center; display: flex; flex-direction: column; gap: 28px; }
 .citazione-sola blockquote p { font-family: var(--serif); font-style: italic; font-size: clamp(28px, 3.2vw, 46px); line-height: 1.32; margin: 0; }
-.citazione-sola figcaption { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+.citazione-sola figcaption { font-size: 16px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
 
